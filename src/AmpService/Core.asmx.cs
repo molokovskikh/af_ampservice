@@ -12,6 +12,8 @@ Namespace AMPService
         Inherits System.Web.Services.WebService
         Dim MyTrans As MySqlTransaction
         Dim UserName, FunctionName As String
+        Private WithEvents dataColumn18 As System.Data.DataColumn
+        Private WithEvents dataColumn19 As System.Data.DataColumn
         Private Const SQLHost As String = "sql.analit.net"
         ' Dim RowCount As Int32
 
@@ -78,6 +80,8 @@ Namespace AMPService
             Me.DataColumn15 = New System.Data.DataColumn
             Me.DataColumn16 = New System.Data.DataColumn
             Me.DataColumn17 = New System.Data.DataColumn
+            Me.dataColumn18 = New System.Data.DataColumn
+            Me.dataColumn19 = New System.Data.DataColumn
             CType(Me.MyDS, System.ComponentModel.ISupportInitialize).BeginInit()
             CType(Me.DataTable1, System.ComponentModel.ISupportInitialize).BeginInit()
             '
@@ -109,7 +113,7 @@ Namespace AMPService
             '
             'DataTable1
             '
-            Me.DataTable1.Columns.AddRange(New System.Data.DataColumn() {Me.DataColumn1, Me.DataColumn2, Me.DataColumn3, Me.DataColumn4, Me.DataColumn5, Me.DataColumn6, Me.DataColumn7, Me.DataColumn8, Me.DataColumn9, Me.DataColumn10, Me.DataColumn11, Me.DataColumn12, Me.DataColumn13, Me.DataColumn14, Me.DataColumn15, Me.DataColumn16, Me.DataColumn17})
+            Me.DataTable1.Columns.AddRange(New System.Data.DataColumn() {Me.DataColumn1, Me.DataColumn2, Me.DataColumn3, Me.DataColumn4, Me.DataColumn5, Me.DataColumn6, Me.DataColumn7, Me.DataColumn8, Me.DataColumn9, Me.DataColumn10, Me.DataColumn11, Me.DataColumn12, Me.DataColumn13, Me.DataColumn14, Me.DataColumn15, Me.DataColumn16, Me.DataColumn17, Me.dataColumn18, Me.dataColumn19})
             Me.DataTable1.TableName = "Prices"
             '
             'DataColumn1
@@ -185,6 +189,16 @@ Namespace AMPService
             '
             Me.DataColumn17.ColumnName = "PrepCode"
             Me.DataColumn17.DataType = GetType(UInteger)
+            '
+            'dataColumn18
+            '
+            Me.dataColumn18.ColumnName = "OrderCode1"
+            Me.dataColumn18.DataType = GetType(UInteger)
+            '
+            'dataColumn19
+            '
+            Me.dataColumn19.ColumnName = "OrderCode2"
+            Me.dataColumn19.DataType = GetType(UInteger)
             CType(Me.MyDS, System.ComponentModel.ISupportInitialize).EndInit()
             CType(Me.DataTable1, System.ComponentModel.ISupportInitialize).EndInit()
 
@@ -358,9 +372,10 @@ restart:
                 If OnlyLeader Then MySelCmd.CommandText = "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
 " create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
 " OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned" & _
+" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20)," & _
+" PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned" & _
 " );" & _
-" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, Junk Bit" & _
+" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned,  Junk Bit" & _
 " );" & _
 " insert into prices "
 
@@ -375,7 +390,7 @@ restart:
 
                 If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
 
-                MySelCmd.CommandText &= " from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
+                MySelCmd.CommandText &= ", c.synonymcode OrderCode1, c.synonymfirmcrcode OrderCode2 from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
     " farm.synonym s, farm.formrules fr)" & _
     " left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" & _
      " left join    farm.synonymfirmcr scr on scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode " & _
@@ -431,12 +446,13 @@ restart:
                 MySelCmd.CommandText &= " group by 1;"
 
                 If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                                            " select min(cost), FullCode, CodeFirmCr, Junk from (prices)" & _
-                                            " group by FullCode, CodeFirmCr, Junk;" & _
-                " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost, Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode" & _
+                                            " select min(cost), FullCode, Junk from (prices)" & _
+                                            " group by FullCode,  Junk;" & _
+                " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, " & _
+                " OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost," & _
+                " Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
     " from (prices p, mincosts m)" & _
     " where p.fullcode=m.fullcode" & _
-    " and p.codefirmcr=m.codefirmcr" & _
     " and p.cost=m.mincost" & _
                 " and p.junk=m.junk"
 
@@ -562,14 +578,15 @@ Restart:
 
                 MySelCmd.CommandText &= ";"
 
-                If OnlyLeader Then MySelCmd.CommandText &= " drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
-            " create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
-              " OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-              " Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned" & _
-              " ) type=InnoDB;" & _
-              " create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, Junk Bit" & _
-              " )type=InnoDB;" & _
-              " insert into prices "
+                If OnlyLeader Then MySelCmd.CommandText &= "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
+" create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
+" OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
+" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20)," & _
+" PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned" & _
+" );" & _
+" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned,  Junk Bit" & _
+" );" & _
+" insert into prices "
 
                 MySelCmd.CommandText &= " select  c.id OrderID, ifnull(c.Code, '') SalerCode, ifnull(c.CodeCr, '') CreaterCode, ifnull(pcd.code, '') ItemID, s.synonym OriginalName, ifnull(scr.synonym, '') OriginalCr, " & _
            " ifnull(c.Unit, '') Unit, ifnull(c.Volume, '') Volume, ifnull(c.Quantity, '') Quantity, ifnull(c.Note, '') Note, ifnull(c.Period, '') Period, ifnull(c.Doc, '') Doc," & _
@@ -582,7 +599,7 @@ Restart:
 
                 If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
 
-                MySelCmd.CommandText &= " from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
+                MySelCmd.CommandText &= " , c.synonymcode OrderCode1, c.synonymfirmcrcode OrderCode2 from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
                " farm.synonym s,farm.formrules fr, PrpCodes pcd)" & _
                " left join    farm.synonymfirmcr scr on scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode " & _
                 " where DisabledByClient=0" & _
@@ -619,7 +636,9 @@ Restart:
                     MySelCmd.CommandText &= " and ("
                     For Each PriceNameStr In SalerName
                         If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "clientsdata.shortname")
+                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
+                        'АМП захотели не название поставщика, а название прайс листа.
+                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "pricesdata.pricename")
 
                         MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
                         MySelCmd.CommandText &= Params(0)
@@ -633,14 +652,15 @@ Restart:
                 MySelCmd.CommandText &= "and pcd.fullcode=c.fullcode and pcd.codefirmcr=c.codefirmcr group by 1;"
 
                 If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                                           " select min(cost), FullCode, CodeFirmCr, Junk from (prices)" & _
-                                           " group by FullCode, CodeFirmCr, Junk;" & _
-               " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost, Cost, SalerID, SalerName,  PriceDate, p.FullCode PrepCode" & _
+                                           " select min(cost), FullCode, Junk from (prices)" & _
+                                           " group by FullCode, Junk;" & _
+                " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, " & _
+                " OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost," & _
+                " Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
     " from (prices p, mincosts m)" & _
     " where p.fullcode=m.fullcode" & _
-    " and p.codefirmcr=m.codefirmcr" & _
     " and p.cost=m.mincost" & _
-               " and p.junk=m.junk"
+                " and p.junk=m.junk"
 
 
                 LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName)
@@ -678,13 +698,14 @@ Restart:
                 MySelCmd.Transaction = MyTrans
 
                 If OnlyLeader Then MySelCmd.CommandText = "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
-            " create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
-              " OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-              " Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned" & _
-              " ) type=InnoDB;" & _
-              " create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, Junk Bit" & _
-              " )type=InnoDB;" & _
-              " insert into prices "
+" create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
+" OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
+" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20)," & _
+" PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned" & _
+" );" & _
+" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned,  Junk Bit" & _
+" );" & _
+" insert into prices "
 
                 MySelCmd.CommandText &= " select  c.id OrderID, ifnull(c.Code, '') SalerCode, ifnull(c.CodeCr, '') CreaterCode, ifnull(ampc.code, '') ItemID, s.synonym OriginalName, ifnull(scr.synonym, '') OriginalCr, " & _
            " ifnull(c.Unit, '') Unit, ifnull(c.Volume, '') Volume, ifnull(c.Quantity, '') Quantity, ifnull(c.Note, '') Note, ifnull(c.Period, '') Period, ifnull(c.Doc, '') Doc," & _
@@ -697,7 +718,7 @@ Restart:
 
                 If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
 
-                MySelCmd.CommandText &= " from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
+                MySelCmd.CommandText &= " , c.synonymcode OrderCode1, c.synonymfirmcrcode OrderCode2 from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
                " farm.synonym s, farm.formrules fr)" & _
                 " left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" & _
                 " left join    farm.synonymfirmcr scr on scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode " & _
@@ -738,7 +759,9 @@ Restart:
                     MySelCmd.CommandText &= " and ("
                     For Each PriceNameStr In SalerName
                         If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "clientsdata.shortname")
+                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
+                        'АМП захотели не название поставщика, а название прайс листа.
+                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "pricesdata.pricename")
 
                         MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
                         MySelCmd.CommandText &= Params(0)
@@ -768,12 +791,11 @@ Restart:
                 MySelCmd.CommandText &= " group by 1;"
 
                 If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                                           " select min(cost), FullCode, CodeFirmCr, Junk from (prices)" & _
-                                           " group by FullCode, CodeFirmCr, Junk;" & _
-               " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost, Cost, SalerID, SalerName,  PriceDate, p.FullCode PrepCode" & _
+                                           " select min(cost), FullCode, Junk from (prices)" & _
+                                           " group by FullCode,  Junk;" & _
+               " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost, Cost, SalerID, SalerName,  PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
     " from (prices p, mincosts m)" & _
     " where p.fullcode=m.fullcode" & _
-    " and p.codefirmcr=m.codefirmcr" & _
     " and p.cost=m.mincost" & _
                " and p.junk=m.junk"
 
@@ -917,9 +939,7 @@ Restart:
 
         <WebMethod()> _
         Public Function PostOrder(ByVal OrderID() As Int32, ByVal Quantity() As Int32, ByVal Message() As String, _
-        ByVal SalerID() As Int32, ByVal PriceDate() As Date, ByVal PrepCode As Int32(), ByVal CodeFirmCr As Int32(), _
-        ByVal SynonymCode As Int32(), ByVal SynonymFirmCrCode As Int32(), ByVal Code As String(), _
-        ByVal CodeCr As String(), ByVal Junk() As Boolean, ByVal Cost() As Decimal) As Int32()
+        ByVal OrderCode1() As Int32, ByVal OrderCode2() As Int32) As DataSet
             FunctionName = "PostOrder"
             Try
                 MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
@@ -931,8 +951,8 @@ Restart:
             End Try
 
             Try
-                Return Global.PostOrder.PostOrder.PostOrderMethod(OrderID, Quantity, Message, GetClientCode, UserName, SQLHost)
-
+                ' Return Global.PostOrder.PostOrder.PostOrderMethod(OrderID, Quantity, Message, GetClientCode, UserName, SQLHost)
+                Return MyDS
             Catch err As Exception
                 MailErr(FunctionName, err.Message, err.Source, UserName)
             Finally
