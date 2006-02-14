@@ -35,7 +35,7 @@ Namespace AMPService
         'Do not modify it using the code editor.
         Public WithEvents MySelCmd As MySql.Data.MySqlClient.MySqlCommand
         Public WithEvents MyCn As MySql.Data.MySqlClient.MySqlConnection
-        Public WithEvents MyDA As MySql.Data.MySqlClient.MySqlDataAdapter
+        Private WithEvents MyDA As MySql.Data.MySqlClient.MySqlDataAdapter
         Public WithEvents MyDS As System.Data.DataSet
         Public WithEvents DataTable1 As System.Data.DataTable
         Public WithEvents DataColumn1 As System.Data.DataColumn
@@ -110,13 +110,12 @@ Namespace AMPService
             'DataTable1
             '
             Me.DataTable1.Columns.AddRange(New System.Data.DataColumn() {Me.DataColumn1, Me.DataColumn2, Me.DataColumn3, Me.DataColumn4, Me.DataColumn5, Me.DataColumn6, Me.DataColumn7, Me.DataColumn8, Me.DataColumn9, Me.DataColumn10, Me.DataColumn11, Me.DataColumn12, Me.DataColumn13, Me.DataColumn14, Me.DataColumn15, Me.DataColumn16, Me.DataColumn17})
-            Me.DataTable1.Constraints.AddRange(New System.Data.Constraint() {New System.Data.UniqueConstraint("Constraint1", New String() {"OrderID"}, False)})
             Me.DataTable1.TableName = "Prices"
             '
             'DataColumn1
             '
             Me.DataColumn1.ColumnName = "OrderID"
-            Me.DataColumn1.DataType = GetType(System.UInt32)
+            Me.DataColumn1.DataType = GetType(UInteger)
             '
             'DataColumn2
             '
@@ -166,17 +165,17 @@ Namespace AMPService
             'DataColumn13
             '
             Me.DataColumn13.ColumnName = "UpCost"
-            Me.DataColumn13.DataType = GetType(System.Decimal)
+            Me.DataColumn13.DataType = GetType(Decimal)
             '
             'DataColumn14
             '
             Me.DataColumn14.ColumnName = "Cost"
-            Me.DataColumn14.DataType = GetType(System.Decimal)
+            Me.DataColumn14.DataType = GetType(Decimal)
             '
             'DataColumn15
             '
             Me.DataColumn15.ColumnName = "SalerID"
-            Me.DataColumn15.DataType = GetType(System.UInt32)
+            Me.DataColumn15.DataType = GetType(UInteger)
             '
             'DataColumn16
             '
@@ -185,7 +184,7 @@ Namespace AMPService
             'DataColumn17
             '
             Me.DataColumn17.ColumnName = "PrepCode"
-            Me.DataColumn17.DataType = GetType(System.UInt32)
+            Me.DataColumn17.DataType = GetType(UInteger)
             CType(Me.MyDS, System.ComponentModel.ISupportInitialize).EndInit()
             CType(Me.DataTable1, System.ComponentModel.ISupportInitialize).EndInit()
 
@@ -918,9 +917,9 @@ Restart:
 
         <WebMethod()> _
         Public Function PostOrder(ByVal OrderID() As Int32, ByVal Quantity() As Int32, ByVal Message() As String, _
-        ByVal SalerID() As Int32, ByVal PriceDate As Date, ByVal ClientAddition As String, ByVal RowCount As Int32, _
-    ByVal FullCode As Int32(), ByVal OrderID As Int32(), ByVal CodeFirmCr As Int32(), ByVal SynonymCode As Int32(), ByVal SynonymFirmCrCode As Int32(), ByVal Code As String(), _
-    ByVal CodeCr As String(), ByVal Quantity As Int32(), ByVal Junk As Boolean(), ByVal Await As Boolean(), ByVal Cost As Decimal()) As Int32()
+        ByVal SalerID() As Int32, ByVal PriceDate() As Date, ByVal PrepCode As Int32(), ByVal CodeFirmCr As Int32(), _
+        ByVal SynonymCode As Int32(), ByVal SynonymFirmCrCode As Int32(), ByVal Code As String(), _
+        ByVal CodeCr As String(), ByVal Junk() As Boolean, ByVal Cost() As Decimal) As Int32()
             FunctionName = "PostOrder"
             Try
                 MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
