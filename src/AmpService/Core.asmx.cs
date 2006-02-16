@@ -119,7 +119,7 @@ Namespace AMPService
             'DataColumn1
             '
             Me.DataColumn1.ColumnName = "OrderID"
-            Me.DataColumn1.DataType = GetType(UInteger)
+            Me.DataColumn1.DataType = GetType(Integer)
             '
             'DataColumn2
             '
@@ -939,7 +939,7 @@ Restart:
 
         <WebMethod()> _
         Public Function PostOrder(ByVal OrderID() As Int32, ByVal Quantity() As Int32, ByVal Message() As String, _
-        ByVal OrderCode1() As Int32, ByVal OrderCode2() As Int32) As DataSet
+        ByVal SalerID() As Int32, ByVal OrderCode1() As Int32, ByVal OrderCode2() As Int32, ByVal Junk() As Boolean) As DataSet
             FunctionName = "PostOrder"
             Try
                 MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
