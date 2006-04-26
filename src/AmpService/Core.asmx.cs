@@ -7,11 +7,12 @@ Imports System.net.Mail
 Namespace AMPService
 
 
-    <System.Web.Services.WebService(Namespace:="AMPNameSpace")> _
+    <System.Web.Services.WebService(Namespace:="AMPNameSpace")> <Microsoft.VisualBasic.ComClass()> _
     Public Class AMPService
         Inherits System.Web.Services.WebService
         Dim MyTrans As MySqlTransaction
         Dim UserName, FunctionName As String
+        Dim StartTime As Date = Now()
         Private WithEvents dataColumn18 As System.Data.DataColumn
         Private WithEvents dataColumn19 As System.Data.DataColumn
         Private Const SQLHost As String = "sql.analit.net"
@@ -165,6 +166,7 @@ Namespace AMPService
             'DataColumn12
             '
             Me.DataColumn12.ColumnName = "Junk"
+            Me.DataColumn12.DataType = GetType(Boolean)
             '
             'DataColumn13
             '
@@ -219,7 +221,7 @@ Namespace AMPService
 
         '
         <WebMethod()> _
-        Public Function GetNameFromCatalog(ByVal Name() As String, ByVal NewEar As Boolean, ByVal OfferOnly As Boolean, ByVal SalerName() As String, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
+        Public Function GetNameFromCatalog(ByVal Name() As String, ByVal Form() As String, ByVal NewEar As Boolean, ByVal OfferOnly As Boolean, ByVal PriceID() As UInt32, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
             FunctionName = "GetNameFromCatalog"
             Dim NameStr As String
             Dim Params(1) As String
@@ -248,18 +250,37 @@ Restart:
                      " and pricesdata.pricecode=intersection.pricecode" & _
                 " and clientsdata.firmcode=pricesdata.firmcode"
 
-                If Not SalerName Is Nothing Then
+                If Not PriceID Is Nothing Then
                     Inc = 0
                     MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In SalerName
+                    For Each PriceNameStr In PriceID
+                        If Len(PriceNameStr) > 0 Then
+                            If Inc > 0 Then MySelCmd.CommandText &= " or "
+                            Params = FormatFindStr(PriceNameStr, "PriceCode" & Inc, "pricesdata.pricecode")
 
-                        If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "clientsdata.shortname")
+                            MySelCmd.Parameters.Add("PriceCode" & Inc, Params(1))
+                            MySelCmd.CommandText &= Params(0)
 
-                        MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
-                        MySelCmd.CommandText &= Params(0)
+                            Inc += 1
+                        End If
+                    Next
+                    If Inc < 1 Then MySelCmd.CommandText &= "1"
+                    MySelCmd.CommandText &= ")"
+                End If
 
-                        Inc += 1
+                If Not Form Is Nothing Then
+                    Inc = 0
+                    MySelCmd.CommandText &= " and ("
+                    For Each PriceNameStr In Form
+                        If Not PriceNameStr Is Nothing Then
+                            If Inc > 0 Then MySelCmd.CommandText &= " or "
+                            Params = FormatFindStr(PriceNameStr, "Form" & Inc, "catalog.form")
+
+                            MySelCmd.Parameters.Add("Form" & Inc, Params(1))
+                            MySelCmd.CommandText &= Params(0)
+
+                            Inc += 1
+                        End If
                     Next
                     MySelCmd.CommandText &= ")"
                 End If
@@ -269,7 +290,7 @@ Restart:
                      " and clientsdata.firmtype=0"
 
                 If NewEar Then MySelCmd.CommandText &= " and ampc.id is null"
-                If OfferOnly Then MySelCmd.CommandText &= " and c.id is not null"
+                If OfferOnly Or PriceID.Length > 0 Then MySelCmd.CommandText &= " and c.id is not null"
 
                 MySelCmd.CommandText &= " and clientsdata.firmsegment=AClientsData.firmsegment" & _
                " and pricesregionaldata.regioncode=intersection.regioncode" & _
@@ -309,7 +330,7 @@ Restart:
                     Next
                     MySelCmd.CommandText &= ")"
                 End If
-
+                MySelCmd.CommandText &= " order by catalog.Name, catalog.Form"
                 If SelStart.ToString.Length > 0 Then
                     MySelCmd.CommandText &= " limit " & SelStart
 
@@ -321,7 +342,7 @@ Restart:
 
                 MySelCmd.CommandText &= ";"
 
-                LogQuery(MyDA.Fill(MyDS, "Catalog"), FunctionName)
+                LogQuery(MyDA.Fill(MyDS, "Catalog"), FunctionName, StartTime)
 
                 MyTrans.Commit()
                 Return MyDS
@@ -345,7 +366,8 @@ Restart:
         End Function
 
         <WebMethod()> _
-        Public Function GetPricesByPrepCode(ByVal PrepCode() As Int32, ByVal OnlyLeader As Boolean, ByVal SalerName() As String) As DataSet
+        Public Function GetPricesByPrepCode(ByVal PrepCode() As Int32, ByVal OnlyLeader As Boolean, _
+                        ByVal Limit As Int32, ByVal SelStart As Int32, ByVal SalerName() As String) As DataSet
             FunctionName = "GetPricesByPrepCode"
             Dim FullCode, inc As Int32
             Dim PriceNameStr As String
@@ -456,8 +478,18 @@ restart:
     " and p.cost=m.mincost" & _
                 " and p.junk=m.junk"
 
+                MySelCmd.CommandText &= " order by 1, 15"
 
-                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName)
+                If SelStart.ToString.Length > 0 Then
+                    MySelCmd.CommandText &= " limit " & SelStart
+
+                    If Limit.ToString.Length > 0 Then
+                        MySelCmd.CommandText &= "," & Limit
+                    End If
+
+                End If
+
+                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
 
                 MyTrans.Commit()
                 Return MyDS
@@ -480,7 +512,8 @@ restart:
         End Function
 
         <WebMethod()> _
-        Public Function GetPricesByItemID(ByVal ItemID As String(), ByVal OnlyLeader As Boolean, ByVal SalerName() As String) As DataSet
+        Public Function GetPricesByItemID(ByVal ItemID As String(), _
+        ByVal OnlyLeader As Boolean, ByVal SalerName() As String, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
             Dim NameStr, PriceNameStr, AMPCodes As String
             Dim Params(1) As String
             Dim Inc, AMPCodesArrID, NotAMPCodesArrID, SepIndex As Int32
@@ -662,8 +695,18 @@ Restart:
     " and p.cost=m.mincost" & _
                 " and p.junk=m.junk"
 
+                MySelCmd.CommandText &= " order by 1, 15"
 
-                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName)
+                If SelStart.ToString.Length > 0 Then
+                    MySelCmd.CommandText &= " limit " & SelStart
+
+                    If Limit.ToString.Length > 0 Then
+                        MySelCmd.CommandText &= "," & Limit
+                    End If
+
+                End If
+
+                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
 
                 MyTrans.Commit()
                 Return MyDS
@@ -685,7 +728,8 @@ Restart:
         End Function
 
         <WebMethod()> _
-      Public Function GetPricesByName(ByVal OriginalName() As String, ByVal SalerName() As String, ByVal OnlyLeader As Boolean, ByVal NewEar As Boolean) As DataSet
+      Public Function GetPricesByName(ByVal OriginalName() As String, ByVal SalerName() As String, _
+      ByVal PriceName() As String, ByVal OnlyLeader As Boolean, ByVal NewEar As Boolean, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
             Dim NameStr, PriceNameStr As String
             Dim Params(1) As String
             Dim Inc As Integer
@@ -759,11 +803,28 @@ Restart:
                     MySelCmd.CommandText &= " and ("
                     For Each PriceNameStr In SalerName
                         If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
+                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "clientsdata.shortname")
                         'АМП захотели не название поставщика, а название прайс листа.
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "pricesdata.pricename")
+                        'Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "pricesdata.pricename")
 
                         MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
+                        MySelCmd.CommandText &= Params(0)
+
+                        Inc += 1
+                    Next
+                    MySelCmd.CommandText &= ")"
+                End If
+
+                If Not PriceName Is Nothing Then
+                    Inc = 0
+                    MySelCmd.CommandText &= " and ("
+                    For Each PriceNameStr In SalerName
+                        If Inc > 0 Then MySelCmd.CommandText &= " or "
+                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
+                        'АМП захотели не название поставщика, а название прайс листа.
+                        Params = FormatFindStr(PriceNameStr, "PriceName" & Inc, "pricesdata.pricename")
+
+                        MySelCmd.Parameters.Add("PriceName" & Inc, Params(1))
                         MySelCmd.CommandText &= Params(0)
 
                         Inc += 1
@@ -799,7 +860,18 @@ Restart:
     " and p.cost=m.mincost" & _
                " and p.junk=m.junk"
 
-                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName)
+                MySelCmd.CommandText &= " order by 1, 15"
+
+                If SelStart.ToString.Length > 0 Then
+                    MySelCmd.CommandText &= " limit " & SelStart
+
+                    If Limit.ToString.Length > 0 Then
+                        MySelCmd.CommandText &= "," & Limit
+                    End If
+
+                End If
+
+                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
 
                 MyTrans.Commit()
                 Return MyDS
@@ -939,7 +1011,7 @@ Restart:
 
         <WebMethod()> _
         Public Function PostOrder(ByVal OrderID() As Int32, ByVal Quantity() As Int32, ByVal Message() As String, _
-        ByVal SalerID() As Int32, ByVal OrderCode1() As Int32, ByVal OrderCode2() As Int32, ByVal Junk() As Boolean) As DataSet
+         ByVal OrderCode1() As Int32, ByVal OrderCode2() As Int32, ByVal Junk() As Boolean) As DataSet
             FunctionName = "PostOrder"
             Try
                 MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
@@ -951,8 +1023,9 @@ Restart:
             End Try
 
             Try
-                ' Return Global.PostOrder.PostOrder.PostOrderMethod(OrderID, Quantity, Message, GetClientCode, UserName, SQLHost)
-                Return MyDS
+                Return Global.AMPService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, _
+                 OrderCode1, OrderCode2, Junk, GetClientCode, UserName, SQLHost)
+                ' Return MyDS
             Catch err As Exception
                 MailErr(FunctionName, err.Message, err.Source, UserName)
             Finally
@@ -1013,7 +1086,7 @@ Restart:
             If Left(UserName, 7) = "ANALIT\" Then
                 UserName = Mid(UserName, 8)
             End If
-            ' UserName = "amp"
+            UserName = "amp"
             Try
                 MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" & _
                             " FROM (clientsdata, osuseraccessright)" & _
@@ -1055,10 +1128,10 @@ Restart:
 
         End Sub
 
-        Private Function LogQuery(ByVal RowCount As Int32, ByVal FunctionName As String) As Boolean
-            MySelCmd.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount) " & _
+        Private Function LogQuery(ByVal RowCount As Int32, ByVal FunctionName As String, ByVal StartTime As Date) As Boolean
+            MySelCmd.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " & _
                                     " values(now(), '" & HttpContext.Current.Request.UserHostAddress & "', '" & _
-                                    UserName & "', '" & FunctionName & "', " & RowCount & ")"
+                                    UserName & "', '" & FunctionName & "', " & RowCount & ", " & CInt(Now.Subtract(StartTime).TotalMilliseconds).ToString & ")"
 
             MySelCmd.ExecuteNonQuery()
         End Function
