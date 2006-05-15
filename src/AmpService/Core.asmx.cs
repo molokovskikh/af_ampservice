@@ -254,7 +254,7 @@ Restart:
                     Inc = 0
                     MySelCmd.CommandText &= " and ("
                     For Each PriceNameStr In PriceID
-                        If Len(PriceNameStr) > 0 Then
+                        If PriceNameStr Is Nothing And Len(PriceNameStr) > 0 Then
                             If Inc > 0 Then MySelCmd.CommandText &= " or "
                             Params = FormatFindStr(PriceNameStr, "PriceCode" & Inc, "pricesdata.pricecode")
 
@@ -272,7 +272,7 @@ Restart:
                     Inc = 0
                     MySelCmd.CommandText &= " and ("
                     For Each PriceNameStr In Form
-                        If Not PriceNameStr Is Nothing Then
+                        If Not PriceNameStr Is Nothing And Len(PriceNameStr) > 0 Then
                             If Inc > 0 Then MySelCmd.CommandText &= " or "
                             Params = FormatFindStr(PriceNameStr, "Form" & Inc, "catalog.form")
 
@@ -281,6 +281,7 @@ Restart:
 
                             Inc += 1
                         End If
+                        If Inc < 1 Then MySelCmd.CommandText &= "1"
                     Next
                     MySelCmd.CommandText &= ")"
                 End If
@@ -367,7 +368,7 @@ Restart:
 
         <WebMethod()> _
         Public Function GetPricesByPrepCode(ByVal PrepCode() As Int32, ByVal OnlyLeader As Boolean, _
-                        ByVal Limit As Int32, ByVal SelStart As Int32, ByVal SalerName() As String) As DataSet
+        ByVal PriceID() As UInt32, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
             FunctionName = "GetPricesByPrepCode"
             Dim FullCode, inc As Int32
             Dim PriceNameStr As String
@@ -391,63 +392,77 @@ restart:
                 'index FullCode(FullCode), index CodeFirmCr(CodeFirmCr), index Cost(Cost), index junk(junk)
                 'index mincost(mincost), index fullcode(FullCode), index CodeFirmcr(CodeFirmCr), index Junk(Junk)
 
-                If OnlyLeader Then MySelCmd.CommandText = "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
-" create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
-" OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20)," & _
-" PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned" & _
-" );" & _
-" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned,  Junk Bit" & _
-" );" & _
-" insert into prices "
+                ' If OnlyLeader Then
 
-                MySelCmd.CommandText &= " select  c.id OrderID, ifnull(c.Code, '') SalerCode, ifnull(c.CodeCr, '') CreaterCode, ifnull(ampc.code, '') ItemID, s.synonym OriginalName, ifnull(scr.synonym, '') OriginalCr, " & _
-" ifnull(c.Unit, '') Unit, ifnull(c.Volume, '') Volume, ifnull(c.Quantity, '') Quantity, ifnull(c.Note, '') Note, ifnull(c.Period, '') Period, ifnull(c.Doc, '') Doc," & _
-" length(c.Junk)<1 Junk," & _
-"intersection.PublicCostCorr As UpCost," & _
-" round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-" *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-" *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost," & _
-" pricesdata.pricecode SalerID, ClientsData.ShortName SalerName, if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate, c.fullcode PrepCode"
+                MySelCmd.CommandText = "DROP temporary table IF EXISTS prices; " & _
+"DROP temporary table IF EXISTS mincosts; " & _
+"create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type= innodb; " & _
+"create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              = innodb; " & _
+"INSERT " & _
+"INTO prices " & _
+"SELECT  c.id OrderID, " & _
+"        c.Code, " & _
+"        c.CodeCr, " & _
+"        null, " & _
+"        s.synonym OriginalName, " & _
+"        scr.synonym, " & _
+"        c.Unit, " & _
+"        c.Volume, " & _
+"        c.Quantity, " & _
+"        c.Note, " & _
+"        c.Period, " & _
+"        c.Doc, " & _
+"        length(c.Junk)< 1 Junk, " & _
+"        intersection.PublicCostCorr As UpCost, " & _
+"        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost, " & _
+"        pricesdata.pricecode SalerID, " & _
+"        ClientsData.ShortName SalerName, " & _
+"        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate, " & _
+"        c.fullcode, " & _
+"        c.codefirmcr, " & _
+"        c.synonymcode OrderCode1, " & _
+"        c.synonymfirmcrcode OrderCode2 " & _
+"FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr) " & _
+"LEFT JOIN farm.synonymfirmcr scr " & _
+"        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode) " & _
+"        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode " & _
+"WHERE   DisabledByClient                                            = 0 " & _
+"        and Disabledbyfirm                                          = 0 " & _
+"        and DisabledByAgency                                        = 0 " & _
+"        and intersection.clientcode                                 = " & GetClientCode().ToString & _
+"        and retclientsset.clientcode                                = intersection.clientcode " & _
+"        and pricesdata.pricecode                                    = intersection.pricecode " & _
+"        and clientsdata.firmcode                                    = pricesdata.firmcode " & _
+"        and clientsdata.firmstatus                                  = 1 " & _
+"        and clientsdata.billingstatus                               = 1 " & _
+"        and clientsdata.firmtype                                    = 0 " & _
+"        and clientsdata.firmsegment                                 = AClientsData.firmsegment " & _
+"        and pricesregionaldata.regioncode                           = intersection.regioncode " & _
+"        and pricesregionaldata.pricecode                            = pricesdata.pricecode " & _
+"        and AClientsData.firmcode                                   = intersection.clientcode " & _
+"        and (clientsdata.maskregion & intersection.regioncode)      > 0 " & _
+"        and (AClientsData.maskregion & intersection.regioncode)     > 0 " & _
+"        and (retclientsset.workregionmask & intersection.regioncode)> 0 " & _
+"        and pricesdata.agencyenabled                                = 1 " & _
+"        and pricesdata.enabled                                      = 1 " & _
+"        and invisibleonclient                                       = 0 " & _
+"        and pricesdata.pricetype                                   <> 1 " & _
+"        and to_days(now())-to_days(datecurprice)                    < maxold " & _
+"        and pricesregionaldata.enabled                              = 1 " & _
+"        and fr.firmcode                                             = pricesdata.pricecode " & _
+"        and c.firmcode                                              = intersection.costcode " & _
+"        and c.fullcode                                              in " & FullCodesString & _
+"        and c.synonymcode                                           = s.synonymcode " & _
+"        and s.firmcode                     = ifnull(parentsynonym, pricesdata.pricecode) "
 
-                If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
-
-                MySelCmd.CommandText &= ", c.synonymcode OrderCode1, c.synonymfirmcrcode OrderCode2 from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
-    " farm.synonym s, farm.formrules fr)" & _
-    " left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" & _
-     " left join    farm.synonymfirmcr scr on scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode " & _
-    " where DisabledByClient=0" & _
-    " and Disabledbyfirm=0" & _
-    " and DisabledByAgency=0" & _
-    " and intersection.clientcode=" & GetClientCode().ToString & _
-    " and retclientsset.clientcode=intersection.clientcode" & _
-    " and pricesdata.pricecode=intersection.pricecode" & _
-    " and clientsdata.firmcode=pricesdata.firmcode" & _
-    " and clientsdata.firmstatus=1" & _
-    " and clientsdata.billingstatus=1" & _
-    " and clientsdata.firmtype=0" & _
-    " and clientsdata.firmsegment=AClientsData.firmsegment" & _
-    " and pricesregionaldata.regioncode=intersection.regioncode" & _
-    " and pricesregionaldata.pricecode=pricesdata.pricecode" & _
-    " and AClientsData.firmcode=intersection.clientcode" & _
-    " and (clientsdata.maskregion & intersection.regioncode)>0" & _
-    " and (AClientsData.maskregion & intersection.regioncode)>0" & _
-    " and (retclientsset.workregionmask & intersection.regioncode)>0" & _
-    " and pricesdata.agencyenabled=1" & _
-    " and pricesdata.enabled=1 and invisibleonclient=0" & _
-    " and pricesdata.pricetype<>1" & _
-    " and to_days(now())-to_days(datecurprice)<maxold" & _
-    " and pricesregionaldata.enabled=1"
-
-
-                If Not SalerName Is Nothing Then
+                If Not PriceID Is Nothing Then
                     inc = 0
                     MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In SalerName
+
+                    For Each PriceNameStr In PriceID
+
                         If inc > 0 Then MySelCmd.CommandText &= " or "
-                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
-                        'АМП захотели не название поставщика, а название прайс листа.
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "pricesdata.pricename")
+                        Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "pricesdata.pricecode")
 
 
                         MySelCmd.Parameters.Add("ShortName" & inc, Params(1))
@@ -458,27 +473,7 @@ restart:
                     MySelCmd.CommandText &= ")"
                 End If
 
-
-                MySelCmd.CommandText &= " and fr.firmcode=pricesdata.pricecode" & _
-    " and c.firmcode=intersection.costcode" & _
-    " and c.fullcode in " & FullCodesString & _
-    " and c.synonymcode=s.synonymcode" & _
-      " and s.firmcode=ifnull(parentsynonym, pricesdata.pricecode)"
-
-                MySelCmd.CommandText &= " group by 1;"
-
-                If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                                            " select min(cost), FullCode, Junk from (prices)" & _
-                                            " group by FullCode,  Junk;" & _
-                " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, " & _
-                " OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost," & _
-                " Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
-    " from (prices p, mincosts m)" & _
-    " where p.fullcode=m.fullcode" & _
-    " and p.cost=m.mincost" & _
-                " and p.junk=m.junk"
-
-                MySelCmd.CommandText &= " order by 1, 15"
+                MySelCmd.CommandText &= "ORDER BY 1, 15 "
 
                 If SelStart.ToString.Length > 0 Then
                     MySelCmd.CommandText &= " limit " & SelStart
@@ -488,6 +483,68 @@ restart:
                     End If
 
                 End If
+                MySelCmd.CommandText &= "; "
+
+                '                MySelCmd.CommandText &= "UPDATE prices p, " & _
+                '"        farm.core0 c " & _
+                '"        SET ItemID      = code " & _
+                '"WHERE   c.firmcode      = 1864 " & _
+                '"        and c.fullcode  = p.fullcode " & _
+                '"        and c.codefirmcr= p.codefirmcr ;"
+
+
+                '                If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
+
+               
+
+                MySelCmd.CommandText &= "SELECT  OrderID, " & _
+                "        SalerCode, " & _
+                "        CreaterCode, " & _
+                "        ItemID, " & _
+                "        OriginalName, " & _
+                "        OriginalCr, " & _
+                "        Unit, " & _
+                "        Volume, " & _
+                "        Quantity, " & _
+                "        Note, " & _
+                "        Period, " & _
+                "        Doc, " & _
+                "        Junk, " & _
+                "        UpCost, " & _
+                "        Cost, " & _
+                "        SalerID, " & _
+                "        SalerName, " & _
+                "        PriceDate, " & _
+                "        FullCode PrepCode, " & _
+                "        synonymcode OrderCode1, " & _
+                "        synonymfirmcrcode OrderCode2 " & _
+                "FROM    prices"
+              
+
+
+           
+
+                '            If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
+                '                                        " select min(cost), FullCode, Junk from (prices)" & _
+                '                                        " group by FullCode,  Junk;" & _
+                '            " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, " & _
+                '            " OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost," & _
+                '            " Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
+                '" from (prices p, mincosts m)" & _
+                '" where p.fullcode=m.fullcode" & _
+                '" and p.cost=m.mincost" & _
+                '            " and p.junk=m.junk"
+
+                '            MySelCmd.CommandText &= " order by 1, 15"
+
+                '            If SelStart.ToString.Length > 0 Then
+                '                MySelCmd.CommandText &= " limit " & SelStart
+
+                '                If Limit.ToString.Length > 0 Then
+                '                    MySelCmd.CommandText &= "," & Limit
+                '                End If
+
+                '            End If
 
                 LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
 
