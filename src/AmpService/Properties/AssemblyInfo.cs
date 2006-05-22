@@ -1,32 +1,13 @@
-Imports System
-Imports System.Reflection
-Imports System.Runtime.InteropServices
+using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
-' General Information about an assembly is controlled through the following 
-' set of attributes. Change these attribute values to modify the information
-' associated with an assembly.
-
-' Review the values of the assembly attributes
-
-<Assembly: AssemblyTitle("")> 
-<Assembly: AssemblyDescription("")> 
-<Assembly: AssemblyCompany("")> 
-<Assembly: AssemblyProduct("")> 
-<Assembly: AssemblyCopyright("")> 
-<Assembly: AssemblyTrademark("")> 
-<Assembly: CLSCompliant(True)> 
-
-'The following GUID is for the ID of the typelib if this project is exposed to COM
-<Assembly: Guid("4D22283C-14D7-4803-995D-3FE4B832F9B4")> 
-
-' Version information for an assembly consists of the following four values:
-'
-'      Major Version
-'      Minor Version 
-'      Build Number
-'      Revision
-'
-' You can specify all the values or you can default the Build and Revision Numbers 
-' by using the '*' as shown below:
-
-<Assembly: AssemblyVersion("1.0.*")> 
+[assembly: AssemblyTitle("")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("")]
+[assembly: AssemblyCopyright("")]
+[assembly: AssemblyTrademark("")]
+[assembly: CLSCompliant(true)]
+[assembly: Guid("4D22283C-14D7-4803-995D-3FE4B832F9B4")]
+[assembly: AssemblyVersion("1.0.*")]
