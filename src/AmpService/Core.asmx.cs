@@ -1,1198 +1,1095 @@
-Imports System.Web.Services
-Imports MySql.Data.MySqlClient
-Imports System.Data
-Imports System.net.Mail
-
-
-Namespace AMPService
-
-
-    <System.Web.Services.WebService(Namespace:="AMPNameSpace")> <Microsoft.VisualBasic.ComClass()> _
-    Public Class AMPService
-        Inherits System.Web.Services.WebService
-        Dim MyTrans As MySqlTransaction
-        Dim UserName, FunctionName As String
-        Dim StartTime As Date = Now()
-        Private WithEvents dataColumn18 As System.Data.DataColumn
-        Private WithEvents dataColumn19 As System.Data.DataColumn
-        Private Const SQLHost As String = "sql.analit.net"
-        ' Dim RowCount As Int32
-
-#Region " Web Services Designer Generated Code "
-
-        Public Sub New()
-            MyBase.New()
-
-            'This call is required by the Web Services Designer.
-            InitializeComponent()
-
-            'Add your own initialization code after the InitializeComponent() call
-
-        End Sub
-
-        'Required by the Web Services Designer
-        Private components As System.ComponentModel.IContainer
-
-        'NOTE: The following procedure is required by the Web Services Designer
-        'It can be modified using the Web Services Designer.  
-        'Do not modify it using the code editor.
-        Public WithEvents MySelCmd As MySql.Data.MySqlClient.MySqlCommand
-        Public WithEvents MyCn As MySql.Data.MySqlClient.MySqlConnection
-        Private WithEvents MyDA As MySql.Data.MySqlClient.MySqlDataAdapter
-        Public WithEvents MyDS As System.Data.DataSet
-        Public WithEvents DataTable1 As System.Data.DataTable
-        Public WithEvents DataColumn1 As System.Data.DataColumn
-        Public WithEvents DataColumn2 As System.Data.DataColumn
-        Public WithEvents DataColumn3 As System.Data.DataColumn
-        Public WithEvents DataColumn4 As System.Data.DataColumn
-        Public WithEvents DataColumn5 As System.Data.DataColumn
-        Public WithEvents DataColumn6 As System.Data.DataColumn
-        Public WithEvents DataColumn7 As System.Data.DataColumn
-        Public WithEvents DataColumn8 As System.Data.DataColumn
-        Public WithEvents DataColumn9 As System.Data.DataColumn
-        Public WithEvents DataColumn10 As System.Data.DataColumn
-        Public WithEvents DataColumn11 As System.Data.DataColumn
-        Public WithEvents DataColumn12 As System.Data.DataColumn
-        Public WithEvents DataColumn13 As System.Data.DataColumn
-        Public WithEvents DataColumn14 As System.Data.DataColumn
-        Public WithEvents DataColumn15 As System.Data.DataColumn
-        Public WithEvents DataColumn16 As System.Data.DataColumn
-        Public WithEvents DataColumn17 As System.Data.DataColumn
-        <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
-            Me.MySelCmd = New MySql.Data.MySqlClient.MySqlCommand
-            Me.MyCn = New MySql.Data.MySqlClient.MySqlConnection
-            Me.MyDA = New MySql.Data.MySqlClient.MySqlDataAdapter
-            Me.MyDS = New System.Data.DataSet
-            Me.DataTable1 = New System.Data.DataTable
-            Me.DataColumn1 = New System.Data.DataColumn
-            Me.DataColumn2 = New System.Data.DataColumn
-            Me.DataColumn3 = New System.Data.DataColumn
-            Me.DataColumn4 = New System.Data.DataColumn
-            Me.DataColumn5 = New System.Data.DataColumn
-            Me.DataColumn6 = New System.Data.DataColumn
-            Me.DataColumn7 = New System.Data.DataColumn
-            Me.DataColumn8 = New System.Data.DataColumn
-            Me.DataColumn9 = New System.Data.DataColumn
-            Me.DataColumn10 = New System.Data.DataColumn
-            Me.DataColumn11 = New System.Data.DataColumn
-            Me.DataColumn12 = New System.Data.DataColumn
-            Me.DataColumn13 = New System.Data.DataColumn
-            Me.DataColumn14 = New System.Data.DataColumn
-            Me.DataColumn15 = New System.Data.DataColumn
-            Me.DataColumn16 = New System.Data.DataColumn
-            Me.DataColumn17 = New System.Data.DataColumn
-            Me.dataColumn18 = New System.Data.DataColumn
-            Me.dataColumn19 = New System.Data.DataColumn
-            CType(Me.MyDS, System.ComponentModel.ISupportInitialize).BeginInit()
-            CType(Me.DataTable1, System.ComponentModel.ISupportInitialize).BeginInit()
-            '
-            'MySelCmd
-            '
-            Me.MySelCmd.CommandText = Nothing
-            Me.MySelCmd.CommandTimeout = 0
-            Me.MySelCmd.CommandType = System.Data.CommandType.Text
-            Me.MySelCmd.Connection = Me.MyCn
-            Me.MySelCmd.Transaction = Nothing
-            Me.MySelCmd.UpdatedRowSource = System.Data.UpdateRowSource.Both
-            '
-            'MyCn
-            '
-            Me.MyCn.ConnectionString = ""
-            '
-            'MyDA
-            '
-            Me.MyDA.DeleteCommand = Nothing
-            Me.MyDA.InsertCommand = Nothing
-            Me.MyDA.SelectCommand = Me.MySelCmd
-            Me.MyDA.UpdateCommand = Nothing
-            '
-            'MyDS
-            '
-            Me.MyDS.DataSetName = "AMPDataSet"
-            Me.MyDS.Locale = New System.Globalization.CultureInfo("ru-RU")
-            Me.MyDS.Tables.AddRange(New System.Data.DataTable() {Me.DataTable1})
-            '
-            'DataTable1
-            '
-            Me.DataTable1.Columns.AddRange(New System.Data.DataColumn() {Me.DataColumn1, Me.DataColumn2, Me.DataColumn3, Me.DataColumn4, Me.DataColumn5, Me.DataColumn6, Me.DataColumn7, Me.DataColumn8, Me.DataColumn9, Me.DataColumn10, Me.DataColumn11, Me.DataColumn12, Me.DataColumn13, Me.DataColumn14, Me.DataColumn15, Me.DataColumn16, Me.DataColumn17, Me.dataColumn18, Me.dataColumn19})
-            Me.DataTable1.TableName = "Prices"
-            '
-            'DataColumn1
-            '
-            Me.DataColumn1.ColumnName = "OrderID"
-            Me.DataColumn1.DataType = GetType(Integer)
-            '
-            'DataColumn2
-            '
-            Me.DataColumn2.ColumnName = "CreaterCode"
-            '
-            'DataColumn3
-            '
-            Me.DataColumn3.ColumnName = "ItemID"
-            '
-            'DataColumn4
-            '
-            Me.DataColumn4.Caption = "OriginalName"
-            Me.DataColumn4.ColumnName = "OriginalName"
-            '
-            'DataColumn5
-            '
-            Me.DataColumn5.ColumnName = "OriginalCr"
-            '
-            'DataColumn6
-            '
-            Me.DataColumn6.ColumnName = "Unit"
-            '
-            'DataColumn7
-            '
-            Me.DataColumn7.ColumnName = "Volume"
-            '
-            'DataColumn8
-            '
-            Me.DataColumn8.ColumnName = "Quantity"
-            '
-            'DataColumn9
-            '
-            Me.DataColumn9.ColumnName = "Note"
-            '
-            'DataColumn10
-            '
-            Me.DataColumn10.ColumnName = "Period"
-            '
-            'DataColumn11
-            '
-            Me.DataColumn11.ColumnName = "Doc"
-            '
-            'DataColumn12
-            '
-            Me.DataColumn12.ColumnName = "Junk"
-            Me.DataColumn12.DataType = GetType(Boolean)
-            '
-            'DataColumn13
-            '
-            Me.DataColumn13.ColumnName = "UpCost"
-            Me.DataColumn13.DataType = GetType(Decimal)
-            '
-            'DataColumn14
-            '
-            Me.DataColumn14.ColumnName = "Cost"
-            Me.DataColumn14.DataType = GetType(Decimal)
-            '
-            'DataColumn15
-            '
-            Me.DataColumn15.ColumnName = "SalerID"
-            Me.DataColumn15.DataType = GetType(UInteger)
-            '
-            'DataColumn16
-            '
-            Me.DataColumn16.ColumnName = "PriceDate"
-            '
-            'DataColumn17
-            '
-            Me.DataColumn17.ColumnName = "PrepCode"
-            Me.DataColumn17.DataType = GetType(UInteger)
-            '
-            'dataColumn18
-            '
-            Me.dataColumn18.ColumnName = "OrderCode1"
-            Me.dataColumn18.DataType = GetType(UInteger)
-            '
-            'dataColumn19
-            '
-            Me.dataColumn19.ColumnName = "OrderCode2"
-            Me.dataColumn19.DataType = GetType(UInteger)
-            CType(Me.MyDS, System.ComponentModel.ISupportInitialize).EndInit()
-            CType(Me.DataTable1, System.ComponentModel.ISupportInitialize).EndInit()
-
-        End Sub
-
-        Protected Overloads Overrides Sub Dispose(ByVal disposing As Boolean)
-            'CODEGEN: This procedure is required by the Web Services Designer
-            'Do not modify it using the code editor.
-            If disposing Then
-                If Not (components Is Nothing) Then
-                    components.Dispose()
-                End If
-            End If
-            MyBase.Dispose(disposing)
-        End Sub
-
-#End Region
-
-        '
-        <WebMethod()> _
-        Public Function GetNameFromCatalog(ByVal Name() As String, ByVal Form() As String, ByVal NewEar As Boolean, ByVal OfferOnly As Boolean, ByVal PriceID() As UInt32, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
-            FunctionName = "GetNameFromCatalog"
-            Dim NameStr As String
-            Dim Params(1) As String
-            Dim PriceNameStr As String
-            Dim Inc As Integer
-            Dim AMPCode As Boolean = False
-            MyDS.Tables.Remove("Prices")
-            Try
-                MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
-Restart:
-                If MyCn.State = ConnectionState.Closed Then MyCn.Open()
-                MyTrans = MyCn.BeginTransaction()
-                MySelCmd.Transaction = MyTrans
-
-                MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; "
-                MySelCmd.CommandText &= "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form" & _
-                     " from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" & _
-                     " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" & _
-                     " left join farm.core0 c on   c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" & _
-                     " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" & _
-                     " where DisabledByClient=0" & _
-                     " and Disabledbyfirm=0" & _
-                     " and DisabledByAgency=0" & _
-                     " and intersection.clientcode=" & GetClientCode().ToString & _
-                     " and retclientsset.clientcode=intersection.clientcode" & _
-                     " and pricesdata.pricecode=intersection.pricecode" & _
-                " and clientsdata.firmcode=pricesdata.firmcode"
-
-                If Not PriceID Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In PriceID
-                        If PriceNameStr Is Nothing And Len(PriceNameStr) > 0 Then
-                            If Inc > 0 Then MySelCmd.CommandText &= " or "
-                            Params = FormatFindStr(PriceNameStr, "PriceCode" & Inc, "pricesdata.pricecode")
-
-                            MySelCmd.Parameters.Add("PriceCode" & Inc, Params(1))
-                            MySelCmd.CommandText &= Params(0)
-
-                            Inc += 1
-                        End If
-                    Next
-                    If Inc < 1 Then MySelCmd.CommandText &= "1"
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                If Not Form Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In Form
-                        If Not PriceNameStr Is Nothing And Len(PriceNameStr) > 0 Then
-                            If Inc > 0 Then MySelCmd.CommandText &= " or "
-                            Params = FormatFindStr(PriceNameStr, "Form" & Inc, "catalog.form")
-
-                            MySelCmd.Parameters.Add("Form" & Inc, Params(1))
-                            MySelCmd.CommandText &= Params(0)
-
-                            Inc += 1
-                        End If
-                        If Inc < 1 Then MySelCmd.CommandText &= "1"
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                MySelCmd.CommandText &= " and clientsdata.firmstatus=1" & _
-                     " and clientsdata.billingstatus=1" & _
-                     " and clientsdata.firmtype=0"
-
-                If NewEar Then MySelCmd.CommandText &= " and ampc.id is null"
-                If OfferOnly Or PriceID.Length > 0 Then MySelCmd.CommandText &= " and c.id is not null"
-
-                MySelCmd.CommandText &= " and clientsdata.firmsegment=AClientsData.firmsegment" & _
-               " and pricesregionaldata.regioncode=intersection.regioncode" & _
-               " and pricesregionaldata.pricecode=pricesdata.pricecode" & _
-               " and AClientsData.firmcode=intersection.clientcode" & _
-               " and (clientsdata.maskregion & intersection.regioncode)>0" & _
-               " and (AClientsData.maskregion & intersection.regioncode)>0" & _
-               " and (retclientsset.workregionmask & intersection.regioncode)>0" & _
-               " and pricesdata.agencyenabled=1" & _
-               " and pricesdata.enabled=1 and invisibleonclient=0" & _
-               " and pricesdata.pricetype<>1" & _
-               " and pricesregionaldata.enabled=1"
-
-                If Not Name Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    If IsNumeric(Name(0)) Then AMPCode = True
-                    For Each NameStr In Name
-
-                        If Len(NameStr) > 0 Then
-
-
-                            If Inc > 0 Then MySelCmd.CommandText &= " or "
-
-                            If AMPCode Then
-                                Params = FormatFindStr(NameStr, "Name" & Inc, "ampc.code")
-                            Else
-                                Params = FormatFindStr(NameStr, "Name" & Inc, "catalog.Name")
-                            End If
-
-
-                            MySelCmd.Parameters.Add("Name" & Inc, Params(1))
-                            MySelCmd.CommandText &= Params(0)
-
-                            Inc += 1
-                        End If
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-                MySelCmd.CommandText &= " order by catalog.Name, catalog.Form"
-                If SelStart.ToString.Length > 0 Then
-                    MySelCmd.CommandText &= " limit " & SelStart
-
-                    If Limit.ToString.Length > 0 Then
-                        MySelCmd.CommandText &= "," & Limit
-                    End If
-
-                End If
-
-                MySelCmd.CommandText &= ";"
-
-                LogQuery(MyDA.Fill(MyDS, "Catalog"), FunctionName, StartTime)
-
-                MyTrans.Commit()
-                Return MyDS
-
-            Catch MySQLErr As MySqlException
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                If MySQLErr.Number = 1213 Or MySQLErr.Number = 1205 Then
-                    System.Threading.Thread.Sleep(100)
-                    GoTo Restart
-                End If
-                MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName)
-
-            Catch ex As Exception
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                MailErr(FunctionName, ex.Message, ex.Source, UserName)
-            Finally
-                If MyCn.State = ConnectionState.Open Then MyCn.Close()
-            End Try
-
-
-        End Function
-
-        <WebMethod()> _
-        Public Function GetPricesByPrepCode(ByVal PrepCode() As Int32, ByVal OnlyLeader As Boolean, _
-        ByVal PriceID() As UInt32, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
-            FunctionName = "GetPricesByPrepCode"
-            Dim FullCode, inc As Int32
-            Dim PriceNameStr As String
-            Dim Params(1) As String
-
-
-
-            Dim FullCodesString As String = "("
-            Try
-                MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
-restart:
-                If MyCn.State = ConnectionState.Closed Then MyCn.Open()
-                MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted)
-                MySelCmd.Transaction = MyTrans
-
-                For Each FullCode In PrepCode
-                    If Len(FullCodesString) > 1 And FullCode > 0 Then FullCodesString &= ", "
-                    If FullCode > 0 Then FullCodesString &= FullCode
-                Next
-                FullCodesString &= ")"
-                'index FullCode(FullCode), index CodeFirmCr(CodeFirmCr), index Cost(Cost), index junk(junk)
-                'index mincost(mincost), index fullcode(FullCode), index CodeFirmcr(CodeFirmCr), index Junk(Junk)
-
-                ' If OnlyLeader Then
-
-                MySelCmd.CommandText = "DROP temporary table IF EXISTS prices; " & _
-"DROP temporary table IF EXISTS mincosts; " & _
-"create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type= innodb; " & _
-"create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              = innodb; " & _
-"INSERT " & _
-"INTO prices " & _
-"SELECT  c.id OrderID, " & _
-"        c.Code, " & _
-"        c.CodeCr, " & _
-"        null, " & _
-"        s.synonym OriginalName, " & _
-"        scr.synonym, " & _
-"        c.Unit, " & _
-"        c.Volume, " & _
-"        c.Quantity, " & _
-"        c.Note, " & _
-"        c.Period, " & _
-"        c.Doc, " & _
-"        length(c.Junk)< 1 Junk, " & _
-"        intersection.PublicCostCorr As UpCost, " & _
-"        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost, " & _
-"        pricesdata.pricecode SalerID, " & _
-"        ClientsData.ShortName SalerName, " & _
-"        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate, " & _
-"        c.fullcode, " & _
-"        c.codefirmcr, " & _
-"        c.synonymcode OrderCode1, " & _
-"        c.synonymfirmcrcode OrderCode2 " & _
-"FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr) " & _
-"LEFT JOIN farm.synonymfirmcr scr " & _
-"        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode) " & _
-"        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode " & _
-"WHERE   DisabledByClient                                            = 0 " & _
-"        and Disabledbyfirm                                          = 0 " & _
-"        and DisabledByAgency                                        = 0 " & _
-"        and intersection.clientcode                                 = " & GetClientCode().ToString & _
-"        and retclientsset.clientcode                                = intersection.clientcode " & _
-"        and pricesdata.pricecode                                    = intersection.pricecode " & _
-"        and clientsdata.firmcode                                    = pricesdata.firmcode " & _
-"        and clientsdata.firmstatus                                  = 1 " & _
-"        and clientsdata.billingstatus                               = 1 " & _
-"        and clientsdata.firmtype                                    = 0 " & _
-"        and clientsdata.firmsegment                                 = AClientsData.firmsegment " & _
-"        and pricesregionaldata.regioncode                           = intersection.regioncode " & _
-"        and pricesregionaldata.pricecode                            = pricesdata.pricecode " & _
-"        and AClientsData.firmcode                                   = intersection.clientcode " & _
-"        and (clientsdata.maskregion & intersection.regioncode)      > 0 " & _
-"        and (AClientsData.maskregion & intersection.regioncode)     > 0 " & _
-"        and (retclientsset.workregionmask & intersection.regioncode)> 0 " & _
-"        and pricesdata.agencyenabled                                = 1 " & _
-"        and pricesdata.enabled                                      = 1 " & _
-"        and invisibleonclient                                       = 0 " & _
-"        and pricesdata.pricetype                                   <> 1 " & _
-"        and to_days(now())-to_days(datecurprice)                    < maxold " & _
-"        and pricesregionaldata.enabled                              = 1 " & _
-"        and fr.firmcode                                             = pricesdata.pricecode " & _
-"        and c.firmcode                                              = intersection.costcode " & _
-"        and c.fullcode                                              in " & FullCodesString & _
-"        and c.synonymcode                                           = s.synonymcode " & _
-"        and s.firmcode                     = ifnull(parentsynonym, pricesdata.pricecode) "
-
-                If Not PriceID Is Nothing Then
-                    inc = 0
-                    MySelCmd.CommandText &= " and ("
-
-                    For Each PriceNameStr In PriceID
-
-                        If inc > 0 Then MySelCmd.CommandText &= " or "
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "pricesdata.pricecode")
-
-
-                        MySelCmd.Parameters.Add("ShortName" & inc, Params(1))
-                        MySelCmd.CommandText &= Params(0)
-
-                        inc += 1
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                MySelCmd.CommandText &= "ORDER BY 1, 15 "
-
-                If SelStart.ToString.Length > 0 Then
-                    MySelCmd.CommandText &= " limit " & SelStart
-
-                    If Limit.ToString.Length > 0 Then
-                        MySelCmd.CommandText &= "," & Limit
-                    End If
-
-                End If
-                MySelCmd.CommandText &= "; "
-
-                '                MySelCmd.CommandText &= "UPDATE prices p, " & _
-                '"        farm.core0 c " & _
-                '"        SET ItemID      = code " & _
-                '"WHERE   c.firmcode      = 1864 " & _
-                '"        and c.fullcode  = p.fullcode " & _
-                '"        and c.codefirmcr= p.codefirmcr ;"
-
-
-                '                If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
-
-               
-
-                MySelCmd.CommandText &= "SELECT  OrderID, " & _
-                "        SalerCode, " & _
-                "        CreaterCode, " & _
-                "        ItemID, " & _
-                "        OriginalName, " & _
-                "        OriginalCr, " & _
-                "        Unit, " & _
-                "        Volume, " & _
-                "        Quantity, " & _
-                "        Note, " & _
-                "        Period, " & _
-                "        Doc, " & _
-                "        Junk, " & _
-                "        UpCost, " & _
-                "        Cost, " & _
-                "        SalerID, " & _
-                "        SalerName, " & _
-                "        PriceDate, " & _
-                "        FullCode PrepCode, " & _
-                "        synonymcode OrderCode1, " & _
-                "        synonymfirmcrcode OrderCode2 " & _
-                "FROM    prices"
-              
-
-
-           
-
-                '            If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                '                                        " select min(cost), FullCode, Junk from (prices)" & _
-                '                                        " group by FullCode,  Junk;" & _
-                '            " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, " & _
-                '            " OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost," & _
-                '            " Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
-                '" from (prices p, mincosts m)" & _
-                '" where p.fullcode=m.fullcode" & _
-                '" and p.cost=m.mincost" & _
-                '            " and p.junk=m.junk"
-
-                '            MySelCmd.CommandText &= " order by 1, 15"
-
-                '            If SelStart.ToString.Length > 0 Then
-                '                MySelCmd.CommandText &= " limit " & SelStart
-
-                '                If Limit.ToString.Length > 0 Then
-                '                    MySelCmd.CommandText &= "," & Limit
-                '                End If
-
-                '            End If
-
-                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
-
-                MyTrans.Commit()
-                Return MyDS
-
-            Catch MySQLErr As MySqlException
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                If MySQLErr.Number = 1213 Or MySQLErr.Number = 1205 Then
-                    System.Threading.Thread.Sleep(100)
-                    GoTo Restart
-                End If
-                MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName)
-
-            Catch ex As Exception
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                MailErr(FunctionName, ex.Message, ex.Source, UserName)
-            Finally
-                If MyCn.State = ConnectionState.Open Then MyCn.Close()
-            End Try
-
-        End Function
-
-        <WebMethod()> _
-        Public Function GetPricesByItemID(ByVal ItemID As String(), _
-        ByVal OnlyLeader As Boolean, ByVal SalerName() As String, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
-            Dim NameStr, PriceNameStr, AMPCodes As String
-            Dim Params(1) As String
-            Dim Inc, AMPCodesArrID, NotAMPCodesArrID, SepIndex As Int32
-            Dim AMPCodesArr(-1), NotAMPCodesArr(-1) As Int32
-            Dim NotID As Boolean
-            FunctionName = "GetPricesByItemID"
-            Try
-                MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
-Restart:
-                If MyCn.State = ConnectionState.Closed Then MyCn.Open()
-                MyTrans = MyCn.BeginTransaction()
-                MySelCmd.Transaction = MyTrans
-
-                MySelCmd.CommandText = " drop temporary table IF EXISTS PrpCodes;" & _
-                                        " create temporary table PrpCodes(Fullcode int(32) unsigned, CodeFirmCr int(32) unsigned, Code varchar(20), key FullCode(FullCode), key CodeFirmCr(CodeFirmCr));" & _
-                                        " insert into PrpCodes" & _
-                                        " select distinct ampc.fullcode, ampc.codefirmcr, ampc.code" & _
-                                        " from  (farm.core0 ampc) " & _
-                                        " where ampc.firmcode=1864"
-
-
-
-                If Not ItemID Is Nothing Then
-
-                    For Each AMPCodes In ItemID
-                        If Len(AMPCodes) > 0 Then
-                            If AMPCodes.StartsWith("!") Then
-                                AMPCodes = AMPCodes.Substring(1)
-                                NotID = True
-                            Else
-                                NotID = False
-                            End If
-
-                            If AMPCodes.IndexOf("..") > 0 Then
-                                SepIndex = AMPCodes.IndexOf("..")
-
-                                If CInt(Left(AMPCodes, SepIndex)) < CInt(Right(AMPCodes, AMPCodes.Length - SepIndex - 2)) Then
-                                    If CInt(Right(AMPCodes, AMPCodes.Length - SepIndex - 2)) - CInt(Left(AMPCodes, SepIndex)) > 20000 Then Err.Raise(1, "Owerflow")
-                                    If NotID Then
-
-                                        ReDim Preserve NotAMPCodesArr(NotAMPCodesArr.Length + Right(AMPCodes, AMPCodes.Length - SepIndex - 2) - Left(AMPCodes, SepIndex))
-
-                                    Else
-
-                                        ReDim Preserve AMPCodesArr(AMPCodesArr.Length + Right(AMPCodes, AMPCodes.Length - SepIndex - 2) - Left(AMPCodes, SepIndex))
-
-                                    End If
-                                    For Inc = Left(AMPCodes, SepIndex) To Right(AMPCodes, AMPCodes.Length - SepIndex - 2)
-
-                                        If NotID Then
-                                            NotAMPCodesArr(NotAMPCodesArrID) = Inc
-                                            NotAMPCodesArrID += 1
-                                        Else
-                                            AMPCodesArr(AMPCodesArrID) = Inc
-                                            AMPCodesArrID += 1
-                                        End If
-
-                                    Next
-                                End If
-
-                            Else
-                                If NotID Then
-                                    ReDim Preserve NotAMPCodesArr(NotAMPCodesArr.Length)
-                                    NotAMPCodesArr(NotAMPCodesArrID) = AMPCodes
-                                    NotAMPCodesArrID += 1
-                                Else
-                                    ReDim Preserve AMPCodesArr(AMPCodesArr.Length)
-                                    AMPCodesArr(AMPCodesArrID) = AMPCodes
-                                    AMPCodesArrID += 1
-                                End If
-
-                            End If
-                        End If
-                    Next
-
-                End If
-
-                If NotAMPCodesArr.Length > 0 Then
-                    MySelCmd.CommandText &= " and ampc.code not in ("
-                    For Inc = 0 To NotAMPCodesArr.Length - 1
-                        MySelCmd.CommandText &= "'" & NotAMPCodesArr(Inc) & "'"
-                        If Inc < NotAMPCodesArr.Length - 1 Then MySelCmd.CommandText &= ","
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                If AMPCodesArr.Length > 0 Then
-                    MySelCmd.CommandText &= " and ampc.code in ("
-                    For Inc = 0 To AMPCodesArr.Length - 1
-                        MySelCmd.CommandText &= AMPCodesArr(Inc)
-                        If Inc < AMPCodesArr.Length - 1 Then MySelCmd.CommandText &= ","
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                MySelCmd.CommandText &= ";"
-
-                If OnlyLeader Then MySelCmd.CommandText &= "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
-" create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
-" OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20)," & _
-" PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned" & _
-" );" & _
-" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned,  Junk Bit" & _
-" );" & _
-" insert into prices "
-
-                MySelCmd.CommandText &= " select  c.id OrderID, ifnull(c.Code, '') SalerCode, ifnull(c.CodeCr, '') CreaterCode, ifnull(pcd.code, '') ItemID, s.synonym OriginalName, ifnull(scr.synonym, '') OriginalCr, " & _
-           " ifnull(c.Unit, '') Unit, ifnull(c.Volume, '') Volume, ifnull(c.Quantity, '') Quantity, ifnull(c.Note, '') Note, ifnull(c.Period, '') Period, ifnull(c.Doc, '') Doc," & _
-           " c.Junk>0 Junk," & _
-           " intersection.PublicCostCorr As UpCost," & _
-           " round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-           " *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-           " *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost," & _
-           " pricesdata.pricecode SalerID, ClientsData.ShortName SalerName, if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate, c.fullcode PrepCode"
-
-                If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
-
-                MySelCmd.CommandText &= " , c.synonymcode OrderCode1, c.synonymfirmcrcode OrderCode2 from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
-               " farm.synonym s,farm.formrules fr, PrpCodes pcd)" & _
-               " left join    farm.synonymfirmcr scr on scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode " & _
-                " where DisabledByClient=0" & _
-                " and Disabledbyfirm=0" & _
-                " and DisabledByAgency=0" & _
-                " and intersection.clientcode=" & GetClientCode().ToString & _
-                " and retclientsset.clientcode=intersection.clientcode" & _
-                " and pricesdata.pricecode=intersection.pricecode" & _
-                " and clientsdata.firmcode=pricesdata.firmcode" & _
-                " and clientsdata.firmstatus=1" & _
-                " and clientsdata.billingstatus=1" & _
-                " and clientsdata.firmtype=0" & _
-                " and to_days(now())-to_days(datecurprice)<maxold"
-
-                MySelCmd.CommandText &= " and clientsdata.firmsegment=AClientsData.firmsegment" & _
-               " and pricesregionaldata.regioncode=intersection.regioncode" & _
-               " and pricesregionaldata.pricecode=pricesdata.pricecode" & _
-               " and AClientsData.firmcode=intersection.clientcode" & _
-               " and (clientsdata.maskregion & intersection.regioncode)>0" & _
-               " and (AClientsData.maskregion & intersection.regioncode)>0" & _
-               " and (retclientsset.workregionmask & intersection.regioncode)>0" & _
-               " and pricesdata.agencyenabled=1" & _
-               " and pricesdata.enabled=1 and invisibleonclient=0" & _
-               " and pricesdata.pricetype<>1" & _
-               " and pricesregionaldata.enabled=1" & _
-               " and fr.firmcode=pricesdata.pricecode" & _
-               " and c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode)" & _
-               " and c.synonymcode=s.synonymcode" & _
-               " and s.firmcode=ifnull(parentsynonym, pricesdata.pricecode)"
-
-
-                If Not SalerName Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In SalerName
-                        If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
-                        'АМП захотели не название поставщика, а название прайс листа.
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "pricesdata.pricename")
-
-                        MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
-                        MySelCmd.CommandText &= Params(0)
-
-                        Inc += 1
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-
-                MySelCmd.CommandText &= "and pcd.fullcode=c.fullcode and pcd.codefirmcr=c.codefirmcr group by 1;"
-
-                If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                                           " select min(cost), FullCode, Junk from (prices)" & _
-                                           " group by FullCode, Junk;" & _
-                " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, " & _
-                " OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost," & _
-                " Cost, SalerID, SalerName, PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
-    " from (prices p, mincosts m)" & _
-    " where p.fullcode=m.fullcode" & _
-    " and p.cost=m.mincost" & _
-                " and p.junk=m.junk"
-
-                MySelCmd.CommandText &= " order by 1, 15"
-
-                If SelStart.ToString.Length > 0 Then
-                    MySelCmd.CommandText &= " limit " & SelStart
-
-                    If Limit.ToString.Length > 0 Then
-                        MySelCmd.CommandText &= "," & Limit
-                    End If
-
-                End If
-
-                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
-
-                MyTrans.Commit()
-                Return MyDS
-
-            Catch MySQLErr As MySqlException
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                If MySQLErr.Number = 1213 Or MySQLErr.Number = 1205 Then
-                    System.Threading.Thread.Sleep(100)
-                    GoTo Restart
-                End If
-                MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName)
-
-            Catch ex As Exception
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                MailErr(FunctionName, ex.Message, ex.Source, UserName)
-            Finally
-                If MyCn.State = ConnectionState.Open Then MyCn.Close()
-            End Try
-        End Function
-
-        <WebMethod()> _
-      Public Function GetPricesByName(ByVal OriginalName() As String, ByVal SalerName() As String, _
-      ByVal PriceName() As String, ByVal OnlyLeader As Boolean, ByVal NewEar As Boolean, ByVal Limit As Int32, ByVal SelStart As Int32) As DataSet
-            Dim NameStr, PriceNameStr As String
-            Dim Params(1) As String
-            Dim Inc As Integer
-            FunctionName = "GetPricesByName"
-            Try
-                MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
-Restart:
-                If MyCn.State = ConnectionState.Closed Then MyCn.Open()
-                MyTrans = MyCn.BeginTransaction()
-                MySelCmd.Transaction = MyTrans
-
-                If OnlyLeader Then MySelCmd.CommandText = "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
-" create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
-" OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-" Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20)," & _
-" PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned" & _
-" );" & _
-" create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned,  Junk Bit" & _
-" );" & _
-" insert into prices "
-
-                MySelCmd.CommandText &= " select  c.id OrderID, ifnull(c.Code, '') SalerCode, ifnull(c.CodeCr, '') CreaterCode, ifnull(ampc.code, '') ItemID, s.synonym OriginalName, ifnull(scr.synonym, '') OriginalCr, " & _
-           " ifnull(c.Unit, '') Unit, ifnull(c.Volume, '') Volume, ifnull(c.Quantity, '') Quantity, ifnull(c.Note, '') Note, ifnull(c.Period, '') Period, ifnull(c.Doc, '') Doc," & _
-           " c.Junk>0 Junk," & _
-           " intersection.PublicCostCorr As UpCost," & _
-           " round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-           " *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-           " *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost," & _
-           " pricesdata.pricecode SalerID, ClientsData.ShortName SalerName, if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate, c.fullcode PrepCode"
-
-                If OnlyLeader Then MySelCmd.CommandText &= ", c.codefirmcr"
-
-                MySelCmd.CommandText &= " , c.synonymcode OrderCode1, c.synonymfirmcrcode OrderCode2 from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
-               " farm.synonym s, farm.formrules fr)" & _
-                " left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" & _
-                " left join    farm.synonymfirmcr scr on scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode " & _
-                " where DisabledByClient=0" & _
-                " and Disabledbyfirm=0" & _
-                " and DisabledByAgency=0" & _
-                " and intersection.clientcode=" & GetClientCode().ToString & _
-                " and retclientsset.clientcode=intersection.clientcode" & _
-                " and pricesdata.pricecode=intersection.pricecode" & _
-                " and clientsdata.firmcode=pricesdata.firmcode" & _
-                " and clientsdata.firmstatus=1" & _
-                " and clientsdata.billingstatus=1" & _
-                " and clientsdata.firmtype=0" & _
-                 " and to_days(now())-to_days(datecurprice)<maxold"
-
-
-                If NewEar Then MySelCmd.CommandText &= " and ampc.id is null"
-
-                MySelCmd.CommandText &= " and clientsdata.firmsegment=AClientsData.firmsegment" & _
-               " and pricesregionaldata.regioncode=intersection.regioncode" & _
-               " and pricesregionaldata.pricecode=pricesdata.pricecode" & _
-               " and AClientsData.firmcode=intersection.clientcode" & _
-               " and (clientsdata.maskregion & intersection.regioncode)>0" & _
-               " and (AClientsData.maskregion & intersection.regioncode)>0" & _
-               " and (retclientsset.workregionmask & intersection.regioncode)>0" & _
-               " and pricesdata.agencyenabled=1" & _
-               " and pricesdata.enabled=1 and invisibleonclient=0" & _
-               " and pricesdata.pricetype<>1" & _
-               " and pricesregionaldata.enabled=1" & _
-               " and fr.firmcode=pricesdata.pricecode" & _
-               " and c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode)" & _
-               " and c.synonymcode=s.synonymcode" & _
-               " and s.firmcode=ifnull(parentsynonym, pricesdata.pricecode)"
-
-
-                If Not SalerName Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In SalerName
-                        If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "clientsdata.shortname")
-                        'АМП захотели не название поставщика, а название прайс листа.
-                        'Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "pricesdata.pricename")
-
-                        MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
-                        MySelCmd.CommandText &= Params(0)
-
-                        Inc += 1
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                If Not PriceName Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    For Each PriceNameStr In SalerName
-                        If Inc > 0 Then MySelCmd.CommandText &= " or "
-                        'Params = FormatFindStr(PriceNameStr, "ShortName" & inc, "clientsdata.shortname")
-                        'АМП захотели не название поставщика, а название прайс листа.
-                        Params = FormatFindStr(PriceNameStr, "PriceName" & Inc, "pricesdata.pricename")
-
-                        MySelCmd.Parameters.Add("PriceName" & Inc, Params(1))
-                        MySelCmd.CommandText &= Params(0)
-
-                        Inc += 1
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-
-                If Not OriginalName Is Nothing Then
-                    Inc = 0
-                    MySelCmd.CommandText &= " and ("
-                    For Each NameStr In OriginalName
-                        If Len(NameStr) > 0 Then
-
-                            If Inc > 0 Then MySelCmd.CommandText &= " or "
-                            Params = FormatFindStr(NameStr, "Name" & Inc, "s.synonym")
-
-                            MySelCmd.Parameters.Add("Name" & Inc, Params(1))
-                            MySelCmd.CommandText &= Params(0)
-
-                            Inc += 1
-                        End If
-                    Next
-                    MySelCmd.CommandText &= ")"
-                End If
-                MySelCmd.CommandText &= " group by 1;"
-
-                If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-                                           " select min(cost), FullCode, Junk from (prices)" & _
-                                           " group by FullCode,  Junk;" & _
-               " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost, Cost, SalerID, SalerName,  PriceDate, p.FullCode PrepCode, synonymcode OrderCode1, synonymfirmcrcode OrderCode2" & _
-    " from (prices p, mincosts m)" & _
-    " where p.fullcode=m.fullcode" & _
-    " and p.cost=m.mincost" & _
-               " and p.junk=m.junk"
-
-                MySelCmd.CommandText &= " order by 1, 15"
-
-                If SelStart.ToString.Length > 0 Then
-                    MySelCmd.CommandText &= " limit " & SelStart
-
-                    If Limit.ToString.Length > 0 Then
-                        MySelCmd.CommandText &= "," & Limit
-                    End If
-
-                End If
-
-                LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime)
-
-                MyTrans.Commit()
-                Return MyDS
-
-            Catch MySQLErr As MySqlException
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                If MySQLErr.Number = 1213 Or MySQLErr.Number = 1205 Then
-                    System.Threading.Thread.Sleep(100)
-                    GoTo Restart
-                End If
-                MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName)
-
-            Catch ex As Exception
-                If Not MyTrans Is Nothing Then MyTrans.Rollback()
-                MailErr(FunctionName, ex.Message, ex.Source, UserName)
-            Finally
-                If MyCn.State = ConnectionState.Open Then MyCn.Close()
-            End Try
-
-        End Function
-
-        '<WebMethod()> _
-        '    Public Function GetPricesBySalerName(ByVal SalerName() As String, ByVal OnlyLeader As Boolean, ByVal NewEar As Boolean) As DataSet
-
-        '        Dim PriceNameStr As String
-        '        Dim Params(1) As String
-        '        Dim Inc As Integer
-
-        '        Try
-        '            MyCn.ConnectionString = "Database=usersettings;Data Source=testsql.analit.net;User Id=system;Password=123"
-        'Restart:
-        '            If MyCn.State = ConnectionState.Closed Then MyCn.Open()
-
-        '            MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted)
-        '            MySelCmd.Transaction = MyTrans
-
-        '            If OnlyLeader Then MySelCmd.CommandText = "drop temporary table IF EXISTS prices; drop temporary table IF EXISTS mincosts;" & _
-        '                  " create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20), CreaterCode varchar(20), ItemID varchar(20)," & _
-        '                    " OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15), Volume varchar(15), Quantity varchar(15), Note varchar(50)," & _
-        '                    " Period varchar(20), Doc varchar(20), Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned" & _
-        '                    " ) type=InnoDB;" & _
-        '                    " create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, Junk Bit" & _
-        '                    " )type=InnoDB;" & _
-        '                    " insert into prices "
-
-        '            MySelCmd.CommandText &= " select  c.id OrderID, ifnull(c.Code, '') SalerCode, ifnull(c.CodeCr, '') CreaterCode, ifnull(ampc.code, '') ItemID, s.synonym OriginalName, scr.synonym OriginalCr, " & _
-        '           " ifnull(c.Unit, '') Unit, ifnull(c.Volume, '') Volume, ifnull(c.Quantity, '') Quantity, ifnull(c.Note, '') Note, ifnull(c.Period, '') Period, ifnull(c.Doc, '') Doc," & _
-        '           " c.Junk>0 Junk," & _
-        '           " intersection.PublicCostCorr As UpCost," & _
-        '           " round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-        '           " *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100)" & _
-        '           " *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost," & _
-        '           " pricesdata.pricecode SalerID, ClientsData.ShortName SalerName, if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate" '
-
-        '            If OnlyLeader Then MySelCmd.CommandText &= ", c.fullcode, c.codefirmcr"
-
-        '            MySelCmd.CommandText &= " from intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c," & _
-        '           " farm.synonym s, farm.synonymfirmcr scr, farm.formrules fr" & _
-        '            " left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" & _
-        '            " where DisabledByClient=0" & _
-        '            " and Disabledbyfirm=0" & _
-        '            " and DisabledByAgency=0" & _
-        '            " and intersection.clientcode=" & GetClientCode().ToString & _
-        '            " and retclientsset.clientcode=intersection.clientcode" & _
-        '            " and pricesdata.pricecode=intersection.pricecode" & _
-        '            " and clientsdata.firmcode=pricesdata.firmcode" & _
-        '            " and clientsdata.firmstatus=1" & _
-        '            " and clientsdata.billingstatus=1" & _
-        '            " and clientsdata.firmtype=0"
-
-        '            If NewEar Then MySelCmd.CommandText &= " and ampc.id is null"
-
-        '            MySelCmd.CommandText &= " and clientsdata.firmsegment=AClientsData.firmsegment" & _
-        '           " and pricesregionaldata.regioncode=intersection.regioncode" & _
-        '           " and pricesregionaldata.pricecode=pricesdata.pricecode" & _
-        '           " and AClientsData.firmcode=intersection.clientcode" & _
-        '           " and (clientsdata.maskregion & intersection.regioncode)>0" & _
-        '           " and (AClientsData.maskregion & intersection.regioncode)>0" & _
-        '           " and (retclientsset.workregionmask & intersection.regioncode)>0" & _
-        '           " and pricesdata.agencyenabled=1" & _
-        '           " and pricesdata.enabled=1 and invisibleonclient=0" & _
-        '           " and pricesdata.pricetype<>1" & _
-        '           " and pricesregionaldata.enabled=1" & _
-        '           " and fr.firmcode=pricesdata.pricecode" & _
-        '           " and c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode)" & _
-        '           " and c.synonymcode=s.synonymcode" & _
-        '              " and s.firmcode=ifnull(parentsynonym, pricesdata.pricecode)" & _
-        '" and scr.firmcode=ifnull(parentsynonym, pricesdata.pricecode)" & _
-        '           " and c.synonymfirmcrcode=scr.synonymfirmcrcode"
-
-        '            Inc = 0
-
-        '            MySelCmd.CommandText &= " and ("
-        '            For Each PriceNameStr In SalerName
-        '                If Inc > 0 Then MySelCmd.CommandText &= " or "
-        '                Params = FormatFindStr(PriceNameStr, "ShortName" & Inc, "clientsdata.shortname")
-
-        '                MySelCmd.Parameters.Add("ShortName" & Inc, Params(1))
-        '                MySelCmd.CommandText &= Params(0)
-
-        '                Inc += 1
-        '            Next
-        '            MySelCmd.CommandText &= ")"
-
-
-        '            MySelCmd.CommandText &= ";"
-
-        '            If OnlyLeader Then MySelCmd.CommandText &= " insert into mincosts" & _
-        '                                       " select min(cost), FullCode, CodeFirmCr, Junk from prices" & _
-        '                                       " group by FullCode, CodeFirmCr, Junk;" & _
-        '           " select  OrderID, SalerCode, CreaterCode, ItemID, OriginalName, OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, p.Junk, UpCost, Cost, SalerID, SalerName, PriceDate" & _
-        '" from prices p, mincosts m" & _
-        '" where p.fullcode=m.fullcode" & _
-        '" and p.codefirmcr=m.codefirmcr" & _
-        '" and p.cost=m.mincost" & _
-        '           " and p.junk=m.junk"
-
-
-
-        '            MyDA.Fill(MyDS, "Prices")
-        '            Return MyDS
-
-
-        '        Catch MySQLErr As MySqlException
-        '            MyTrans.Rollback()
-        '            If MySQLErr.Number = 1213 Or MySQLErr.Number = 1205 Then
-        '                System.Threading.Thread.Sleep(100)
-        '                GoTo Restart
-        '            End If
-        '        Catch ex As Exception
-        '            MyTrans.Rollback()
-        '        Finally
-        '            If MyCn.State = ConnectionState.Open Then MyCn.Close()
-        '        End Try
-
-        '    End Function
-
-        <WebMethod()> _
-        Public Function PostOrder(ByVal OrderID() As Int32, ByVal Quantity() As Int32, ByVal Message() As String, _
-         ByVal OrderCode1() As Int32, ByVal OrderCode2() As Int32, ByVal Junk() As Boolean) As DataSet
-            FunctionName = "PostOrder"
-            Try
-                MyCn.ConnectionString = "Database=usersettings;Data Source=" & SQLHost & ";User Id=system;Password=123"
-Restart:
-                If MyCn.State = ConnectionState.Closed Then MyCn.Open()
-
-            Catch err As Exception
-                MailErr(FunctionName, err.Message, err.Source, UserName)
-            End Try
-
-            Try
-                Return Global.AMPService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, _
-                 OrderCode1, OrderCode2, Junk, GetClientCode, UserName, SQLHost)
-                ' Return MyDS
-            Catch err As Exception
-                MailErr(FunctionName, err.Message, err.Source, UserName)
-            Finally
-                If MyCn.State = ConnectionState.Open Then MyCn.Close()
-
-            End Try
-
-
-        End Function
-
-        Private Function FormatFindStr(ByVal InpStr As String, ByVal ParameterName As String, ByVal FieldName As String) As String()
-            Dim UseLike As Boolean
-            Dim TmpRes As String = FieldName
-            Dim Result(1) As String
-
-            'Если будем использовать LIKE
-            If InpStr.IndexOf("*") >= 0 Then UseLike = True
-
-
-            'Если есть отрицание
-            If InpStr.IndexOf("!") >= 0 Then
-
-                InpStr = InpStr.Remove(0, 1)
-
-                If UseLike Then
-
-                    TmpRes &= " not like "
-
-                Else
-
-                    TmpRes &= " <> "
-
-                End If
-
-            Else
-                If UseLike Then
-
-                    TmpRes &= " like "
-
-                Else
-
-                    TmpRes &= " = "
-
-                End If
-            End If
-
-            InpStr = InpStr.Replace("*", "%")
-            TmpRes &= "?" & ParameterName
-
-            Result(0) = New String(TmpRes)
-            Result(1) = New String(InpStr)
-
-            Return Result
-        End Function
-
-        Private Function GetClientCode() As UInt32
-            UserName = HttpContext.Current.User.Identity.Name
-            If Left(UserName, 7) = "ANALIT\" Then
-                UserName = Mid(UserName, 8)
-            End If
-            UserName = "amp"
-            Try
-                MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" & _
-                            " FROM (clientsdata, osuseraccessright)" & _
-                            " where osuseraccessright.clientcode=clientsdata.firmcode" & _
-                            " and firmstatus=1" & _
-                            " and billingstatus=1" & _
-                            " and allowGetData=1" & _
-                            " and OSUserName='" & UserName & "'"
-
-                Return MySelCmd.ExecuteScalar
-
-            Catch ErrorTXT As Exception
-                MailErr("GetClientCode", ErrorTXT.Message, ErrorTXT.Source, UserName)
-            Finally
-
-            End Try
-        End Function
-
-        Private Sub MailErr(ByVal ProcessName As String, ByVal ErrMessage As String, ByVal ErrSource As String, ByVal UserName As String)
-            Dim Message As New MailMessage
-            Dim Address As New MailAddress("service@analit.net")
-            Dim Client As New SmtpClient("box.analit.net")
-            Try
-
-
-                Message.From = Address
-                Message.Subject = "Ошибка в AMPService"
-                'Message.BodyFormat
-                Message.Body = "Процесс: " & ProcessName & Chr(10) & Chr(13) & _
-                "Ошибка: " & ErrMessage & Chr(10) & Chr(13) & _
-                "Источник: " & ErrSource & Chr(10) & Chr(13) & _
-                "Логин: " & UserName
-                Message.To.Add(Address)
-                Message.BodyEncoding = System.Text.Encoding.UTF8
-                Client.Send(Message)
-
-            Catch
-            End Try
-
-        End Sub
-
-        Private Function LogQuery(ByVal RowCount As Int32, ByVal FunctionName As String, ByVal StartTime As Date) As Boolean
-            MySelCmd.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " & _
-                                    " values(now(), '" & HttpContext.Current.Request.UserHostAddress & "', '" & _
-                                    UserName & "', '" & FunctionName & "', " & RowCount & ", " & CInt(Now.Subtract(StartTime).TotalMilliseconds).ToString & ")"
-
-            MySelCmd.ExecuteNonQuery()
-        End Function
-
-    End Class
-
-End Namespace
+using System;
+using System.Web.Services;
+using MySql.Data.MySqlClient;
+using System.Data;
+using System.Net.Mail;
+using System.Collections.Generic;
+
+namespace AMPWebService
+{
+	[System.Web.Services.WebService(Namespace = "AMPNameSpace")]
+	public class AMPService : System.Web.Services.WebService
+	{
+		MySqlTransaction MyTrans;
+		string UserName;
+		string FunctionName;
+		DateTime StartTime = DateTime.Now;
+		private System.Data.DataColumn dataColumn18;
+		private System.Data.DataColumn dataColumn19;
+
+		public AMPService() : base()
+		{
+			InitializeComponent();
+		}
+
+		private System.ComponentModel.IContainer components;
+		public MySql.Data.MySqlClient.MySqlCommand MySelCmd;
+		public MySql.Data.MySqlClient.MySqlConnection MyCn;
+		private MySql.Data.MySqlClient.MySqlDataAdapter MyDA;
+		public System.Data.DataSet MyDS;
+		public System.Data.DataTable DataTable1;
+		public System.Data.DataColumn DataColumn1;
+		public System.Data.DataColumn DataColumn2;
+		public System.Data.DataColumn DataColumn3;
+		public System.Data.DataColumn DataColumn4;
+		public System.Data.DataColumn DataColumn5;
+		public System.Data.DataColumn DataColumn6;
+		public System.Data.DataColumn DataColumn7;
+		public System.Data.DataColumn DataColumn8;
+		public System.Data.DataColumn DataColumn9;
+		public System.Data.DataColumn DataColumn10;
+		public System.Data.DataColumn DataColumn11;
+		public System.Data.DataColumn DataColumn12;
+		public System.Data.DataColumn DataColumn13;
+		public System.Data.DataColumn DataColumn14;
+		public System.Data.DataColumn DataColumn15;
+		public System.Data.DataColumn DataColumn16;
+		public System.Data.DataColumn DataColumn17;
+
+		[System.Diagnostics.DebuggerStepThrough()]
+		private void InitializeComponent()
+		{
+			this.MySelCmd = new MySql.Data.MySqlClient.MySqlCommand();
+			this.MyCn = new MySql.Data.MySqlClient.MySqlConnection();
+			this.MyDA = new MySql.Data.MySqlClient.MySqlDataAdapter();
+			this.MyDS = new System.Data.DataSet();
+			this.DataTable1 = new System.Data.DataTable();
+			this.DataColumn1 = new System.Data.DataColumn();
+			this.DataColumn2 = new System.Data.DataColumn();
+			this.DataColumn3 = new System.Data.DataColumn();
+			this.DataColumn4 = new System.Data.DataColumn();
+			this.DataColumn5 = new System.Data.DataColumn();
+			this.DataColumn6 = new System.Data.DataColumn();
+			this.DataColumn7 = new System.Data.DataColumn();
+			this.DataColumn8 = new System.Data.DataColumn();
+			this.DataColumn9 = new System.Data.DataColumn();
+			this.DataColumn10 = new System.Data.DataColumn();
+			this.DataColumn11 = new System.Data.DataColumn();
+			this.DataColumn12 = new System.Data.DataColumn();
+			this.DataColumn13 = new System.Data.DataColumn();
+			this.DataColumn14 = new System.Data.DataColumn();
+			this.DataColumn15 = new System.Data.DataColumn();
+			this.DataColumn16 = new System.Data.DataColumn();
+			this.DataColumn17 = new System.Data.DataColumn();
+			this.dataColumn18 = new System.Data.DataColumn();
+			this.dataColumn19 = new System.Data.DataColumn();
+			this.MyDS.BeginInit();
+			this.DataTable1.BeginInit();
+			this.MySelCmd.CommandText = null;
+			this.MySelCmd.CommandTimeout = 0;
+			this.MySelCmd.CommandType = System.Data.CommandType.Text;
+			this.MySelCmd.Connection = this.MyCn;
+			this.MySelCmd.Transaction = null;
+			this.MySelCmd.UpdatedRowSource = System.Data.UpdateRowSource.Both;
+			this.MyCn.ConnectionString = Literals.ConnectionString;
+			this.MyDA.DeleteCommand = null;
+			this.MyDA.InsertCommand = null;
+			this.MyDA.SelectCommand = this.MySelCmd;
+			this.MyDA.UpdateCommand = null;
+			this.MyDS.DataSetName = "AMPDataSet";
+			this.MyDS.Locale = new System.Globalization.CultureInfo("ru-RU");
+			this.MyDS.Tables.AddRange(new System.Data.DataTable[] { this.DataTable1 });
+			this.DataTable1.Columns.AddRange(new System.Data.DataColumn[] { this.DataColumn1, this.DataColumn2, this.DataColumn3, this.DataColumn4, this.DataColumn5, this.DataColumn6, this.DataColumn7, this.DataColumn8, this.DataColumn9, this.DataColumn10, this.DataColumn11, this.DataColumn12, this.DataColumn13, this.DataColumn14, this.DataColumn15, this.DataColumn16, this.DataColumn17, this.dataColumn18, this.dataColumn19 });
+			this.DataTable1.TableName = "Prices";
+			this.DataColumn1.ColumnName = "OrderID";
+			this.DataColumn1.DataType = typeof(int);
+			this.DataColumn2.ColumnName = "CreaterCode";
+			this.DataColumn3.ColumnName = "ItemID";
+			this.DataColumn4.Caption = "OriginalName";
+			this.DataColumn4.ColumnName = "OriginalName";
+			this.DataColumn5.ColumnName = "OriginalCr";
+			this.DataColumn6.ColumnName = "Unit";
+			this.DataColumn7.ColumnName = "Volume";
+			this.DataColumn8.ColumnName = "Quantity";
+			this.DataColumn9.ColumnName = "Note";
+			this.DataColumn10.ColumnName = "Period";
+			this.DataColumn11.ColumnName = "Doc";
+			this.DataColumn12.ColumnName = "Junk";
+			this.DataColumn12.DataType = typeof(bool);
+			this.DataColumn13.ColumnName = "UpCost";
+			this.DataColumn13.DataType = typeof(decimal);
+			this.DataColumn14.ColumnName = "Cost";
+			this.DataColumn14.DataType = typeof(decimal);
+			this.DataColumn15.ColumnName = "SalerID";
+			this.DataColumn15.DataType = typeof(uint);
+			this.DataColumn16.ColumnName = "PriceDate";
+			this.DataColumn17.ColumnName = "PrepCode";
+			this.DataColumn17.DataType = typeof(uint);
+			this.dataColumn18.ColumnName = "OrderCode1";
+			this.dataColumn18.DataType = typeof(uint);
+			this.dataColumn19.ColumnName = "OrderCode2";
+			this.dataColumn19.DataType = typeof(uint);
+			this.MyDS.EndInit();
+			this.DataTable1.EndInit();
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (!((components == null)))
+				{
+					components.Dispose();
+				}
+			}
+			base.Dispose(disposing);
+		}
+
+		[WebMethod()]
+		public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit, int SelStart)
+		{
+			FunctionName = "GetNameFromCatalog";
+			string[] Params = new string[2];
+			int Inc;
+			bool AMPCode = false;
+			MyDS.Tables.Remove("Prices");
+			Restart:
+			try
+			{
+				if (MyCn.State == ConnectionState.Closed)
+					MyCn.Open();
+
+				MyTrans = MyCn.BeginTransaction();
+				MySelCmd.Transaction = MyTrans;
+				MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; ";
+				MySelCmd.CommandText += "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" + " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" + " left join farm.core0 c on c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" + " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" + " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" + GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" + " and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
+				if (!(PriceID == null))
+				{
+					Inc = 0;
+					MySelCmd.CommandText += " and (";
+					for (int i = 0; i < PriceID.Length; i++)
+					{
+						string PriceNameStr = Convert.ToString(PriceID[i]);
+						if (!String.IsNullOrEmpty(PriceNameStr))
+						{
+							if (Inc > 0)
+							{
+								MySelCmd.CommandText += " or ";
+							}
+							Params = FormatFindStr(PriceNameStr, "PriceCode" + Inc, "pricesdata.pricecode");
+							MySelCmd.Parameters.Add("PriceCode" + Inc, Params[1]);
+							MySelCmd.CommandText += Params[0];
+							Inc += 1;
+						}
+					}
+					if (Inc < 1)
+					{
+						MySelCmd.CommandText += "1";
+					}
+					MySelCmd.CommandText += ")";
+				}
+				if (!(Form == null))
+				{
+					Inc = 0;
+					MySelCmd.CommandText += " and (";
+					foreach (string PriceNameStr in Form)
+					{
+						if (!String.IsNullOrEmpty(PriceNameStr))
+						{
+							if (Inc > 0)
+							{
+								MySelCmd.CommandText += " or ";
+							}
+							Params = FormatFindStr(PriceNameStr, "Form" + Inc, "catalog.form");
+							MySelCmd.Parameters.Add("Form" + Inc, Params[1]);
+							MySelCmd.CommandText += Params[0];
+							Inc += 1;
+						}
+						if (Inc < 1)
+						{
+							MySelCmd.CommandText += "1";
+						}
+					}
+					MySelCmd.CommandText += ")";
+				}
+				MySelCmd.CommandText += " and clientsdata.firmstatus=1" + " and clientsdata.billingstatus=1" + " and clientsdata.firmtype=0";
+				if (NewEar)
+				{
+					MySelCmd.CommandText += " and ampc.id is null";
+				}
+				if (OfferOnly | PriceID.Length > 0)
+				{
+					MySelCmd.CommandText += " and c.id is not null";
+				}
+				MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" + " and pricesregionaldata.regioncode=intersection.regioncode" + " and pricesregionaldata.pricecode=pricesdata.pricecode" + " and AClientsData.firmcode=intersection.clientcode" + " and (clientsdata.maskregion & intersection.regioncode)>0" + " and (AClientsData.maskregion & intersection.regioncode)>0" + " and (retclientsset.workregionmask & intersection.regioncode)>0" + " and pricesdata.agencyenabled=1" + " and pricesdata.enabled=1 and invisibleonclient=0" + " and pricesdata.pricetype<>1" + " and pricesregionaldata.enabled=1";
+				if (!(Name == null))
+				{
+					Inc = 0;
+					MySelCmd.CommandText += " and (";
+					
+					if (Char.IsNumber(Name[0], 0))
+					{
+						AMPCode = true;
+					}
+					foreach (string NameStr in Name)
+					{
+						if (!String.IsNullOrEmpty(NameStr))
+						{
+							if (Inc > 0)
+							{
+								MySelCmd.CommandText += " or ";
+							}
+							if (AMPCode)
+							{
+								Params = FormatFindStr(NameStr, "Name" + Inc, "ampc.code");
+							}
+							else
+							{
+								Params = FormatFindStr(NameStr, "Name" + Inc, "catalog.Name");
+							}
+							MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
+							MySelCmd.CommandText += Params[0];
+							Inc += 1;
+						}
+					}
+					MySelCmd.CommandText += ")";
+				}
+				MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
+				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+
+				LogQuery(MyDA.Fill(MyDS, "Catalog"), FunctionName, StartTime);
+				MyTrans.Commit();
+				return MyDS;
+			}
+			catch (MySqlException MySQLErr)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
+				{
+					System.Threading.Thread.Sleep(100);
+					goto Restart;
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+			}
+			catch (Exception ex)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+			}
+			finally
+			{
+				if (MyCn.State == ConnectionState.Open)
+				{
+					MyCn.Close();
+				}
+			}
+			return MyDS;
+		}
+
+		[WebMethod()]
+		public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
+		{
+			FunctionName = "GetPricesByPrepCode";
+			Int32 inc;
+			string PriceNameStr;
+			string[] Params = new string[2];
+			string FullCodesString = "(";
+			Restart :
+			try
+			{
+				if (MyCn.State == ConnectionState.Closed)
+					MyCn.Open();
+
+				MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted);
+				MySelCmd.Transaction = MyTrans;
+				foreach (int FullCode in PrepCode)
+				{
+					if ((FullCodesString.Length > 1) && (FullCode > 0))
+						FullCodesString += ", ";
+					if (FullCode > 0)
+						FullCodesString += FullCode;
+				}
+				FullCodesString += ")";
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText +=
+@"
+DROP temporary table IF EXISTS prices; 
+DROP temporary table IF EXISTS mincosts; 
+create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type= heap; 
+create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
+INSERT 
+INTO    prices 
+";
+				}
+				MySelCmd.CommandText = String.Format(
+@"
+SELECT  c.id OrderID,
+        ifnull(c.Code, '') SalerCode, 
+        ifnull(c.CodeCr, '') CreaterCode, 
+        ifnull(ampc.code, '') ItemID, 
+        s.synonym OriginalName, 
+        ifnull(scr.synonym, '') OriginalCr, 
+        ifnull(c.Unit, '') Unit, 
+        ifnull(c.Volume, '') Volume, 
+        ifnull(c.Quantity, '') Quantity, 
+        ifnull(c.Note, '') Note, 
+        ifnull(c.Period, '') Period, 
+        ifnull(c.Doc, '') Doc, 
+        c.Junk> 0 Junk, 
+        intersection.PublicCostCorr As UpCost,
+        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+        pricesdata.pricecode SalerID,
+        ClientsData.ShortName SalerName,
+        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+        c.fullcode PrepCode,
+        c.codefirmcr ,
+        c.synonymcode OrderCode1,
+        c.synonymfirmcrcode OrderCode2
+FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr) 
+LEFT JOIN farm.core0 ampc 
+        ON ampc.fullcode   = c.fullcode 
+        and ampc.codefirmcr= c.codefirmcr 
+        and ampc.firmcode  = 1864 
+LEFT JOIN farm.synonymfirmcr scr 
+        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode) 
+        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+WHERE   DisabledByClient                                            = 0 
+        and Disabledbyfirm                                          = 0 
+        and DisabledByAgency                                        = 0 
+        and intersection.clientcode                                 = {1} 
+        and retclientsset.clientcode                                = intersection.clientcode 
+        and pricesdata.pricecode                                    = intersection.pricecode 
+        and clientsdata.firmcode                                    = pricesdata.firmcode 
+        and clientsdata.firmstatus                                  = 1 
+        and clientsdata.billingstatus                               = 1 
+        and clientsdata.firmtype                                    = 0 
+        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+        and pricesregionaldata.regioncode                           = intersection.regioncode 
+        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+        and AClientsData.firmcode                                   = intersection.clientcode 
+        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+        and pricesdata.agencyenabled                                = 1 
+        and pricesdata.enabled                                      = 1 
+        and invisibleonclient                                       = 0 
+        and pricesdata.pricetype                                   <> 1 
+        and to_days(now())-to_days(datecurprice)                    < maxold 
+        and pricesregionaldata.enabled                              = 1 
+        and fr.firmcode                                             = pricesdata.pricecode 
+        and c.firmcode                                              = intersection.costcode 
+        and c.fullcode in {0} 
+        and c.synonymcode = s.synonymcode 
+        and s.firmcode    = ifnull(parentsynonym, pricesdata.pricecode) 
+", FullCodesString, GetClientCode().ToString());
+				if (!(PriceID == null))
+				{
+					inc = 0;
+					MySelCmd.CommandText += " and (";
+					for (int i = 0; i < PriceID.Length; i++)
+					{
+						PriceNameStr = Convert.ToString(PriceID[i]);
+						if (inc > 0)
+						{
+							MySelCmd.CommandText += " or ";
+						}
+						Params = FormatFindStr(PriceNameStr, "ShortName" + inc, "pricesdata.pricecode");
+						MySelCmd.Parameters.Add("ShortName" + inc, Params[1]);
+						MySelCmd.CommandText += Params[0];
+						inc += 1;
+					}
+					MySelCmd.CommandText += ")";
+				}
+				MySelCmd.CommandText += " GROUP BY 1 ";
+				MySelCmd.CommandText += GetLimitString(SelStart, Limit); 
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText += ";";
+                    MySelCmd.CommandText +=
+@"
+INSERT 
+INTO    mincosts 
+SELECT  min(cost), 
+        FullCode, 
+        Junk 
+FROM    (prices) 
+GROUP BY FullCode, 
+        Junk; 
+SELECT  OrderID, 
+        SalerCode, 
+        CreaterCode, 
+        ItemID, 
+        OriginalName, 
+        OriginalCr, 
+        Unit, 
+        Volume, 
+        Quantity, 
+        Note, 
+        Period, 
+        Doc, 
+        p.Junk, 
+        UpCost, 
+        Cost, 
+        SalerID, 
+        SalerName, 
+        PriceDate, 
+        p.FullCode PrepCode, 
+        synonymcode OrderCode1, 
+        synonymfirmcrcode OrderCode2 
+FROM    (prices p, mincosts m) 
+WHERE   p.fullcode= m.fullcode 
+        and p.cost= m.mincost 
+        and p.junk= m.junk
+";
+				}
+
+				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText +=
+@"
+DROP temporary table IF EXISTS prices; 
+DROP temporary table IF EXISTS mincosts; 
+";
+				}
+
+				LogQuery(MyDA.Fill(MyDS, "prices"), FunctionName, StartTime);
+				MyTrans.Commit();
+				return MyDS;
+			}
+
+			catch (MySqlException MySQLErr)
+			{
+				if (MyTrans != null)
+				{
+					MyTrans.Rollback();
+				}
+				if ((MySQLErr.Number == 1213) || (MySQLErr.Number == 1205))
+				{
+					System.Threading.Thread.Sleep(100);
+					goto Restart;
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+			}
+			catch (Exception ex)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+			}
+			finally
+			{
+				if (MyCn.State == ConnectionState.Open)
+				{
+					MyCn.Close();
+				}
+			}
+			return MyDS;
+		}
+
+		[WebMethod()]
+		public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, string[] SalerName, Int32 Limit, Int32 SelStart)
+		{
+			string NameStr = String.Empty;
+			string AMPCodes;
+			string[] Params;
+			List<int> AMPCodesArr = new List<int>();
+			List<int> NotAMPCodesArr = new List<int>();
+			FunctionName = "GetPricesByItemID";
+			Restart:
+			try
+			{
+			
+				if (MyCn.State == ConnectionState.Closed)
+					MyCn.Open();
+
+				MyTrans = MyCn.BeginTransaction();
+				MySelCmd.Transaction = MyTrans;
+				if (ItemID != null)
+				{
+					foreach (string item in ItemID)
+					{
+						bool NotID;
+						AMPCodes = item;
+						if (AMPCodes.Length > 0)
+						{
+							if (AMPCodes.StartsWith("!"))
+							{
+								AMPCodes = AMPCodes.Remove(0, 1);
+								NotID = true;
+							}
+							else
+							{
+								NotID = false;
+							}
+							if (AMPCodes.IndexOf("..") > 0)
+							{
+								int SepIndex = AMPCodes.IndexOf("..");
+								int beginIndex = Convert.ToInt32(AMPCodes.Substring(0, SepIndex));
+								int endIndex = Convert.ToInt32(AMPCodes.Substring(SepIndex + 2, AMPCodes.Length - SepIndex - 2));
+								if (beginIndex < endIndex)
+								{
+									if ((beginIndex - endIndex) > 20000)
+										new Exception("Owerflow");
+									for (int Inc = beginIndex; Inc <= endIndex; Inc++)
+									{
+										if (NotID)
+											NotAMPCodesArr.Add(Inc);
+										else
+											AMPCodesArr.Add(Inc);
+									}
+								}
+							}
+							else
+							{
+								if (NotID)
+									NotAMPCodesArr.Add(Convert.ToInt32(AMPCodes));
+								else
+									AMPCodesArr.Add(Convert.ToInt32(AMPCodes));
+							}
+						}
+					}
+				}
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText =
+@"
+DROP temporary table IF EXISTS prices; 
+DROP temporary table IF EXISTS mincosts; 
+create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
+create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
+INSERT 
+INTO    prices 
+";
+				}
+				MySelCmd.CommandText += String.Format(
+@"
+SELECT  c.id OrderID,
+        ifnull(c.Code, '') SalerCode, 
+        ifnull(c.CodeCr, '') CreaterCode, 
+        ifnull(ampc.code, '') ItemID, 
+        s.synonym OriginalName, 
+        ifnull(scr.synonym, '') OriginalCr, 
+        ifnull(c.Unit, '') Unit, 
+        ifnull(c.Volume, '') Volume, 
+        ifnull(c.Quantity, '') Quantity, 
+        ifnull(c.Note, '') Note, 
+        ifnull(c.Period, '') Period, 
+        ifnull(c.Doc, '') Doc, 
+        c.Junk> 0 Junk, 
+        intersection.PublicCostCorr As UpCost,
+        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+        pricesdata.pricecode SalerID,
+        ClientsData.ShortName SalerName,
+        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+        c.fullcode PrepCode,
+        c.codefirmcr ,
+        c.synonymcode OrderCode1,
+        c.synonymfirmcrcode OrderCode2
+FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
+LEFT JOIN farm.core0 ampc
+        ON ampc.fullcode   = c.fullcode
+        and ampc.codefirmcr= c.codefirmcr
+        and ampc.firmcode  = 1864
+LEFT JOIN farm.synonymfirmcr scr
+        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
+        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+WHERE   DisabledByClient                                            = 0 
+        and Disabledbyfirm                                          = 0 
+        and DisabledByAgency                                        = 0 
+        and intersection.clientcode                                 = {0}  
+        and retclientsset.clientcode                                = intersection.clientcode 
+        and pricesdata.pricecode                                    = intersection.pricecode 
+        and clientsdata.firmcode                                    = pricesdata.firmcode 
+        and clientsdata.firmstatus                                  = 1 
+        and clientsdata.billingstatus                               = 1 
+        and clientsdata.firmtype                                    = 0 
+        and to_days(now())-to_days(datecurprice)                    < maxold 
+        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+        and pricesregionaldata.regioncode                           = intersection.regioncode 
+        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+        and AClientsData.firmcode                                   = intersection.clientcode 
+        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+        and pricesdata.agencyenabled                                = 1 
+        and pricesdata.enabled                                      = 1 
+        and invisibleonclient                                       = 0 
+        and pricesdata.pricetype                                   <> 1 
+        and pricesregionaldata.enabled                              = 1 
+        and fr.firmcode                                             = pricesdata.pricecode 
+        and c.firmcode                                              = if(clientsdata.OldCode= 0, pricesdata.pricecode, intersection.costcode) 
+        and c.synonymcode                                           = s.synonymcode 
+        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
+", GetClientCode().ToString()); 
+
+				if (!(SalerName == null))
+				{
+					int Inc = 0;
+					MySelCmd.CommandText += " and (";
+					foreach (string PriceNameStr in SalerName)
+					{
+						if (Inc > 0)
+						{
+							MySelCmd.CommandText += " or ";
+						}
+						Params = FormatFindStr(PriceNameStr, "ShortName" + Inc, "pricesdata.pricename");
+						MySelCmd.Parameters.Add("ShortName" + Inc, Params[1]);
+						MySelCmd.CommandText += Params[0];
+						Inc += 1;
+					}
+					MySelCmd.CommandText += ")";
+				}
+				if (NotAMPCodesArr.Count > 0)
+				{
+					MySelCmd.CommandText += " and ampc.code not in (";
+					for (int Inc = 0; Inc <= NotAMPCodesArr.Count - 1; Inc++)
+					{
+						MySelCmd.CommandText += "'" + NotAMPCodesArr[Inc] + "'";
+						if (Inc < NotAMPCodesArr.Count - 1)
+						{
+							MySelCmd.CommandText += ",";
+						}
+					}
+					MySelCmd.CommandText += ")";
+				}
+				if (AMPCodesArr.Count > 0)
+				{
+					MySelCmd.CommandText += " and ampc.code in (";
+					for (int Inc = 0; Inc <= AMPCodesArr.Count - 1; Inc++)
+					{
+						MySelCmd.CommandText += AMPCodesArr[Inc];
+						if (Inc < AMPCodesArr.Count - 1)
+						{
+							MySelCmd.CommandText += ",";
+						}
+					}
+					MySelCmd.CommandText += ")";
+				}
+
+				MySelCmd.CommandText += "group by 1";
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText += ";";
+					MySelCmd.CommandText += 
+@"
+INSERT 
+INTO    mincosts 
+SELECT  min(cost), 
+        FullCode, 
+        Junk 
+FROM    (prices) 
+GROUP BY FullCode, 
+        Junk; 
+SELECT  OrderID, 
+        SalerCode, 
+        CreaterCode, 
+        ItemID, 
+        OriginalName, 
+        OriginalCr, 
+        Unit, 
+        Volume, 
+        Quantity, 
+        Note, 
+        Period, 
+        Doc, 
+        p.Junk, 
+        UpCost, 
+        Cost, 
+        SalerID, 
+        SalerName, 
+        PriceDate, 
+        p.FullCode PrepCode, 
+        synonymcode OrderCode1, 
+        synonymfirmcrcode OrderCode2 
+FROM    (prices p, mincosts m) 
+WHERE   p.fullcode= m.fullcode 
+        and p.cost= m.mincost 
+        and p.junk= m.junk
+";
+				}
+				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText +=
+@"
+DROP temporary table IF EXISTS prices; 
+DROP temporary table IF EXISTS mincosts; 
+";
+				}
+				LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime);
+				MyTrans.Commit();
+				return MyDS;
+			}
+			catch (MySqlException MySQLErr)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
+				{
+					System.Threading.Thread.Sleep(100);
+					goto Restart;
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+			}
+			catch (Exception ex)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+			}
+			finally
+			{
+				if (MyCn.State == ConnectionState.Open)
+				{
+					MyCn.Close();
+				}
+			}
+			return MyDS;
+		}
+
+		[WebMethod()]
+		public DataSet GetPricesByName(string[] OriginalName, string[] SalerName, string[] PriceName, bool OnlyLeader, bool NewEar, Int32 Limit, Int32 SelStart)
+		{
+			string[] Params = new string[2];
+			int Inc;
+			FunctionName = "GetPricesByName";
+			Restart:
+			try
+			{
+				if (MyCn.State == ConnectionState.Closed)
+					MyCn.Open();
+
+				MyTrans = MyCn.BeginTransaction();
+				MySelCmd.Transaction = MyTrans;
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText =
+@"
+DROP temporary table IF EXISTS prices; 
+DROP temporary table IF EXISTS mincosts; 
+create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, CodeFirmCr int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
+create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
+INSERT 
+INTO    prices 
+";						
+				}
+				MySelCmd.CommandText += String.Format(
+@"
+SELECT  c.id OrderID,
+        ifnull(c.Code, '') SalerCode, 
+        ifnull(c.CodeCr, '') CreaterCode, 
+        ifnull(ampc.code, '') ItemID, 
+        s.synonym OriginalName, 
+        ifnull(scr.synonym, '') OriginalCr, 
+        ifnull(c.Unit, '') Unit, 
+        ifnull(c.Volume, '') Volume, 
+        ifnull(c.Quantity, '') Quantity, 
+        ifnull(c.Note, '') Note, 
+        ifnull(c.Period, '') Period, 
+        ifnull(c.Doc, '') Doc, 
+        c.Junk> 0 Junk, 
+        intersection.PublicCostCorr As UpCost,
+        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+        pricesdata.pricecode SalerID,
+        ClientsData.ShortName SalerName,
+        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+        c.fullcode PrepCode,
+        c.codefirmcr ,
+        c.synonymcode OrderCode1,
+        c.synonymfirmcrcode OrderCode2
+FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
+LEFT JOIN farm.core0 ampc
+        ON ampc.fullcode   = c.fullcode
+        and ampc.codefirmcr= c.codefirmcr
+        and ampc.firmcode  = 1864
+LEFT JOIN farm.synonymfirmcr scr
+        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
+        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+WHERE   DisabledByClient                                            = 0 
+        and Disabledbyfirm                                          = 0 
+        and DisabledByAgency                                        = 0 
+        and intersection.clientcode                                 = {0}  
+        and retclientsset.clientcode                                = intersection.clientcode 
+        and pricesdata.pricecode                                    = intersection.pricecode 
+        and clientsdata.firmcode                                    = pricesdata.firmcode 
+        and clientsdata.firmstatus                                  = 1 
+        and clientsdata.billingstatus                               = 1 
+        and clientsdata.firmtype                                    = 0 
+        and to_days(now())-to_days(datecurprice)                    < maxold 
+        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+        and pricesregionaldata.regioncode                           = intersection.regioncode 
+        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+        and AClientsData.firmcode                                   = intersection.clientcode 
+        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+        and pricesdata.agencyenabled                                = 1 
+        and pricesdata.enabled                                      = 1 
+        and invisibleonclient                                       = 0 
+        and pricesdata.pricetype                                   <> 1 
+        and pricesregionaldata.enabled                              = 1 
+        and fr.firmcode                                             = pricesdata.pricecode 
+        and c.firmcode                                              = if(clientsdata.OldCode= 0, pricesdata.pricecode, intersection.costcode) 
+        and c.synonymcode                                           = s.synonymcode 
+        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
+", GetClientCode().ToString());
+
+				if (NewEar)
+					MySelCmd.CommandText += " and ampc.id is null";
+
+				if (SalerName != null)
+				{
+					Inc = 0;
+					MySelCmd.CommandText += " and (";
+					foreach (string PriceNameStr in SalerName)
+					{
+						if (Inc > 0)
+							MySelCmd.CommandText += " or ";
+						Params = FormatFindStr(PriceNameStr, "ShortName" + Inc, "clientsdata.shortname");
+						MySelCmd.Parameters.Add("ShortName" + Inc, Params[1]);
+						MySelCmd.CommandText += Params[0];
+						Inc += 1;
+					}
+					MySelCmd.CommandText += ")";
+				}
+				if (PriceName != null)
+				{
+					Inc = 0;
+					MySelCmd.CommandText += " and (";
+					foreach (string PriceNameStr in SalerName)
+					{
+						if (Inc > 0)
+						{
+							MySelCmd.CommandText += " or ";
+						}
+						Params = FormatFindStr(PriceNameStr, "PriceName" + Inc, "pricesdata.pricename");
+						MySelCmd.Parameters.Add("PriceName" + Inc, Params[1]);
+						MySelCmd.CommandText += Params[0];
+						Inc += 1;
+					}
+					MySelCmd.CommandText += ")";
+				}
+				if (OriginalName != null)
+				{
+					Inc = 0;
+					MySelCmd.CommandText += " and (";
+					foreach (string NameStr in OriginalName)
+					{
+						if (NameStr.Length > 0)
+						{
+							if (Inc > 0)
+							{
+								MySelCmd.CommandText += " or ";
+							}
+							Params = FormatFindStr(NameStr, "Name" + Inc, "s.synonym");
+							MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
+							MySelCmd.CommandText += Params[0];
+							Inc += 1;
+						}
+					}
+					MySelCmd.CommandText += ")";
+				}
+				MySelCmd.CommandText += " group by 1";
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText += ";";
+					MySelCmd.CommandText +=
+@"
+INSERT 
+INTO    mincosts 
+SELECT  min(cost), 
+        FullCode, 
+        Junk 
+FROM    (prices) 
+GROUP BY FullCode, 
+        Junk; 
+SELECT  OrderID, 
+        SalerCode, 
+        CreaterCode, 
+        ItemID, 
+        OriginalName, 
+        OriginalCr, 
+        Unit, 
+        Volume, 
+        Quantity, 
+        Note, 
+        Period, 
+        Doc, 
+        p.Junk, 
+        UpCost, 
+        Cost, 
+        SalerID, 
+        SalerName, 
+        PriceDate, 
+        p.FullCode PrepCode, 
+        synonymcode OrderCode1, 
+        synonymfirmcrcode OrderCode2 
+FROM    (prices p, mincosts m) 
+WHERE   p.fullcode= m.fullcode 
+        and p.cost= m.mincost 
+        and p.junk= m.junk
+";
+				}
+				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				if (OnlyLeader)
+				{
+					MySelCmd.CommandText +=
+@"
+DROP temporary table IF EXISTS prices; 
+DROP temporary table IF EXISTS mincosts; 
+";
+				}
+
+				LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime);
+				MyTrans.Commit();
+				return MyDS;
+			}
+			catch (MySqlException MySQLErr)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
+				{
+					System.Threading.Thread.Sleep(100);
+					goto Restart;
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+			}
+			catch (Exception ex)
+			{
+				if (!(MyTrans == null))
+				{
+					MyTrans.Rollback();
+				}
+				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+			}
+			finally
+			{
+				if (MyCn.State == ConnectionState.Open)
+				{
+					MyCn.Close();
+				}
+			}
+			return MyDS;
+		}
+
+		[WebMethod()]
+		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2, bool[] Junk)
+		{
+			FunctionName = "PostOrder";
+			try
+			{
+				return AMPWebService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk, GetClientCode(), UserName, SQLHost);
+			}
+			catch (Exception err)
+			{
+				AMPWebService.PostOrder.MailErr(FunctionName, err.Message, err.Source, UserName);
+			}
+			finally
+			{
+				if (MyCn.State == ConnectionState.Open)
+				{
+					MyCn.Close();
+				}
+			}
+			return null;
+		}
+
+		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
+		{
+			bool UseLike = false;
+			string TmpRes = FieldName;
+			string[] Result = new string[2];
+			if (InpStr.IndexOf("*") >= 0)
+			{
+				UseLike = true;
+			}
+			if (InpStr.IndexOf("!") >= 0)
+			{
+				InpStr = InpStr.Remove(0, 1);
+				if (UseLike)
+				{
+					TmpRes += " not like ";
+				}
+				else
+				{
+					TmpRes += " <> ";
+				}
+			}
+			else
+			{
+				if (UseLike)
+				{
+					TmpRes += " like ";
+				}
+				else
+				{
+					TmpRes += " = ";
+				}
+			}
+			InpStr = InpStr.Replace("*", "%");
+			TmpRes += "?" + ParameterName;
+			Result[0] = TmpRes;
+			Result[1] = InpStr;
+			return Result;
+		}
+
+		private UInt32 GetClientCode()
+		{
+#if DEBUG
+			UserName = "michail";
+#else
+			UserName = System.Web.HttpContext.Current.User.Identity.Name;
+			if (UserName.Substring(0, 7) == "ANALIT\\")
+			{
+				UserName = UserName.Substring(7);
+			}
+			UserName = "amp";
+#endif
+			try
+			{
+				MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" + " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" + " and billingstatus=1" + " and allowGetData=1" + " and OSUserName='" + UserName + "'";
+				return Convert.ToUInt32(MySelCmd.ExecuteScalar());
+			}
+			catch (Exception ErrorTXT)
+			{
+				AMPWebService.PostOrder.MailErr("GetClientCode", ErrorTXT.Message, ErrorTXT.Source, UserName);
+			}
+			finally
+			{
+			}
+
+			return 0;
+		}
+
+		private void LogQuery(Int32 RowCount, string FunctionName, System.DateTime StartTime)
+		{
+			//MySelCmd.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " + " values(now(), '" + System.Web.HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + RowCount + ", " + System.Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ")";
+			MySelCmd.ExecuteNonQuery();
+		}
+		/// <summary>
+		/// Формирует блок LIMIT для SQL запроса. Пример: "LIMIT 1 20"
+		/// </summary>
+		/// <param name="offset">Начиная с какого элемента</param>
+		/// <param name="count">Количество элементов</param>
+		/// <returns></returns>
+		private string GetLimitString(int offset, int count)
+		{
+			string result = String.Empty;
+			if (offset >= 0)
+			{
+				result = " limit " + offset;
+				if (count > 0)
+					result += "," + count;
+			}
+
+			return result + ";";
+		}
+	}
+}
