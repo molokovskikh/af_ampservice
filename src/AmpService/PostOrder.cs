@@ -74,7 +74,7 @@ namespace AMPWebService
 #endif
         }
 
-        public static DataSet PostOrderMethod(int[] CoreIDs, int[] Quantities, string[] Messages, int[] SynonymCodes, int[] SynonymFirmCrCodes, bool[] Junks, ulong ClientCode, string UserName, string Host)
+        public static DataSet PostOrderMethod(int[] CoreIDs, int[] Quantities, string[] Messages, int[] SynonymCodes, int[] SynonymFirmCrCodes, bool[] Junks, ulong ClientCode, string UserName)
         {
             MySqlConnection MyCn = new MySqlConnection(Literals.ConnectionString);
             MySqlCommand MySelCmd = new MySqlCommand();

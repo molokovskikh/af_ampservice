@@ -985,7 +985,7 @@ DROP temporary table IF EXISTS mincosts;
 			FunctionName = "PostOrder";
 			try
 			{
-				return AMPWebService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk, GetClientCode(), UserName, SQLHost);
+				return AMPWebService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk, GetClientCode(), UserName);
 			}
 			catch (Exception err)
 			{
