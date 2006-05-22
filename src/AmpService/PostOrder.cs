@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 using System.Net.Mail;
 
 
-namespace AMPService
+namespace AMPWebService
 {
     public class PostOrder
     {
@@ -50,8 +50,9 @@ namespace AMPService
             return dtRes;
         }
 
-        private static void MailErr(string ProcessName, string ErrMessage, string ErrSource, string UserName)
+        public static void MailErr(string ProcessName, string ErrMessage, string ErrSource, string UserName)
         {
+#if !DEBUG
             MailMessage Message = new MailMessage();
             MailAddress Address = new MailAddress("service@analit.net");
             SmtpClient Client = new SmtpClient("box.analit.net");
@@ -70,11 +71,12 @@ namespace AMPService
             catch
             {
             }
+#endif
         }
 
         public static DataSet PostOrderMethod(int[] CoreIDs, int[] Quantities, string[] Messages, int[] SynonymCodes, int[] SynonymFirmCrCodes, bool[] Junks, ulong ClientCode, string UserName, string Host)
         {
-            MySqlConnection MyCn = new MySqlConnection(String.Format("Database=usersettings;Data Source={0};User Id=system;Password=123", Host));
+            MySqlConnection MyCn = new MySqlConnection(Literals.ConnectionString);
             MySqlCommand MySelCmd = new MySqlCommand();
             MySqlDataAdapter MyDA = new MySqlDataAdapter(MySelCmd);
             MySqlTransaction MyTrans = null;
@@ -170,9 +172,6 @@ and c.ID in " + CoreIDString;
                         MySelCmd.Parameters.Add("ClientCode", ClientCode);
                         MyDA.Fill(dsPost, "SummaryOrder");
                         dtSummaryOrder = dsPost.Tables["SummaryOrder"];
-
-                        if (dtSummaryOrder.Rows.Count == 0)
-                            MailErr("PostOrder", "Запрос вернул пустоту" + Environment.NewLine + MySelCmd.CommandText, "PostOrderMethod", UserName);
 
                         DataRow[] drs;
                         dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof(string)));
@@ -365,7 +364,7 @@ where
                         else
                         {
                             Quit = true;
-                            MailErr("PostOrder", MySQLErr.Message, MySQLErr.Source, UserName);
+                            AMPWebService.PostOrder.MailErr("PostOrder", MySQLErr.Message, MySQLErr.Source, UserName);
                         }
                     }
                     catch (Exception ex)
@@ -375,7 +374,7 @@ where
                         {
                             MyTrans.Rollback();
                         }
-                        MailErr("PostOrder", ex.Message, ex.Source, UserName);
+                        AMPWebService.PostOrder.MailErr("PostOrder", ex.Message, ex.Source, UserName);
                     }
                 }
                 while (!Quit);
