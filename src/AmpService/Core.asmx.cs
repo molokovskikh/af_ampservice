@@ -4,9 +4,105 @@ using MySql.Data.MySqlClient;
 using System.Data;
 using System.Net.Mail;
 using System.Collections.Generic;
+using ExecuteTemplate;
+using System.IO;
+using System.Text;
+using System.Web.UI.WebControls;
+using Microsoft.Practices.EnterpriseLibrary.Logging;
 
 namespace AMPWebService
 {
+	internal class FirmNameArgs : ExecuteArgs
+	{
+		
+		private string[] _firmNames;
+
+		public string[] FirmNames
+		{
+			get { return _firmNames; }
+			set { _firmNames = value; }
+		}
+
+		public FirmNameArgs(MySqlConnection Connection, string[] firmNames)
+			: base(Connection)
+		{
+			_firmNames = firmNames;
+		}
+	}
+
+	internal class GetPricesArgs : ExecuteArgs
+	{
+		private int			_count;
+		private int			_offset;
+		private bool		_onlyLeader;
+		private bool		_newYear;
+		private string[]	_rangeField;
+		private string[]	_rangeValue;
+		private string[]	_sortField;
+		private string[]	_sortDirection;
+
+		public int Count
+		{
+			get { return _count; }
+			set { _count = value; }
+		}
+
+		public int Offset
+		{
+			get { return _offset; }
+			set { _offset = value; }
+		}
+
+		public bool OnlyLeader
+		{
+			get { return _onlyLeader; }
+			set { _onlyLeader = value; }
+		}
+
+		public bool NewYear
+		{
+			get { return _newYear; }
+			set { _newYear = value; }
+		}
+
+		public string[] RangeField
+		{
+			get { return _rangeField; }
+			set { _rangeField = value; }
+		}
+
+		public string[] RangeValue
+		{
+			get { return _rangeValue; }
+			set { _rangeValue = value; }
+		}
+
+		public string[] SortField
+		{
+			get { return _sortField; }
+			set { _sortField = value; }
+		}
+		
+		public string[] SortDirection
+		{
+			get { return _sortDirection; }
+			set { _sortDirection = value; }
+		}
+
+		public GetPricesArgs(bool onlyLeader, bool newYear, string[] rangeField, string[] rangeValue, string[] sortField, string[] sortDirection, int count, int offset, MySqlConnection connection)
+			: base(connection)
+		{
+			_count = count;
+			_offset = offset;
+			_onlyLeader = onlyLeader;
+			_newYear = newYear;
+			_rangeField = rangeField;
+			_rangeValue = rangeValue;
+			_sortField = sortField;
+			_sortDirection = sortDirection;
+		}
+	}
+
 	[System.Web.Services.WebService(Namespace = "AMPNameSpace")]
 	public class AMPService : System.Web.Services.WebService
 	{
@@ -247,6 +343,7 @@ namespace AMPWebService
 				MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
 				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
 
+				Logger.Write(MyDA.SelectCommand.CommandText);
 				LogQuery(MyDA.Fill(MyDS, "Catalog"), FunctionName, StartTime);
 				MyTrans.Commit();
 				return MyDS;
@@ -282,7 +379,7 @@ namespace AMPWebService
 			return MyDS;
 		}
 
-		[WebMethod()]
+		[WebMethod]
 		public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
 		{
 			FunctionName = "GetPricesByPrepCode";
@@ -308,7 +405,7 @@ namespace AMPWebService
 				FullCodesString += ")";
 				if (OnlyLeader)
 				{
-					MySelCmd.CommandText +=
+					MySelCmd.CommandText =
 @"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
@@ -318,7 +415,7 @@ INSERT
 INTO    prices 
 ";
 				}
-				MySelCmd.CommandText = String.Format(
+				MySelCmd.CommandText += String.Format(
 @"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode, 
@@ -398,7 +495,6 @@ WHERE   DisabledByClient                                            = 0
 					MySelCmd.CommandText += ")";
 				}
 				MySelCmd.CommandText += " GROUP BY 1 ";
-				MySelCmd.CommandText += GetLimitString(SelStart, Limit); 
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText += ";";
@@ -449,7 +545,7 @@ DROP temporary table IF EXISTS prices;
 DROP temporary table IF EXISTS mincosts; 
 ";
 				}
-
+				Logger.Write(MyDA.SelectCommand.CommandText);
 				LogQuery(MyDA.Fill(MyDS, "prices"), FunctionName, StartTime);
 				MyTrans.Commit();
 				return MyDS;
@@ -487,7 +583,7 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, string[] SalerName, Int32 Limit, Int32 SelStart)
+		public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, uint[] PriceID , Int32 Limit, Int32 SelStart)
 		{
 			string NameStr = String.Empty;
 			string AMPCodes;
@@ -620,25 +716,11 @@ WHERE   DisabledByClient                                            = 0
         and c.firmcode                                              = if(clientsdata.OldCode= 0, pricesdata.pricecode, intersection.costcode) 
         and c.synonymcode                                           = s.synonymcode 
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
-", GetClientCode().ToString()); 
+", GetClientCode().ToString());
 
-				if (!(SalerName == null))
-				{
-					int Inc = 0;
-					MySelCmd.CommandText += " and (";
-					foreach (string PriceNameStr in SalerName)
-					{
-						if (Inc > 0)
-						{
-							MySelCmd.CommandText += " or ";
-						}
-						Params = FormatFindStr(PriceNameStr, "ShortName" + Inc, "pricesdata.pricename");
-						MySelCmd.Parameters.Add("ShortName" + Inc, Params[1]);
-						MySelCmd.CommandText += Params[0];
-						Inc += 1;
-					}
-					MySelCmd.CommandText += ")";
-				}
+				MySelCmd.CommandText += FormatPriceIDForQuery(PriceID);
+
+
 				if (NotAMPCodesArr.Count > 0)
 				{
 					MySelCmd.CommandText += " and ampc.code not in (";
@@ -666,7 +748,7 @@ WHERE   DisabledByClient                                            = 0
 					MySelCmd.CommandText += ")";
 				}
 
-				MySelCmd.CommandText += "group by 1";
+				MySelCmd.CommandText += " group by 1 ";
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText += ";";
@@ -716,6 +798,7 @@ DROP temporary table IF EXISTS prices;
 DROP temporary table IF EXISTS mincosts; 
 ";
 				}
+				Logger.Write(MyDA.SelectCommand.CommandText);
 				LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime);
 				MyTrans.Commit();
 				return MyDS;
@@ -752,7 +835,7 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet GetPricesByName(string[] OriginalName, string[] SalerName, string[] PriceName, bool OnlyLeader, bool NewEar, Int32 Limit, Int32 SelStart)
+		public DataSet GetPricesByOriginalName(string[] OriginalName, uint[] PriceId, bool OnlyLeader, bool NewEar, Int32 Limit, Int32 SelStart)
 		{
 			string[] Params = new string[2];
 			int Inc;
@@ -841,38 +924,8 @@ WHERE   DisabledByClient                                            = 0
 				if (NewEar)
 					MySelCmd.CommandText += " and ampc.id is null";
 
-				if (SalerName != null)
-				{
-					Inc = 0;
-					MySelCmd.CommandText += " and (";
-					foreach (string PriceNameStr in SalerName)
-					{
-						if (Inc > 0)
-							MySelCmd.CommandText += " or ";
-						Params = FormatFindStr(PriceNameStr, "ShortName" + Inc, "clientsdata.shortname");
-						MySelCmd.Parameters.Add("ShortName" + Inc, Params[1]);
-						MySelCmd.CommandText += Params[0];
-						Inc += 1;
-					}
-					MySelCmd.CommandText += ")";
-				}
-				if (PriceName != null)
-				{
-					Inc = 0;
-					MySelCmd.CommandText += " and (";
-					foreach (string PriceNameStr in SalerName)
-					{
-						if (Inc > 0)
-						{
-							MySelCmd.CommandText += " or ";
-						}
-						Params = FormatFindStr(PriceNameStr, "PriceName" + Inc, "pricesdata.pricename");
-						MySelCmd.Parameters.Add("PriceName" + Inc, Params[1]);
-						MySelCmd.CommandText += Params[0];
-						Inc += 1;
-					}
-					MySelCmd.CommandText += ")";
-				}
+				MySelCmd.CommandText += FormatPriceIDForQuery(PriceId);
+
 				if (OriginalName != null)
 				{
 					Inc = 0;
@@ -944,6 +997,7 @@ DROP temporary table IF EXISTS mincosts;
 ";
 				}
 
+				Logger.Write(MyDA.SelectCommand.CommandText);
 				LogQuery(MyDA.Fill(MyDS, "Prices"), FunctionName, StartTime);
 				MyTrans.Commit();
 				return MyDS;
@@ -979,26 +1033,66 @@ DROP temporary table IF EXISTS mincosts;
 			return MyDS;
 		}
 
-		[WebMethod()]
+		[WebMethod]
 		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2, bool[] Junk)
 		{
-			FunctionName = "PostOrder";
-			try
-			{
-				return AMPWebService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk, GetClientCode(), UserName);
-			}
-			catch (Exception err)
-			{
-				AMPWebService.PostOrder.MailErr(FunctionName, err.Message, err.Source, UserName);
-			}
-			finally
-			{
-				if (MyCn.State == ConnectionState.Open)
-				{
-					MyCn.Close();
-				}
-			}
-			return null;
+			return AMPWebService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk, GetClientCode(), UserName);
+		}
+
+		private DataSet InnerGetPriceCodeByName(ExecuteArgs e)
+		{
+			MySqlDataAdapter dataAdapter = new MySqlDataAdapter();
+			DataSet data = new DataSet();
+			dataAdapter.SelectCommand = new MySqlCommand();
+			dataAdapter.SelectCommand.Connection = e.Connection;
+			dataAdapter.SelectCommand.Transaction = e.Transaction;
+			data.ReadXmlSchema(Path.GetDirectoryName(Context.Request.PhysicalPath + "") + "\\App_Data\\PricesSchema.xml");
+
+			dataAdapter.SelectCommand.CommandText =
+@"
+SELECT  PricesData.PriceCode as PriceCode, 
+        ClientsData.ShortName as FirmName, 
+        PricesData.PriceName as PriceName
+FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData) 
+WHERE   DisabledByClient                                            = 0 
+        and Disabledbyfirm                                          = 0 
+        and DisabledByAgency                                        = 0 
+        and intersection.clientcode                                 = ?ClientCode 
+        and retclientsset.clientcode                                = intersection.clientcode 
+        and pricesdata.pricecode                                    = intersection.pricecode 
+        and clientsdata.firmcode                                    = pricesdata.firmcode 
+        and clientsdata.firmstatus                                  = 1 
+        and clientsdata.billingstatus                               = 1 
+        and clientsdata.firmtype                                    = 0 
+        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+        and pricesregionaldata.regioncode                           = intersection.regioncode 
+        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+        and AClientsData.firmcode                                   = intersection.clientcode 
+        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+        and pricesdata.agencyenabled                                = 1 
+        and pricesdata.enabled                                      = 1 
+        and invisibleonclient                                       = 0 
+        and pricesdata.pricetype                                   <> 1 
+        and pricesregionaldata.enabled                              = 1
+";
+			
+			
+			dataAdapter.SelectCommand.CommandText += StringArrayToQuery(((FirmNameArgs)e).FirmNames, "ClientsData.ShortName");
+
+			Logger.Write(dataAdapter.SelectCommand.CommandText);
+
+			dataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+			dataAdapter.Fill(data);
+
+			return data;
+		}
+
+		[WebMethod]
+		public DataSet GetPriceCodeByName(string[] firmNames)
+		{
+			return MethodTemplate.ExecuteMethod("GetPriceCodeByName", new FirmNameArgs(MyCn, firmNames), new ExecuteMethodDelegate(this.InnerGetPriceCodeByName));
 		}
 
 		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
@@ -1014,24 +1108,16 @@ DROP temporary table IF EXISTS mincosts;
 			{
 				InpStr = InpStr.Remove(0, 1);
 				if (UseLike)
-				{
 					TmpRes += " not like ";
-				}
 				else
-				{
 					TmpRes += " <> ";
-				}
 			}
 			else
 			{
 				if (UseLike)
-				{
 					TmpRes += " like ";
-				}
 				else
-				{
 					TmpRes += " = ";
-				}
 			}
 			InpStr = InpStr.Replace("*", "%");
 			TmpRes += "?" + ParameterName;
@@ -1067,11 +1153,61 @@ DROP temporary table IF EXISTS mincosts;
 
 			return 0;
 		}
+		
+		/// <summary>
+		/// Форматирует массив идентификаторов прайс листа для применения в запросе.
+		/// Пример: массив {1, 2} приводится к виду " and PricesData.PriceCode in (1, 2) "
+		/// </summary>
+		/// <param name="priceID">массив идентификаторов</param>
+		/// <returns>отформатированная строка</returns>
+		private string FormatPriceIDForQuery(params uint[] priceID)
+		{ 
+			string result = String.Empty;
+			if ((priceID != null) && (priceID.Length > 0))
+			{ 
+				string ids = String.Empty; 
+				foreach (uint id in priceID)
+					ids += Convert.ToString(id) + " , ";
+
+				ids = ids.Remove(ids.Length - 3);
+				result = String.Format(" and PricesData.PriceCode in ({0}) ", ids);
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// Преобразовывает массив строк для использования в запросе.
+		/// Также происходит замена символа "*" на "%".
+		/// Пример: массив {"hello", "w*rld"} разворачивается в строку 
+		/// "and ( someFiel like 'hello'  or  someField like 'w%rld')"
+		/// </summary>
+		/// <param name="array">Аргументы поиска</param>
+		/// <param name="fieldName">Имя поля по которому происходит поиск</param>
+		/// <returns>Отформатированная строка</returns>
+		private string StringArrayToQuery(string[] array, string fieldName)
+		{
+			StringBuilder builder = new StringBuilder();
+			if ((array != null) && (array.Length > 0))
+			{
+				builder.Append(" and (");
+				foreach (string item in array)
+				{
+					if (item.IndexOf("*") > -1)
+						builder.Append(fieldName + " like '" + item.Replace("*", "%") + "'");
+					else
+						builder.Append(fieldName + " like = '" + item + "'");
+					builder.Append(" or "); 
+				}
+				builder.Remove(builder.Length - 4, 4);
+				builder.Append(") ");
+			}
+			return builder.ToString();
+		}
 
 		private void LogQuery(Int32 RowCount, string FunctionName, System.DateTime StartTime)
 		{
 			//MySelCmd.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " + " values(now(), '" + System.Web.HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + RowCount + ", " + System.Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ")";
-			MySelCmd.ExecuteNonQuery();
+			//MySelCmd.ExecuteNonQuery();
 		}
 		/// <summary>
 		/// Формирует блок LIMIT для SQL запроса. Пример: "LIMIT 1 20"
@@ -1090,6 +1226,6 @@ DROP temporary table IF EXISTS mincosts;
 			}
 
 			return result + ";";
-		}
+		}		
 	}
 }
