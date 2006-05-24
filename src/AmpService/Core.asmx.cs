@@ -1046,14 +1046,17 @@ DROP temporary table IF EXISTS mincosts;
 			dataAdapter.SelectCommand = new MySqlCommand();
 			dataAdapter.SelectCommand.Connection = e.Connection;
 			dataAdapter.SelectCommand.Transaction = e.Transaction;
-			data.ReadXmlSchema(Path.GetDirectoryName(Context.Request.PhysicalPath + "") + "\\App_Data\\PricesSchema.xml");
 
 			dataAdapter.SelectCommand.CommandText =
 @"
 SELECT  PricesData.PriceCode as PriceCode, 
+		PricesData.PriceName as PriceName,
+		PriceInfo,
+		ClientsData.FirmCode,
         ClientsData.ShortName as FirmName, 
-        PricesData.PriceName as PriceName
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData) 
+		RegionalData.ContactInfo,
+		RegionalData.OperativeInfo
+FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, RegionalData) 
 WHERE   DisabledByClient                                            = 0 
         and Disabledbyfirm                                          = 0 
         and DisabledByAgency                                        = 0 
@@ -1076,6 +1079,8 @@ WHERE   DisabledByClient                                            = 0
         and invisibleonclient                                       = 0 
         and pricesdata.pricetype                                   <> 1 
         and pricesregionaldata.enabled                              = 1
+        and RegionalData.FirmCode = ClientsData.FirmCode
+        and RegionalData.RegionCode = Intersection.RegionCode
 ";
 			
 			
@@ -1084,15 +1089,44 @@ WHERE   DisabledByClient                                            = 0
 			Logger.Write(dataAdapter.SelectCommand.CommandText);
 
 			dataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-			dataAdapter.Fill(data);
+			dataAdapter.Fill(data, "PriceList");
 
 			return data;
 		}
 
 		[WebMethod]
-		public DataSet GetPriceCodeByName(string[] firmNames)
+		public DataSet GetPriceCodeByName(string[] firmName)
 		{
-			return MethodTemplate.ExecuteMethod("GetPriceCodeByName", new FirmNameArgs(MyCn, firmNames), new ExecuteMethodDelegate(this.InnerGetPriceCodeByName));
+			return MethodTemplate.ExecuteMethod("GetPriceCodeByName", new FirmNameArgs(MyCn, firmName), new ExecuteMethodDelegate(this.InnerGetPriceCodeByName));
+		}
+
+		private DataSet InnerGetPrices(ExecuteArgs e)
+		{
+			List<string> validRequestFields = new List<string>();
+			List<string> validSortFields = new List<string>();
+			//валидация входящих параметров
+			GetPricesArgs args = e as GetPricesArgs;
+			if (args.RangeField.Length != args.RangeValue.Length)
+				new Exception();
+			foreach (string fieldName in args.RangeField)
+				if (!validRequestFields.Contains(fieldName))
+					new Exception();
+			foreach (string fieldName in args.SortField)
+				if (!validSortFields.Contains(fieldName))
+					new Exception();
+
+			foreach (string direction in args.SortDirection)
+				if (!((String.Compare(direction, "Asc") == 0) || (String.Compare(direction, "Desc") == 0)))
+					new Exception();
+
+			return null;
+
+		}
+
+		[WebMethod]
+		public DataSet GetPrices(bool OnlyLeader, bool NewYear, string[] RangeField, string[] RangeValue, string[] SortField, string[] SortOrder, int Limit, int SelStart)
+		{
+			return MethodTemplate.ExecuteMethod("GetPrices", new GetPricesArgs(OnlyLeader, NewYear, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart, MyCn), new ExecuteMethodDelegate(this.InnerGetPrices));
 		}
 
 		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
@@ -1179,7 +1213,7 @@ WHERE   DisabledByClient                                            = 0
 		/// Преобразовывает массив строк для использования в запросе.
 		/// Также происходит замена символа "*" на "%".
 		/// Пример: массив {"hello", "w*rld"} разворачивается в строку 
-		/// "and ( someFiel like 'hello'  or  someField like 'w%rld')"
+		/// "and ( someField like 'hello'  or  someField like 'w%rld')"
 		/// </summary>
 		/// <param name="array">Аргументы поиска</param>
 		/// <param name="fieldName">Имя поля по которому происходит поиск</param>
@@ -1195,7 +1229,7 @@ WHERE   DisabledByClient                                            = 0
 					if (item.IndexOf("*") > -1)
 						builder.Append(fieldName + " like '" + item.Replace("*", "%") + "'");
 					else
-						builder.Append(fieldName + " like = '" + item + "'");
+						builder.Append(fieldName + " = '" + item + "'");
 					builder.Append(" or "); 
 				}
 				builder.Remove(builder.Length - 4, 4);
