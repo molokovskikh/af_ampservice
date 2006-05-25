@@ -1,192 +1,101 @@
 using System;
-using System.Web.Services;
-using MySql.Data.MySqlClient;
-using System.Data;
-using System.Net.Mail;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
+using System.Threading;
+using System.Web;
+using System.Web.Services;
 using ExecuteTemplate;
-using System.IO;
-using System.Text;
-using System.Web.UI.WebControls;
 using Microsoft.Practices.EnterpriseLibrary.Logging;
-using System.Collections;
+using MySql.Data.MySqlClient;
 
 namespace AMPWebService
 {
-	internal class FirmNameArgs : ExecuteArgs
-	{
-		
-		private string[] _firmNames;
-
-		public string[] FirmNames
-		{
-			get { return _firmNames; }
-			set { _firmNames = value; }
-		}
-
-		public FirmNameArgs(string[] firmNames)
-			: base()
-		{
-			_firmNames = firmNames;
-		}
-	}
-
-	internal class GetPricesArgs : ExecuteArgs
-	{
-		private int			_count;
-		private int			_offset;
-		private bool		_onlyLeader;
-		private bool		_newEar;
-		private string[]	_rangeField;
-		private string[]	_rangeValue;
-		private string[]	_sortField;
-		private string[]	_sortDirection;
-
-		public int Count
-		{
-			get { return _count; }
-			set { _count = value; }
-		}
-
-		public int Offset
-		{
-			get { return _offset; }
-			set { _offset = value; }
-		}
-
-		public bool OnlyLeader
-		{
-			get { return _onlyLeader; }
-			set { _onlyLeader = value; }
-		}
-
-		public bool NewEar
-		{
-			get { return _newEar; }
-			set { _newEar = value; }
-		}
-
-		public string[] RangeField
-		{
-			get { return _rangeField; }
-			set { _rangeField = value; }
-		}
-
-		public string[] RangeValue
-		{
-			get { return _rangeValue; }
-			set { _rangeValue = value; }
-		}
-
-		public string[] SortField
-		{
-			get { return _sortField; }
-			set { _sortField = value; }
-		}
-		
-		public string[] SortDirection
-		{
-			get { return _sortDirection; }
-			set { _sortDirection = value; }
-		}
-
-		public GetPricesArgs(bool onlyLeader, bool newEar, string[] rangeField, string[] rangeValue, string[] sortField, string[] sortDirection, int count, int offset)
-			: base()
-		{
-			_count = count;
-			_offset = offset;
-			_onlyLeader = onlyLeader;
-			_newEar = newEar;
-			_rangeField = rangeField;
-			_rangeValue = rangeValue;
-			_sortField = sortField;
-			_sortDirection = sortDirection;
-		}
-	}
-
-	[System.Web.Services.WebService(Namespace = "AMPNameSpace")]
-	public class AMPService : System.Web.Services.WebService
+	[WebService(Namespace = "AMPNameSpace")]
+	public class AMPService : WebService
 	{
 		MySqlTransaction MyTrans;
 		string UserName;
 		string FunctionName;
 		DateTime StartTime = DateTime.Now;
-		private System.Data.DataColumn dataColumn18;
-		private System.Data.DataColumn dataColumn19;
+		private DataColumn dataColumn18;
+		private DataColumn dataColumn19;
 
 		public AMPService() : base()
 		{
 			InitializeComponent();
 		}
 
-		private System.ComponentModel.IContainer components;
-		public MySql.Data.MySqlClient.MySqlCommand MySelCmd;
-		public MySql.Data.MySqlClient.MySqlConnection MyCn;
-		private MySql.Data.MySqlClient.MySqlDataAdapter MyDA;
-		public System.Data.DataSet MyDS;
-		public System.Data.DataTable DataTable1;
-		public System.Data.DataColumn DataColumn1;
-		public System.Data.DataColumn DataColumn2;
-		public System.Data.DataColumn DataColumn3;
-		public System.Data.DataColumn DataColumn4;
-		public System.Data.DataColumn DataColumn5;
-		public System.Data.DataColumn DataColumn6;
-		public System.Data.DataColumn DataColumn7;
-		public System.Data.DataColumn DataColumn8;
-		public System.Data.DataColumn DataColumn9;
-		public System.Data.DataColumn DataColumn10;
-		public System.Data.DataColumn DataColumn11;
-		public System.Data.DataColumn DataColumn12;
-		public System.Data.DataColumn DataColumn13;
-		public System.Data.DataColumn DataColumn14;
-		public System.Data.DataColumn DataColumn15;
-		public System.Data.DataColumn DataColumn16;
-		public System.Data.DataColumn DataColumn17;
+		private IContainer components;
+		public MySqlCommand MySelCmd;
+		public MySqlConnection MyCn;
+		private MySqlDataAdapter MyDA;
+		public DataSet MyDS;
+		public DataTable DataTable1;
+		public DataColumn DataColumn1;
+		public DataColumn DataColumn2;
+		public DataColumn DataColumn3;
+		public DataColumn DataColumn4;
+		public DataColumn DataColumn5;
+		public DataColumn DataColumn6;
+		public DataColumn DataColumn7;
+		public DataColumn DataColumn8;
+		public DataColumn DataColumn9;
+		public DataColumn DataColumn10;
+		public DataColumn DataColumn11;
+		public DataColumn DataColumn12;
+		public DataColumn DataColumn13;
+		public DataColumn DataColumn14;
+		public DataColumn DataColumn15;
+		public DataColumn DataColumn16;
+		public DataColumn DataColumn17;
 
-		[System.Diagnostics.DebuggerStepThrough()]
+		[DebuggerStepThrough()]
 		private void InitializeComponent()
 		{
-			this.MySelCmd = new MySql.Data.MySqlClient.MySqlCommand();
-			this.MyCn = new MySql.Data.MySqlClient.MySqlConnection();
-			this.MyDA = new MySql.Data.MySqlClient.MySqlDataAdapter();
-			this.MyDS = new System.Data.DataSet();
-			this.DataTable1 = new System.Data.DataTable();
-			this.DataColumn1 = new System.Data.DataColumn();
-			this.DataColumn2 = new System.Data.DataColumn();
-			this.DataColumn3 = new System.Data.DataColumn();
-			this.DataColumn4 = new System.Data.DataColumn();
-			this.DataColumn5 = new System.Data.DataColumn();
-			this.DataColumn6 = new System.Data.DataColumn();
-			this.DataColumn7 = new System.Data.DataColumn();
-			this.DataColumn8 = new System.Data.DataColumn();
-			this.DataColumn9 = new System.Data.DataColumn();
-			this.DataColumn10 = new System.Data.DataColumn();
-			this.DataColumn11 = new System.Data.DataColumn();
-			this.DataColumn12 = new System.Data.DataColumn();
-			this.DataColumn13 = new System.Data.DataColumn();
-			this.DataColumn14 = new System.Data.DataColumn();
-			this.DataColumn15 = new System.Data.DataColumn();
-			this.DataColumn16 = new System.Data.DataColumn();
-			this.DataColumn17 = new System.Data.DataColumn();
-			this.dataColumn18 = new System.Data.DataColumn();
-			this.dataColumn19 = new System.Data.DataColumn();
+			this.MySelCmd = new MySqlCommand();
+			this.MyCn = new MySqlConnection();
+			this.MyDA = new MySqlDataAdapter();
+			this.MyDS = new DataSet();
+			this.DataTable1 = new DataTable();
+			this.DataColumn1 = new DataColumn();
+			this.DataColumn2 = new DataColumn();
+			this.DataColumn3 = new DataColumn();
+			this.DataColumn4 = new DataColumn();
+			this.DataColumn5 = new DataColumn();
+			this.DataColumn6 = new DataColumn();
+			this.DataColumn7 = new DataColumn();
+			this.DataColumn8 = new DataColumn();
+			this.DataColumn9 = new DataColumn();
+			this.DataColumn10 = new DataColumn();
+			this.DataColumn11 = new DataColumn();
+			this.DataColumn12 = new DataColumn();
+			this.DataColumn13 = new DataColumn();
+			this.DataColumn14 = new DataColumn();
+			this.DataColumn15 = new DataColumn();
+			this.DataColumn16 = new DataColumn();
+			this.DataColumn17 = new DataColumn();
+			this.dataColumn18 = new DataColumn();
+			this.dataColumn19 = new DataColumn();
 			this.MyDS.BeginInit();
 			this.DataTable1.BeginInit();
 			this.MySelCmd.CommandText = null;
 			this.MySelCmd.CommandTimeout = 0;
-			this.MySelCmd.CommandType = System.Data.CommandType.Text;
+			this.MySelCmd.CommandType = CommandType.Text;
 			this.MySelCmd.Connection = this.MyCn;
 			this.MySelCmd.Transaction = null;
-			this.MySelCmd.UpdatedRowSource = System.Data.UpdateRowSource.Both;
+			this.MySelCmd.UpdatedRowSource = UpdateRowSource.Both;
 			this.MyCn.ConnectionString = Literals.ConnectionString;
 			this.MyDA.DeleteCommand = null;
 			this.MyDA.InsertCommand = null;
 			this.MyDA.SelectCommand = this.MySelCmd;
 			this.MyDA.UpdateCommand = null;
 			this.MyDS.DataSetName = "AMPDataSet";
-			this.MyDS.Locale = new System.Globalization.CultureInfo("ru-RU");
-			this.MyDS.Tables.AddRange(new System.Data.DataTable[] { this.DataTable1 });
-			this.DataTable1.Columns.AddRange(new System.Data.DataColumn[] { this.DataColumn1, this.DataColumn2, this.DataColumn3, this.DataColumn4, this.DataColumn5, this.DataColumn6, this.DataColumn7, this.DataColumn8, this.DataColumn9, this.DataColumn10, this.DataColumn11, this.DataColumn12, this.DataColumn13, this.DataColumn14, this.DataColumn15, this.DataColumn16, this.DataColumn17, this.dataColumn18, this.dataColumn19 });
+			this.MyDS.Locale = new CultureInfo("ru-RU");
+			this.MyDS.Tables.AddRange(new DataTable[] { this.DataTable1 });
+			this.DataTable1.Columns.AddRange(new DataColumn[] { this.DataColumn1, this.DataColumn2, this.DataColumn3, this.DataColumn4, this.DataColumn5, this.DataColumn6, this.DataColumn7, this.DataColumn8, this.DataColumn9, this.DataColumn10, this.DataColumn11, this.DataColumn12, this.DataColumn13, this.DataColumn14, this.DataColumn15, this.DataColumn16, this.DataColumn17, this.dataColumn18, this.dataColumn19 });
 			this.DataTable1.TableName = "Prices";
 			this.DataColumn1.ColumnName = "OrderID";
 			this.DataColumn1.DataType = typeof(int);
@@ -342,7 +251,7 @@ namespace AMPWebService
 					MySelCmd.CommandText += ")";
 				}
 				MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
-				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 
 				Logger.Write(MyDA.SelectCommand.CommandText);
 				LogQuery(MyDA.Fill(MyDS, "Catalog"), FunctionName, StartTime);
@@ -357,7 +266,7 @@ namespace AMPWebService
 				}
 				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
 				{
-					System.Threading.Thread.Sleep(100);
+					Thread.Sleep(100);
 					goto Restart;
 				}
 				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
@@ -380,7 +289,7 @@ namespace AMPWebService
 			return MyDS;
 		}
 
-		[WebMethod]
+		[WebMethod()]
 		public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
 		{
 			FunctionName = "GetPricesByPrepCode";
@@ -536,7 +445,7 @@ WHERE   p.fullcode= m.fullcode
 ";
 				}
 
-				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText +=
@@ -559,7 +468,7 @@ DROP temporary table IF EXISTS mincosts;
 				}
 				if ((MySQLErr.Number == 1213) || (MySQLErr.Number == 1205))
 				{
-					System.Threading.Thread.Sleep(100);
+					Thread.Sleep(100);
 					goto Restart;
 				}
 				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
@@ -717,7 +626,7 @@ WHERE   DisabledByClient                                            = 0
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
 ", GetClientCode().ToString());
 
-				MySelCmd.CommandText += FormatPriceIDForQuery(PriceID);
+				MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceID);
 
 
 				if (NotAMPCodesArr.Count > 0)
@@ -788,7 +697,7 @@ WHERE   p.fullcode= m.fullcode
         and p.junk= m.junk
 ";
 				}
-				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText +=
@@ -810,7 +719,7 @@ DROP temporary table IF EXISTS mincosts;
 				}
 				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
 				{
-					System.Threading.Thread.Sleep(100);
+					Thread.Sleep(100);
 					goto Restart;
 				}
 				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
@@ -922,7 +831,7 @@ WHERE   DisabledByClient                                            = 0
 				if (NewEar)
 					MySelCmd.CommandText += " and ampc.id is null";
 
-				MySelCmd.CommandText += FormatPriceIDForQuery(PriceId);
+				MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceId);
 
 				if (OriginalName != null)
 				{
@@ -985,7 +894,7 @@ WHERE   p.fullcode= m.fullcode
         and p.junk= m.junk
 ";
 				}
-				MySelCmd.CommandText += GetLimitString(SelStart, Limit);
+				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText +=
@@ -1008,7 +917,7 @@ DROP temporary table IF EXISTS mincosts;
 				}
 				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
 				{
-					System.Threading.Thread.Sleep(100);
+					Thread.Sleep(100);
 					goto Restart;
 				}
 				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
@@ -1031,7 +940,7 @@ DROP temporary table IF EXISTS mincosts;
 			return MyDS;
 		}
 
-		[WebMethod]
+		[WebMethod()]
 		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2, bool[] Junk)
 		{
 			return AMPWebService.PostOrder.PostOrderMethod(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk, GetClientCode(), UserName);
@@ -1077,7 +986,7 @@ WHERE   DisabledByClient                                            = 0
 ";
 
 
-			e.DataAdapter.SelectCommand.CommandText += StringArrayToQuery(((FirmNameArgs)e).FirmNames, "ClientsData.ShortName");
+			e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(((FirmNameArgs)e).FirmNames, "ClientsData.ShortName");
 
 			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
@@ -1087,10 +996,10 @@ WHERE   DisabledByClient                                            = 0
 			return data;
 		}
 
-		[WebMethod]
+		[WebMethod()]
 		public DataSet GetPriceCodeByName(string[] firmName)
 		{
-			return MethodTemplate.ExecuteMethod(new FirmNameArgs(firmName), new ExecuteMethodDelegate(this.InnerGetPriceCodeByName), MyCn);
+			return MethodTemplate.ExecuteMethod(new FirmNameArgs(firmName), InnerGetPriceCodeByName, MyCn);
 		}
 
 		private DataSet InnerGetPrices(ExecuteArgs e)
@@ -1233,12 +1142,12 @@ WHERE   DisabledByClient                                            = 0
 			if (args.NewEar)
 				e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
 			foreach (string fieldName in FiltedField.Keys)
-				e.DataAdapter.SelectCommand.CommandText += StringArrayToQuery(FiltedField[fieldName], fieldName);
+				e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
 
 			if (!args.OnlyLeader)
 			{
-				e.DataAdapter.SelectCommand.CommandText += FormatOrderBlock(args.SortField, args.SortDirection);
-				e.DataAdapter.SelectCommand.CommandText += GetLimitString(args.Offset, args.Count);
+				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(args.SortField, args.SortDirection);
+				e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(args.Offset, args.Count);
 			}
 			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
@@ -1247,6 +1156,7 @@ WHERE   DisabledByClient                                            = 0
 
 			if (args.OnlyLeader)
 			{
+				
 				DataTable resultTable = data.Tables[0].Clone();
 				DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
 				foreach (DataRow row in prepCodeTable.Rows)
@@ -1272,7 +1182,7 @@ WHERE   DisabledByClient                                            = 0
 
 				if ((args.SortField != null) && (args.SortField.Length > 0))
 				{
-					resultTable.DefaultView.Sort = FormatOrderBlock(args.SortField, args.SortDirection).Substring(10);
+					resultTable.DefaultView.Sort = Utils.FormatOrderBlock(args.SortField, args.SortDirection).Substring(10);
 					resultTable = resultTable.DefaultView.ToTable();
 				}
 				data.Tables.Remove(data.Tables[0]);
@@ -1314,10 +1224,65 @@ WHERE   DisabledByClient                                            = 0
 		/// Примечание: следует помнить что первым значением является 0 а не 1.
 		/// </param>
 		/// <returns>DataSet содержащий позиции прайс листов.</returns>
-		[WebMethod]
+		[WebMethod()]
 		public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField, string[] SortOrder, int Limit, int SelStart)
 		{
-			return MethodTemplate.ExecuteMethod(new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart), new ExecuteMethodDelegate(this.InnerGetPrices), MyCn);
+			return MethodTemplate.ExecuteMethod(new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart), InnerGetPrices, MyCn);
+		}
+		
+		/// <summary>
+		/// Получает список заказов для клиента AMP.
+		/// </summary>
+		/// <param name="OrderID">Идентификатор заказа
+		/// Допустимые значения: 
+		///		1. "0" - все новые заказы (*)
+		///		2. "Номер заказа"
+		///		3. "!" + "Номер заказа" - все заказы у которых номер больше заданого.
+		/// </param>
+		/// <param name="PriceCode">
+		/// Номер прайса по которому сделан заказ.
+		/// Прмечание: значение равное или меньше 0 игнорируются
+		/// </param>
+		/// <returns>Список заказов</returns>
+		[WebMethod()]
+		public DataSet GetOrders(string OrderID, int PriceCode)
+		{
+			return MethodTemplate.ExecuteMethod(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, MyCn);
+		}
+
+		private DataSet InnerGetOrders(ExecuteArgs e)
+		{
+			GetOrdersArgs args = e as GetOrdersArgs;
+			
+			args.DataAdapter.SelectCommand.CommandText +=
+@"
+SELECT oh.ClientCode,
+	oh.PriceDate,
+	oh.WriteTime as OrderDate,
+	oh.ClientAddition as Comment,
+	ol.Code as ItemID,
+	ol.Cost,
+	ol.Quantity
+FROM Orders.OrdersHead oh
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
+WHERE oh.Processed = 1
+	and oh.ClientCode = 1864
+";
+			if (args.OrderID != "0")
+			{
+				if (args.OrderID.IndexOf("!") < 0)
+					args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID = " + args.OrderID;
+				else
+					args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID " + args.OrderID.Replace("!", " > ");
+			}
+			if (args.PriceCode > 0)
+				args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode.ToString();
+				
+			DataSet data = new DataSet();
+			
+			args.DataAdapter.Fill(data);
+			
+			return data;	
 		}
 
 		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
@@ -1356,7 +1321,7 @@ WHERE   DisabledByClient                                            = 0
 #if DEBUG
 			UserName = "michail";
 #else
-			UserName = System.Web.HttpContext.Current.User.Identity.Name;
+			UserName = HttpContext.Current.User.Identity.Name;
 			if (UserName.Substring(0, 7) == "ANALIT\\")
 			{
 				UserName = UserName.Substring(7);
@@ -1378,107 +1343,11 @@ WHERE   DisabledByClient                                            = 0
 
 			return 0;
 		}
-		
-		/// <summary>
-		/// Форматирует массив идентификаторов прайс листа для применения в запросе.
-		/// Пример: массив {1, 2} приводится к виду " and PricesData.PriceCode in (1, 2) "
-		/// </summary>
-		/// <param name="priceID">массив идентификаторов</param>
-		/// <returns>отформатированная строка</returns>
-		private string FormatPriceIDForQuery(params uint[] priceID)
-		{ 
-			string result = String.Empty;
-			if ((priceID != null) && (priceID.Length > 0))
-			{ 
-				string ids = String.Empty; 
-				foreach (uint id in priceID)
-					ids += Convert.ToString(id) + " , ";
 
-				ids = ids.Remove(ids.Length - 3);
-				result = String.Format(" and PricesData.PriceCode in ({0}) ", ids);
-			}
-			return result;
-		}
-
-		/// <summary>
-		/// Преобразовывает массив строк для использования в запросе.
-		/// Также происходит замена символа "*" на "%".
-		/// Пример: массив {"hello", "w*rld"} разворачивается в строку 
-		/// "and ( someField like 'hello'  or  someField like 'w%rld')"
-		/// </summary>
-		/// <param name="array">Аргументы поиска</param>
-		/// <param name="fieldName">Имя поля по которому происходит поиск</param>
-		/// <returns>Отформатированная строка</returns>
-		private string StringArrayToQuery(IList<string> array, string fieldName)
-		{		
-			StringBuilder builder = new StringBuilder();
-			if ((array != null) && (array.Count > 0))
-			{
-				builder.Append(" and (");
-				foreach (string item in array)
-				{
-					if (item.IndexOf("*") > -1)
-						builder.Append(fieldName + " like '" + item.Replace("*", "%") + "'");
-					else
-						builder.Append(fieldName + " = '" + item + "'");
-					builder.Append(" or "); 
-				}
-				builder.Remove(builder.Length - 4, 4);
-				builder.Append(") ");
-			}
-			return builder.ToString();
-		}
-		/// <summary>
-		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.
-		/// Пример: массив orderFields = {"field1", "field2"}, orderDirection = {"ASC"}
-		/// преобразуется к виду " ORDER BY field1 ASC, field2 ".
-		/// </summary>
-		/// <param name="orderFields">Список полей из которых формируется блок сортировки.</param>
-		/// <param name="orderDirection">Список направлений сортировки для orderFields.
-		/// Допустимые значения: null, "ASC", "DESC".
-		/// Примечание: длинна списка orderDirection может быть меньше или равна длинне orderFields.
-		/// </param>
-		/// <returns></returns>
-		private string FormatOrderBlock(IList<string> orderFields, IList<string> orderDirection)
-		{
-			StringBuilder builder = new StringBuilder();
-			if ((orderFields != null) && (orderFields.Count > 0))
-			{
-				builder.Append(" ORDER BY ");
-				for (int i = 0; i < orderFields.Count; i++)
-				{
-					string direction = String.Empty;
-					if ((orderDirection != null) && (i < orderDirection.Count))
-						direction = orderDirection[i];
-					builder.Append(orderFields[i] + " " + direction + ", ");
-				}
-				builder.Remove(builder.Length - 2, 2);
-			}
-			return builder.ToString();
-		}
-
-		private void LogQuery(Int32 RowCount, string FunctionName, System.DateTime StartTime)
+		private void LogQuery(Int32 RowCount, string FunctionName, DateTime StartTime)
 		{
 			//MySelCmd.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " + " values(now(), '" + System.Web.HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + RowCount + ", " + System.Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ")";
 			//MySelCmd.ExecuteNonQuery();
 		}
-		/// <summary>
-		/// Формирует блок LIMIT для SQL запроса. Пример: "LIMIT 1 20"
-		/// </summary>
-		/// <param name="offset">Начиная с какого элемента</param>
-		/// <param name="count">Количество элементов</param>
-		/// <returns></returns>
-		private string GetLimitString(int offset, int count)
-		{
-			string result = String.Empty;
-			if (offset >= 0)
-			{
-				result = " limit " + offset;
-				if (count > 0)
-					result += "," + count;
-			}
-
-			return result + ";";
-		}		
 	}
 }
