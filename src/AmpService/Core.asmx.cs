@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Web.UI.WebControls;
 using Microsoft.Practices.EnterpriseLibrary.Logging;
+using System.Collections;
 
 namespace AMPWebService
 {
@@ -23,8 +24,8 @@ namespace AMPWebService
 			set { _firmNames = value; }
 		}
 
-		public FirmNameArgs(MySqlConnection Connection, string[] firmNames)
-			: base(Connection)
+		public FirmNameArgs(string[] firmNames)
+			: base()
 		{
 			_firmNames = firmNames;
 		}
@@ -35,7 +36,7 @@ namespace AMPWebService
 		private int			_count;
 		private int			_offset;
 		private bool		_onlyLeader;
-		private bool		_newYear;
+		private bool		_newEar;
 		private string[]	_rangeField;
 		private string[]	_rangeValue;
 		private string[]	_sortField;
@@ -59,10 +60,10 @@ namespace AMPWebService
 			set { _onlyLeader = value; }
 		}
 
-		public bool NewYear
+		public bool NewEar
 		{
-			get { return _newYear; }
-			set { _newYear = value; }
+			get { return _newEar; }
+			set { _newEar = value; }
 		}
 
 		public string[] RangeField
@@ -89,13 +90,13 @@ namespace AMPWebService
 			set { _sortDirection = value; }
 		}
 
-		public GetPricesArgs(bool onlyLeader, bool newYear, string[] rangeField, string[] rangeValue, string[] sortField, string[] sortDirection, int count, int offset, MySqlConnection connection)
-			: base(connection)
+		public GetPricesArgs(bool onlyLeader, bool newEar, string[] rangeField, string[] rangeValue, string[] sortField, string[] sortDirection, int count, int offset)
+			: base()
 		{
 			_count = count;
 			_offset = offset;
 			_onlyLeader = onlyLeader;
-			_newYear = newYear;
+			_newEar = newEar;
 			_rangeField = rangeField;
 			_rangeValue = rangeValue;
 			_sortField = sortField;
@@ -713,7 +714,7 @@ WHERE   DisabledByClient                                            = 0
         and pricesdata.pricetype                                   <> 1 
         and pricesregionaldata.enabled                              = 1 
         and fr.firmcode                                             = pricesdata.pricecode 
-        and c.firmcode                                              = if(clientsdata.OldCode= 0, pricesdata.pricecode, intersection.costcode) 
+        and c.firmcode                                              = intersection.costcode
         and c.synonymcode                                           = s.synonymcode 
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
 ", GetClientCode().ToString());
@@ -916,7 +917,7 @@ WHERE   DisabledByClient                                            = 0
         and pricesdata.pricetype                                   <> 1 
         and pricesregionaldata.enabled                              = 1 
         and fr.firmcode                                             = pricesdata.pricecode 
-        and c.firmcode                                              = if(clientsdata.OldCode= 0, pricesdata.pricecode, intersection.costcode) 
+        and c.firmcode                                              = intersection.costcode
         and c.synonymcode                                           = s.synonymcode 
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
 ", GetClientCode().ToString());
@@ -1041,13 +1042,8 @@ DROP temporary table IF EXISTS mincosts;
 
 		private DataSet InnerGetPriceCodeByName(ExecuteArgs e)
 		{
-			MySqlDataAdapter dataAdapter = new MySqlDataAdapter();
-			DataSet data = new DataSet();
-			dataAdapter.SelectCommand = new MySqlCommand();
-			dataAdapter.SelectCommand.Connection = e.Connection;
-			dataAdapter.SelectCommand.Transaction = e.Transaction;
 
-			dataAdapter.SelectCommand.CommandText =
+			e.DataAdapter.SelectCommand.CommandText =
 @"
 SELECT  PricesData.PriceCode as PriceCode, 
 		PricesData.PriceName as PriceName,
@@ -1082,14 +1078,14 @@ WHERE   DisabledByClient                                            = 0
         and RegionalData.FirmCode = ClientsData.FirmCode
         and RegionalData.RegionCode = Intersection.RegionCode
 ";
-			
-			
-			dataAdapter.SelectCommand.CommandText += StringArrayToQuery(((FirmNameArgs)e).FirmNames, "ClientsData.ShortName");
 
-			Logger.Write(dataAdapter.SelectCommand.CommandText);
 
-			dataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-			dataAdapter.Fill(data, "PriceList");
+			e.DataAdapter.SelectCommand.CommandText += StringArrayToQuery(((FirmNameArgs)e).FirmNames, "ClientsData.ShortName");
+
+			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+
+			DataSet data = new DataSet();
+			e.DataAdapter.Fill(data, "PriceList");
 
 			return data;
 		}
@@ -1097,36 +1093,234 @@ WHERE   DisabledByClient                                            = 0
 		[WebMethod]
 		public DataSet GetPriceCodeByName(string[] firmName)
 		{
-			return MethodTemplate.ExecuteMethod("GetPriceCodeByName", new FirmNameArgs(MyCn, firmName), new ExecuteMethodDelegate(this.InnerGetPriceCodeByName));
+			return MethodTemplate.ExecuteMethod(new FirmNameArgs(firmName), new ExecuteMethodDelegate(this.InnerGetPriceCodeByName), MyCn);
 		}
 
 		private DataSet InnerGetPrices(ExecuteArgs e)
 		{
-			List<string> validRequestFields = new List<string>();
+			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
+			Dictionary<string, string> validRequestFields = new Dictionary<string, string>();
+			validRequestFields.Add("prepcode", "c.fullcode");
+			validRequestFields.Add("pricecode", "pricesdata.pricecode");
+			validRequestFields.Add("itemid", "ampc.code");
+			validRequestFields.Add("originalname", "s.synonym");	
+
 			List<string> validSortFields = new List<string>();
-			//валидация входящих параметров
+			validSortFields.Add("orderid");
+			validSortFields.Add("salercode");
+			validSortFields.Add("creatercode");
+			validSortFields.Add("itemid");
+			validSortFields.Add("originalname");
+			validSortFields.Add("originalcr");
+			validSortFields.Add("unit");
+			validSortFields.Add("volume");
+			validSortFields.Add("quantity");
+			validSortFields.Add("note");
+			validSortFields.Add("period");
+			validSortFields.Add("doc");
+			validSortFields.Add("junk");
+			validSortFields.Add("upcost");
+			validSortFields.Add("cost");
+			validSortFields.Add("pricecode");
+			validSortFields.Add("salername");
+			validSortFields.Add("pricedate");
+			validSortFields.Add("prepcode");
+			validSortFields.Add("ordercode1");
+			validSortFields.Add("ordercode2");
+
 			GetPricesArgs args = e as GetPricesArgs;
-			if (args.RangeField.Length != args.RangeValue.Length)
-				new Exception();
+			
+			//проверка входящих параметров
+			if ((args.RangeValue ==null) || (args.RangeField == null) 
+				|| (args.RangeField.Length != args.RangeValue.Length))
+				throw new Exception();
+			//TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
+			//то будет Exception на этапе трансляции
+			//проверка имен полей для фильтрации
 			foreach (string fieldName in args.RangeField)
-				if (!validRequestFields.Contains(fieldName))
-					new Exception();
-			foreach (string fieldName in args.SortField)
-				if (!validSortFields.Contains(fieldName))
-					new Exception();
+				if (!validRequestFields.ContainsKey(fieldName.ToLower()))
+					throw new Exception();
+			//проверка имен полей для сортировки
+			if (args.SortField != null)
+			{
+				foreach (string fieldName in args.SortField)
+					if (!validSortFields.Contains(fieldName.ToLower()))
+						throw new Exception();
+			}
+			//проверка направлений сортировки
+			if (args.SortDirection != null)
+			{
+				foreach (string direction in args.SortDirection)
+					if (!((String.Compare(direction, "Asc", true) == 0) || (String.Compare(direction, "Desc", true) == 0)))
+						throw new Exception();
+			}
 
-			foreach (string direction in args.SortDirection)
-				if (!((String.Compare(direction, "Asc") == 0) || (String.Compare(direction, "Desc") == 0)))
-					new Exception();
+			//словарь хранящий имена фильтруемых полей и значения фильтрации
+			//           |            |
+			//		  имя поля	список значений для него
+			Dictionary<string, List<string>> FiltedField = new Dictionary<string, List<string>>();
+			//разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
+			//транслируются во внутренние
+			for (int i = 0; i < args.RangeField.Length; i++)
+			{
+				//преобразовываем клиентские названия полей во внутренние
+				string innerFieldName = validRequestFields[args.RangeField[i].ToLower()];
+				//если в словаре не такого поля 
+				if (!FiltedField.ContainsKey(innerFieldName))
+					//то добавляем его и создаем массив для хранения его значений
+					FiltedField.Add(innerFieldName, new List<string>());
+				//добавляем значение для фильтрации
+				FiltedField[innerFieldName].Add(args.RangeValue[i]);
+			}
 
-			return null;
 
+			e.DataAdapter.SelectCommand.CommandText +=
+@"
+SELECT  c.id OrderID,
+        ifnull(c.Code, '') SalerCode, 
+        ifnull(c.CodeCr, '') CreaterCode, 
+        ifnull(ampc.code, '') ItemID, 
+        s.synonym OriginalName, 
+        ifnull(scr.synonym, '') OriginalCr, 
+        ifnull(c.Unit, '') Unit, 
+        ifnull(c.Volume, '') Volume, 
+        ifnull(c.Quantity, '') Quantity, 
+        ifnull(c.Note, '') Note, 
+        ifnull(c.Period, '') Period, 
+        ifnull(c.Doc, '') Doc, 
+        c.Junk> 0 Junk, 
+        intersection.PublicCostCorr As UpCost,
+        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+        pricesdata.pricecode PriceCode,
+        ClientsData.ShortName SalerName,
+        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+        c.fullcode PrepCode,
+        c.synonymcode OrderCode1,
+        c.synonymfirmcrcode OrderCode2
+FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
+LEFT JOIN farm.core0 ampc
+        ON ampc.fullcode   = c.fullcode
+        and ampc.codefirmcr= c.codefirmcr
+        and ampc.firmcode  = 1864
+LEFT JOIN farm.synonymfirmcr scr
+        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
+        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+WHERE   DisabledByClient                                            = 0 
+        and Disabledbyfirm                                          = 0 
+        and DisabledByAgency                                        = 0 
+        and intersection.clientcode                                 = ?ClientCode  
+        and retclientsset.clientcode                                = intersection.clientcode 
+        and pricesdata.pricecode                                    = intersection.pricecode 
+        and clientsdata.firmcode                                    = pricesdata.firmcode 
+        and clientsdata.firmstatus                                  = 1 
+        and clientsdata.billingstatus                               = 1 
+        and clientsdata.firmtype                                    = 0 
+        and to_days(now())-to_days(datecurprice)                    < maxold 
+        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+        and pricesregionaldata.regioncode                           = intersection.regioncode 
+        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+        and AClientsData.firmcode                                   = intersection.clientcode 
+        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+        and pricesdata.agencyenabled                                = 1 
+        and pricesdata.enabled                                      = 1 
+        and invisibleonclient                                       = 0 
+        and pricesdata.pricetype                                   <> 1 
+        and pricesregionaldata.enabled                              = 1 
+        and fr.firmcode                                             = pricesdata.pricecode 
+        and c.firmcode                                              = intersection.costcode 
+        and c.synonymcode                                           = s.synonymcode 
+        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
+";
+			if (args.NewEar)
+				e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
+			foreach (string fieldName in FiltedField.Keys)
+				e.DataAdapter.SelectCommand.CommandText += StringArrayToQuery(FiltedField[fieldName], fieldName);
+
+			if (!args.OnlyLeader)
+			{
+				e.DataAdapter.SelectCommand.CommandText += FormatOrderBlock(args.SortField, args.SortDirection);
+				e.DataAdapter.SelectCommand.CommandText += GetLimitString(args.Offset, args.Count);
+			}
+			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+
+			DataSet data = new DataSet();
+			e.DataAdapter.Fill(data, "PriceList");
+
+			if (args.OnlyLeader)
+			{
+				DataTable resultTable = data.Tables[0].Clone();
+				DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
+				foreach (DataRow row in prepCodeTable.Rows)
+				{
+					DataRow[] orderedRows = data.Tables[0].Select(String.Format("PrepCode = {0}", row["PrepCode"]), "Cost ASC");
+					resultTable.ImportRow(orderedRows[0]);
+				}
+
+				if (args.Offset > -1)
+				{
+					DataTable tempTable = resultTable;
+					resultTable = data.Tables[0].Clone();
+
+					int count;
+					if ((args.Count > tempTable.Rows.Count) || (args.Count < args.Offset))
+						count = tempTable.Rows.Count;
+					else
+						count = args.Count;
+
+					for (int i = args.Offset; i < count; i++)
+						resultTable.ImportRow(tempTable.Rows[i]);
+				}
+
+				if ((args.SortField != null) && (args.SortField.Length > 0))
+				{
+					resultTable.DefaultView.Sort = FormatOrderBlock(args.SortField, args.SortDirection).Substring(10);
+					resultTable = resultTable.DefaultView.ToTable();
+				}
+				data.Tables.Remove(data.Tables[0]);
+				data.Tables.Add(resultTable);
+			}
+
+			return data;
 		}
 
+		/// <summary>
+		/// Выбирает список список позиций прайс листов, основываясь на полях 
+		/// фильтрации из RangeField и их значениях из RangeValue.
+		/// </summary>
+		/// <param name="OnlyLeader">Выбирать только позиции имеющие минимальную цену для заданного поставщика</param>
+		/// <param name="NewEar"></param>
+		/// <param name="RangeField">Список полей для которых осуществляется фильтрация. 
+		/// Допустимые значения: PrepCode Int, PriceCode Int, ItemID String, OriginalName String или null
+		/// </param>
+		/// <param name="RangeValue">Список значений ко которым происходит фильтрация.
+		/// Допустимые значения: Int, String - строки могут содержать метасимвол "%".
+		/// Примечание: количество значений должно совпадать с количеством полей.
+		/// </param>
+		/// <param name="SortField">Поля по которым может осуществляться сортировка. 
+		/// Допустимые значения: null, OrderID, SalerCode, CreaterCode, ItemID, OriginalName, 
+		/// OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, Junk, UpCost, Cost, PriceCode, 
+		/// SalerName, PriceDate, PrepCode, OrderCode1, OrderCode2.
+		/// </param>
+		/// <param name="SortOrder">Порядок сортировки для полей из SortField.
+		/// Допустимые значения: "ASC" - прямой порядок сортировки , "DESC" - обратный порядок сортовки.
+		/// Примечание: Количество значений может совпадать или быть меньще количества полей для сортировки.
+		/// Если количество значений меньше то для оставщихся полей бедут применен прямой порядок сортировки (ASC). 
+		/// Пример: SortField = {"OrderID", "Junk" ,"Cost"}, SortOrder = {"DESC"} - в этом случае выборка будет 
+		/// отсортированна так же как и в случае если бы  SortOrder = {"DESC", "ASC", "ASC"}
+		/// </param>
+		/// <param name="Limit">Количество записей в выборке. 
+		/// Примечание: если Limit меньше SelStart то тогда выбираются все записи начиная с SelStart.
+		/// </param>
+		/// <param name="SelStart">Значение с которого начинается выбор. 
+		/// Примечание: следует помнить что первым значением является 0 а не 1.
+		/// </param>
+		/// <returns>DataSet содержащий позиции прайс листов.</returns>
 		[WebMethod]
-		public DataSet GetPrices(bool OnlyLeader, bool NewYear, string[] RangeField, string[] RangeValue, string[] SortField, string[] SortOrder, int Limit, int SelStart)
+		public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField, string[] SortOrder, int Limit, int SelStart)
 		{
-			return MethodTemplate.ExecuteMethod("GetPrices", new GetPricesArgs(OnlyLeader, NewYear, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart, MyCn), new ExecuteMethodDelegate(this.InnerGetPrices));
+			return MethodTemplate.ExecuteMethod(new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart), new ExecuteMethodDelegate(this.InnerGetPrices), MyCn);
 		}
 
 		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
@@ -1218,10 +1412,10 @@ WHERE   DisabledByClient                                            = 0
 		/// <param name="array">Аргументы поиска</param>
 		/// <param name="fieldName">Имя поля по которому происходит поиск</param>
 		/// <returns>Отформатированная строка</returns>
-		private string StringArrayToQuery(string[] array, string fieldName)
-		{
+		private string StringArrayToQuery(IList<string> array, string fieldName)
+		{		
 			StringBuilder builder = new StringBuilder();
-			if ((array != null) && (array.Length > 0))
+			if ((array != null) && (array.Count > 0))
 			{
 				builder.Append(" and (");
 				foreach (string item in array)
@@ -1234,6 +1428,34 @@ WHERE   DisabledByClient                                            = 0
 				}
 				builder.Remove(builder.Length - 4, 4);
 				builder.Append(") ");
+			}
+			return builder.ToString();
+		}
+		/// <summary>
+		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.
+		/// Пример: массив orderFields = {"field1", "field2"}, orderDirection = {"ASC"}
+		/// преобразуется к виду " ORDER BY field1 ASC, field2 ".
+		/// </summary>
+		/// <param name="orderFields">Список полей из которых формируется блок сортировки.</param>
+		/// <param name="orderDirection">Список направлений сортировки для orderFields.
+		/// Допустимые значения: null, "ASC", "DESC".
+		/// Примечание: длинна списка orderDirection может быть меньше или равна длинне orderFields.
+		/// </param>
+		/// <returns></returns>
+		private string FormatOrderBlock(IList<string> orderFields, IList<string> orderDirection)
+		{
+			StringBuilder builder = new StringBuilder();
+			if ((orderFields != null) && (orderFields.Count > 0))
+			{
+				builder.Append(" ORDER BY ");
+				for (int i = 0; i < orderFields.Count; i++)
+				{
+					string direction = String.Empty;
+					if ((orderDirection != null) && (i < orderDirection.Count))
+						direction = orderDirection[i];
+					builder.Append(orderFields[i] + " " + direction + ", ");
+				}
+				builder.Remove(builder.Length - 2, 2);
 			}
 			return builder.ToString();
 		}
