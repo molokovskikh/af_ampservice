@@ -206,7 +206,7 @@ and c.ID in " + CoreIDString;
                                 MySelCmd.Parameters.Add("RowCount", drOrderList.Length);
                                 MySelCmd.Parameters.Add("ClientAddition", drOrderList[0]["Message"]);
                                 drOH["OrderID"] = Convert.ToUInt64(MySelCmd.ExecuteScalar());
-                                MySelCmd.CommandText = "insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
+								MySelCmd.CommandText = "insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost, Processed) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost, 1);";
                                 MySelCmd.Parameters.Clear();
                                 MySelCmd.Parameters.Add("OrderID", MySqlDbType.Int64);
                                 MySelCmd.Parameters.Add("FullCode", MySqlDbType.Int64);
