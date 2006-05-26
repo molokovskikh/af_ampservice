@@ -159,7 +159,7 @@ namespace AMPWebService
 				MySelCmd.Transaction = MyTrans;
 				MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; ";
 				MySelCmd.CommandText += "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" + " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" + " left join farm.core0 c on c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" + " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" + " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" + GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" + " and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
-				if (!(PriceID == null))
+				if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
 				{
 					Inc = 0;
 					MySelCmd.CommandText += " and (";
@@ -213,7 +213,7 @@ namespace AMPWebService
 				{
 					MySelCmd.CommandText += " and ampc.id is null";
 				}
-				if (OfferOnly | PriceID.Length > 0)
+				if (OfferOnly || PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
 				{
 					MySelCmd.CommandText += " and c.id is not null";
 				}
@@ -385,7 +385,7 @@ WHERE   DisabledByClient                                            = 0
         and c.synonymcode = s.synonymcode 
         and s.firmcode    = ifnull(parentsynonym, pricesdata.pricecode) 
 ", FullCodesString, GetClientCode().ToString());
-				if (!(PriceID == null))
+				if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
 				{
 					inc = 0;
 					MySelCmd.CommandText += " and (";
