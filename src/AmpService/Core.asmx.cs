@@ -1263,10 +1263,11 @@ SELECT oh.ClientCode,
 	ol.Code as ItemID,
 	ol.Cost,
 	ol.Quantity
-FROM Orders.OrdersHead oh
-	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
-WHERE oh.Processed = 1
-	and oh.ClientCode = 1864
+FROM UserSettings.PricesData pd
+  INNER JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
+  INNER JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
+WHERE oh.Processed = 0 and
+	pd.FirmCode = 62
 ";
 			if (args.OrderID != "0")
 			{
