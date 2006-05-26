@@ -18,7 +18,7 @@ namespace AMPWebService
 		public static string FormatPriceIDForQuery(params uint[] priceID)
 		{
 			string result = String.Empty;
-			if ((priceID != null) && (priceID.Length > 0))
+			if (priceID != null && !(priceID.Length == 1 && priceID[0] == 0))
 			{
 				string ids = String.Empty;
 				foreach (uint id in priceID)
