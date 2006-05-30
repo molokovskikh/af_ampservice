@@ -26,10 +26,10 @@ namespace AMPWebService
 	
 	internal class GetOrdersArgs : ExecuteArgs
 	{
-		private string _orderID;
+		private string[] _orderID;
 		private int _priceCode;
 
-		public string OrderID
+		public string[] OrderID
 		{
 			get { return _orderID; }
 			set { _orderID = value; }
@@ -41,7 +41,7 @@ namespace AMPWebService
 			set { _priceCode = value; }
 		}
 		
-		public GetOrdersArgs(string orderID, int priceCode)
+		public GetOrdersArgs(string[] orderID, int priceCode)
 		{
 			_orderID = orderID;
 			_priceCode = priceCode;
