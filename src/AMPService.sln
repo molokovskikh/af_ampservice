@@ -1,48 +1,65 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "http://localhost:8080/AMPService/", "http://localhost:8080/AMPService", "{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "http://localhost/AMPService/", "http://localhost/AMPService", "{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}"
 	ProjectSection(WebsiteProperties) = preProject
 		SccProjectName = ""$/Inforoom/NET2.0/AMPService/AMPService_1", EEFAAAAA"
 		SccAuxPath = ""
 		SccLocalPath = "."
 		SccProvider = "MSSCCI:Microsoft Visual SourceSafe"
-		Debug.AspNetCompiler.VirtualPath = "/AMPService"
-		Debug.AspNetCompiler.PhysicalPath = "c:\inetpub\wwwroot\AMPService\"
-		Debug.AspNetCompiler.TargetPath = "Y:\Publish\AMPService\"
-		Debug.AspNetCompiler.Updateable = "false"
+		Debug.AspNetCompiler.VirtualPath = "/Bin"
+		Debug.AspNetCompiler.PhysicalPath = "AMPService\"
+		Debug.AspNetCompiler.TargetPath = "AMPService\Bin\"
+		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/AMPService"
-		Release.AspNetCompiler.PhysicalPath = "c:\inetpub\wwwroot\AMPService\"
-		Release.AspNetCompiler.TargetPath = "Y:\Publish\AMPService\"
-		Release.AspNetCompiler.Updateable = "false"
+		Release.AspNetCompiler.VirtualPath = "/Bin"
+		Release.AspNetCompiler.PhysicalPath = "AMPService\"
+		Release.AspNetCompiler.TargetPath = "AMPService\Bin\"
+		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "true"
+		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		SlnRelativePath = "c:\inetpub\wwwroot\AMPService\"
 	EndProjectSection
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "AMPServiceTester", "..\..\AMPServiceTester\AMPServiceTester.vbproj", "{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}"
+EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 2
+		SccNumberOfProjects = 1
 		SccLocalPath0 = .
-		SccWebProject1 = true
-		SccProjectUniqueName1 = http://localhost:8080/AMPService
-		SccProjectName1 = \u0022$/Inforoom/NET2.0/AMPService/AMPService_1\u0022,\u0020EEFAAAAA
-		SccLocalPath1 = c:\\inetpub\\wwwroot\\AMPService
-		SccProjectEnlistmentChoice1 = 2
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Release|.NET = Release|.NET
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|.NET.ActiveCfg = Debug|.NET
 		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|.NET.Build.0 = Debug|.NET
+		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|Any CPU.ActiveCfg = Debug|.NET
+		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|Mixed Platforms.ActiveCfg = Debug|.NET
+		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|Mixed Platforms.Build.0 = Debug|.NET
 		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|.NET.ActiveCfg = Debug|.NET
 		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|.NET.Build.0 = Debug|.NET
+		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|Any CPU.ActiveCfg = Debug|.NET
+		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|Mixed Platforms.ActiveCfg = Debug|.NET
+		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|Mixed Platforms.Build.0 = Debug|.NET
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|.NET.ActiveCfg = Release|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
