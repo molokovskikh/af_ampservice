@@ -120,4 +120,61 @@ namespace AMPWebService
 			_sortDirection = sortDirection;
 		}
 	}
+
+	internal class PostOrderArgs : ExecuteArgs
+	{
+		private int[] _quantities;
+		private string[] _messages;
+		private int[] _synonymCodes;
+		private int[] _synonymFirmCrCodes;
+		private bool[] _junks;
+		private int[] _coreIDs;
+
+		public int[] CoreIDs
+		{
+			get { return _coreIDs; }
+			set { _coreIDs = value; }
+		}
+		
+		public int[] Quantities
+		{
+			get { return _quantities; }
+			set { _quantities = value; }
+		}
+		
+		public string[] Messages
+		{
+			get { return _messages; }
+			set { _messages = value; }
+		}
+
+		public int[] SynonymCodes
+		{
+			get { return _synonymCodes; }
+			set { _synonymCodes = value; }
+		}
+
+		public int[] SynonymFirmCrCodes
+		{
+			get { return _synonymFirmCrCodes; }
+			set { _synonymFirmCrCodes = value; }
+		}
+
+		public bool[] Junks
+		{
+			get { return _junks; }
+			set { _junks = value; }
+		}
+
+		public PostOrderArgs(int[] coreIDs, int[] quantities, string[] messages, int[] synonymCodes, int[] synonymFirmCrCodes, bool[] junks)
+		{
+			_coreIDs = coreIDs;
+			_quantities = quantities;
+			_messages = messages;
+			_synonymCodes = synonymCodes;
+			_synonymFirmCrCodes = synonymFirmCrCodes;
+			_junks = junks;
+		}
+	}
+
 }
