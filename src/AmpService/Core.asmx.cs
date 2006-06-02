@@ -964,7 +964,7 @@ DROP temporary table IF EXISTS mincosts;
 		[WebMethod()]
 		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2, bool[] Junk)
 		{
-			return MethodTemplate.ExecuteMethod(new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, MyCn);
+			return MethodTemplate.ExecuteMethod(new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, MyCn) as DataSet;
 		}
 
 		public static DataSet InnerPostOrder(ExecuteArgs e)
@@ -1293,7 +1293,7 @@ WHERE   DisabledByClient                                            = 0
 		[WebMethod()]
 		public DataSet GetPriceCodeByName(string[] firmName)
 		{
-			return MethodTemplate.ExecuteMethod(new FirmNameArgs(firmName), InnerGetPriceCodeByName, MyCn);
+			return MethodTemplate.ExecuteMethod(new FirmNameArgs(firmName), InnerGetPriceCodeByName) as DataSet;
 		}
 
 		private DataSet InnerGetPrices(ExecuteArgs e)
@@ -1531,7 +1531,7 @@ WHERE   DisabledByClient                                            = 0
 		[WebMethod()]
 		public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField, string[] SortOrder, int Limit, int SelStart)
 		{
-			return MethodTemplate.ExecuteMethod(new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart), InnerGetPrices, MyCn);
+			return MethodTemplate.ExecuteMethod(new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart), InnerGetPrices) as DataSet;
 		}
 		
 		/// <summary>
@@ -1551,7 +1551,7 @@ WHERE   DisabledByClient                                            = 0
 		[WebMethod()]
 		public DataSet GetOrders(string[] OrderID, int PriceCode)
 		{
-			return MethodTemplate.ExecuteMethod(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, MyCn);
+			return MethodTemplate.ExecuteMethod(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders) as DataSet;
 		}
 
 		private DataSet InnerGetOrders(ExecuteArgs e)
