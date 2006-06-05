@@ -15,7 +15,7 @@ public class Literals
 {
 	public static string ConnectionString
 	{
-		get { return ConfigurationManager.ConnectionStrings["DB"]; }
+		get { return Convert.ToString(ConfigurationManager.ConnectionStrings["DB"]); }
 	}
 
 }
