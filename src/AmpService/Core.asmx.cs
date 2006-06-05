@@ -1298,6 +1298,8 @@ WHERE   DisabledByClient                                            = 0
 
 		private DataSet InnerGetPrices(ExecuteArgs e)
 		{
+			UserName = "amp";
+			FunctionName = "GetPrices";
 			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
 			Dictionary<string, string> validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer());
 			validRequestFields.Add("OrderID", "c.id");
@@ -1670,8 +1672,8 @@ WHERE  pd.FirmCode = 62
 				command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount) " + " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + data.Tables[0].Rows.Count + ", " + Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ", " + CalculateUniqueFullCodeCount(data.Tables[0]) + "); ";
 			else 
 				command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " + " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + data.Tables[0].Rows.Count + ", " + Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + "); ";
-			command.CommandText = oldQuery;
 			command.ExecuteNonQuery();
+			command.CommandText = oldQuery;
 		}
 		
 		private int CalculateUniqueFullCodeCount(DataTable table)
