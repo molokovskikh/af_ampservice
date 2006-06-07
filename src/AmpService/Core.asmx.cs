@@ -414,7 +414,7 @@ WHERE   DisabledByClient                                            = 0
 				}
 				MySelCmd.CommandText += " GROUP BY 1 ";
 				if (!OnlyLeader)
-					MySelCmd.CommandText += " ORDER BY OrderID, Cost ";
+					MySelCmd.CommandText += " ORDER BY Cost ";
 
 				if (OnlyLeader)
 				{
@@ -454,7 +454,7 @@ FROM    (prices p, mincosts m)
 WHERE   p.fullcode= m.fullcode 
         and p.cost= m.mincost 
         and p.junk= m.junk
-ORDER BY OrderID, Cost
+ORDER BY Cost
 ";
 				}
 
@@ -670,7 +670,7 @@ WHERE   DisabledByClient                                            = 0
 
 				MySelCmd.CommandText += " group by 1 ";
 				if (!OnlyLeader)
-					MySelCmd.CommandText += " ORDER BY OrderID, Cost ";
+					MySelCmd.CommandText += " ORDER BY Cost ";
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText += ";";
@@ -709,7 +709,7 @@ FROM    (prices p, mincosts m)
 WHERE   p.fullcode= m.fullcode 
         and p.cost= m.mincost 
         and p.junk= m.junk
-ORDER BY OrderID, Cost
+ORDER BY Cost
 ";
 				}
 				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
@@ -871,7 +871,7 @@ WHERE   DisabledByClient                                            = 0
 				}
 				MySelCmd.CommandText += " group by 1";
 				if (!OnlyLeader)
-					MySelCmd.CommandText += " ORDER BY OrderID, Cost ";
+					MySelCmd.CommandText += " ORDER BY Cost ";
 
 				if (OnlyLeader)
 				{
@@ -911,7 +911,7 @@ FROM    (prices p, mincosts m)
 WHERE   p.fullcode= m.fullcode 
         and p.cost= m.mincost 
         and p.junk= m.junk
-ORDER BY OrderID, Cost
+ORDER BY Cost
 ";
 				}
 				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
