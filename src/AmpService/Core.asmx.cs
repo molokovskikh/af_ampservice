@@ -1573,7 +1573,8 @@ SELECT
         ol.Code           as ItemID, 
         ol.Cost, 
         ol.Quantity, 
-        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', cd.phone), '') as Addition
+        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', cd.phone), '') as Addition,
+		if(length(FirmClientCode)< 1, cd.shortname, '') as Name
 FROM    UserSettings.PricesData pd 
 INNER JOIN Orders.OrdersHead oh 
         ON pd.PriceCode = oh.PriceCode 
