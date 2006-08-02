@@ -1348,20 +1348,20 @@ WHERE   DisabledByClient                                            = 0
 			//проверка имен полей дл€ фильтрации
 			foreach (string fieldName in args.RangeField)
 				if (!validRequestFields.ContainsKey(fieldName))
-					throw new Exception();
+					throw new ArgumentException(String.Format("ѕо полю {0} не может производитьс€ фильтраци€", fieldName), fieldName);
 			//проверка имен полей дл€ сортировки
 			if (args.SortField != null)
-			{			
+			{
 				foreach (string fieldName in args.SortField)
-					if (!validSortFields.Exists( delegate(string value){ return String.Compare(fieldName, value, true) == 0; } ))
-						throw new Exception();
+					if (!validSortFields.Exists(delegate(string value) { return String.Compare(fieldName, value, true) == 0; }))
+						throw new ArgumentException(String.Format("ѕо пол€ю {0} не может производитьс€ сортировка", fieldName), fieldName);
 			}
 			//проверка направлений сортировки
 			if (args.SortDirection != null)
 			{
 				foreach (string direction in args.SortDirection)
 					if (!((String.Compare(direction, "Asc", true) == 0) || (String.Compare(direction, "Desc", true) == 0)))
-						throw new Exception();
+						throw new ArgumentException(String.Format("Ќе допустимое значение направлени€ сортровки {0}. ƒопустимые значение \"Asc\" и \"Desc\"", direction), direction);
 			}
 
 			//словарь хран€щий имена фильтруемых полей и значени€ фильтрации
