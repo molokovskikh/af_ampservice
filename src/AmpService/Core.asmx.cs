@@ -1068,7 +1068,7 @@ and c.ID in " + CoreIDString;
 				if (drOrderList.Length > 0)
 				{
 					e.DataAdapter.SelectCommand.CommandText = "insert into orders.ordershead (WriteTime, ClientCode, PriceCode, RegionCode, PriceDate, RowCount, ClientAddition, Processed)" +
-						"values(now(), ?ClientCode, ?PriceCode, ?RegionCode, ?PriceDate, ?RowCount, ?ClientAddition, 1);";
+						"values(now(), ?ClientCode, ?PriceCode, ?RegionCode, ?PriceDate, ?RowCount, ?ClientAddition, 0);";
 					e.DataAdapter.SelectCommand.CommandText += "select LAST_INSERT_ID()";
 					e.DataAdapter.SelectCommand.Parameters.Clear();
 					e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", drOH["ClientCode"]);
