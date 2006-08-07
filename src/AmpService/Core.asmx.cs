@@ -1450,6 +1450,8 @@ WHERE   DisabledByClient                                            = 0
 
 			if (!args.OnlyLeader)
 			{
+				//группируем так что бы в исходящем наборе были позиции с уникальным OrderID
+				e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
 				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(args.SortField, args.SortDirection);
 				e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(args.Offset, args.Count);
 			}
