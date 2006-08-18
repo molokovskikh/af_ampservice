@@ -348,7 +348,7 @@ SELECT  c.id OrderID,
         ifnull(c.Note, '') Note, 
         ifnull(c.Period, '') Period, 
         ifnull(c.Doc, '') Doc, 
-        c.Junk> 0 Junk, 
+        length(c.Junk) > 0 Junk, 
         intersection.PublicCostCorr As UpCost,
         round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
         pricesdata.pricecode PriceID,
@@ -592,7 +592,7 @@ SELECT  c.id OrderID,
         ifnull(c.Note, '') Note, 
         ifnull(c.Period, '') Period, 
         ifnull(c.Doc, '') Doc, 
-        c.Junk> 0 Junk, 
+        length(c.Junk)> 0 Junk, 
         intersection.PublicCostCorr As UpCost,
         round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
         pricesdata.pricecode SalerID,
@@ -798,7 +798,7 @@ SELECT  c.id OrderID,
         ifnull(c.Note, '') Note, 
         ifnull(c.Period, '') Period, 
         ifnull(c.Doc, '') Doc, 
-        c.Junk> 0 Junk, 
+        length(c.Junk) > 0 Junk, 
         intersection.PublicCostCorr As UpCost,
         round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
         pricesdata.pricecode SalerID,
@@ -1022,8 +1022,8 @@ DROP temporary table IF EXISTS mincosts;
   c.Code,
   c.CodeCr,
   0 Quantity,
-  c.Junk>0 Junk,
-  c.Await>0 Await,
+  length(c.Junk) > 0 Junk,
+  length(c.Await) > 0 Await,
   c.BaseCost,
   round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost
 from
@@ -1135,7 +1135,7 @@ and c.ID in " + CoreIDString;
   ifnull(c.Note, '') Note,
   ifnull(c.Period, '') Period,
   ifnull(c.Doc, '') Doc,
-  length(c.Junk)<1 Junk,
+  length(c.Junk) > 0 Junk,
   ins.PublicCostCorr As UpCost,
   round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
   pd.pricecode SalerID,
@@ -1176,7 +1176,7 @@ where
   and prd.enabled=1
   and c.SynonymCode = ?SynonymCode
   and c.SynonymFirmCrCode = ?SynonymFirmCrCode
-  and (if(c.Junk > 0, 1, 0) = ?Junk)
+  and (length(c.Junk) > 0 = ?Junk)
 ";
 			e.DataAdapter.SelectCommand.Parameters.Clear();
 			e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
@@ -1397,7 +1397,7 @@ SELECT  c.id OrderID,
         ifnull(c.Note, '') Note, 
         ifnull(c.Period, '') Period, 
         ifnull(c.Doc, '') Doc, 
-        c.Junk> 0 Junk, 
+        length(c.Junk) > 0 Junk, 
         intersection.PublicCostCorr As UpCost,
         round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
         pricesdata.pricecode PriceCode,
