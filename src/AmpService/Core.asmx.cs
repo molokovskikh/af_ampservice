@@ -79,22 +79,22 @@ namespace AMPWebService
 			DataColumn17 = new DataColumn();
 			dataColumn18 = new DataColumn();
 			dataColumn19 = new DataColumn();
-			this.MyDS.BeginInit();
-			this.DataTable1.BeginInit();
-			this.MySelCmd.CommandText = null;
-			this.MySelCmd.CommandTimeout = 0;
-			this.MySelCmd.CommandType = CommandType.Text;
-			this.MySelCmd.Connection = this.MyCn;
-			this.MySelCmd.Transaction = null;
-			this.MySelCmd.UpdatedRowSource = UpdateRowSource.Both;
-			this.MyCn.ConnectionString = Literals.ConnectionString;
-			this.MyDA.DeleteCommand = null;
-			this.MyDA.InsertCommand = null;
-			this.MyDA.SelectCommand = this.MySelCmd;
-			this.MyDA.UpdateCommand = null;
-			this.MyDS.DataSetName = "AMPDataSet";
-			this.MyDS.Locale = new CultureInfo("ru-RU");
-			this.MyDS.Tables.AddRange(new DataTable[] {this.DataTable1});
+			MyDS.BeginInit();
+			DataTable1.BeginInit();
+			MySelCmd.CommandText = null;
+			MySelCmd.CommandTimeout = 0;
+			MySelCmd.CommandType = CommandType.Text;
+			MySelCmd.Connection = MyCn;
+			MySelCmd.Transaction = null;
+			MySelCmd.UpdatedRowSource = UpdateRowSource.Both;
+			MyCn.ConnectionString = Literals.ConnectionString;
+			MyDA.DeleteCommand = null;
+			MyDA.InsertCommand = null;
+			MyDA.SelectCommand = MySelCmd;
+			MyDA.UpdateCommand = null;
+			MyDS.DataSetName = "AMPDataSet";
+			MyDS.Locale = new CultureInfo("ru-RU");
+			MyDS.Tables.AddRange(new DataTable[] {DataTable1});
 			DataTable1.Columns.AddRange(
 				new DataColumn[]
 					{
@@ -149,7 +149,8 @@ namespace AMPWebService
 		}
 
 		[WebMethod()]
-		public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit, int SelStart)
+		public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit,
+		                                  int SelStart)
 		{
 			FunctionName = "GetNameFromCatalog";
 			string[] Params;
@@ -165,7 +166,14 @@ namespace AMPWebService
 				MyTrans = MyCn.BeginTransaction();
 				MySelCmd.Transaction = MyTrans;
 				MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; ";
-				MySelCmd.CommandText += "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" + " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" + " left join farm.core0 c on c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" + " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" + " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" + GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" + " and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
+				MySelCmd.CommandText +=
+					"select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
+					" left join farm.formrules on formrules.firmcode=pricesdata.pricecode" +
+					" left join farm.core0 c on c.firmcode=if(clientsdata.OldCode=0, pricesdata.pricecode, intersection.costcode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
+					" left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" +
+					" where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" +
+					GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" +
+					" and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
 				if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
 				{
 					Inc = 0;
@@ -215,7 +223,8 @@ namespace AMPWebService
 					}
 					MySelCmd.CommandText += ")";
 				}
-				MySelCmd.CommandText += " and clientsdata.firmstatus=1" + " and clientsdata.billingstatus=1" + " and clientsdata.firmtype=0";
+				MySelCmd.CommandText += " and clientsdata.firmstatus=1" + " and clientsdata.billingstatus=1" +
+				                        " and clientsdata.firmtype=0";
 				if (NewEar)
 				{
 					MySelCmd.CommandText += " and ampc.id is null";
@@ -224,13 +233,21 @@ namespace AMPWebService
 				{
 					MySelCmd.CommandText += " and c.id is not null";
 				}
-				MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" + " and pricesregionaldata.regioncode=intersection.regioncode" + " and pricesregionaldata.pricecode=pricesdata.pricecode" + " and AClientsData.firmcode=intersection.clientcode" + " and (clientsdata.maskregion & intersection.regioncode)>0" + " and (AClientsData.maskregion & intersection.regioncode)>0" + " and (retclientsset.workregionmask & intersection.regioncode)>0" + " and pricesdata.agencyenabled=1" + " and pricesdata.enabled=1 and invisibleonclient=0" + " and pricesdata.pricetype<>1" + " and pricesregionaldata.enabled=1";
+				MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" +
+				                        " and pricesregionaldata.regioncode=intersection.regioncode" +
+				                        " and pricesregionaldata.pricecode=pricesdata.pricecode" +
+				                        " and AClientsData.firmcode=intersection.clientcode" +
+				                        " and (clientsdata.maskregion & intersection.regioncode)>0" +
+				                        " and (AClientsData.maskregion & intersection.regioncode)>0" +
+				                        " and (retclientsset.workregionmask & intersection.regioncode)>0" +
+				                        " and pricesdata.agencyenabled=1" + " and pricesdata.enabled=1 and invisibleonclient=0" +
+				                        " and pricesdata.pricetype<>1" + " and pricesregionaldata.enabled=1";
 				if (!(Name == null))
 				{
 					Inc = 0;
 					MySelCmd.CommandText += " and (";
-					
-					int temp;					
+
+					int temp;
 					if (int.TryParse(Name[0], out temp))
 					{
 						AMPCode = true;
@@ -325,7 +342,7 @@ namespace AMPWebService
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText =
-@"
+						@"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
 create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), PriceID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type= heap; 
@@ -335,7 +352,7 @@ INTO    prices
 ";
 				}
 				MySelCmd.CommandText += String.Format(
-@"
+					@"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode, 
         ifnull(c.CodeCr, '') CreaterCode, 
@@ -393,7 +410,8 @@ WHERE   DisabledByClient                                            = 0
         and c.fullcode in {0} 
         and c.synonymcode = s.synonymcode 
         and s.firmcode    = ifnull(parentsynonym, pricesdata.pricecode) 
-", FullCodesString, GetClientCode().ToString());
+",
+					FullCodesString, GetClientCode().ToString());
 				if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
 				{
 					inc = 0;
@@ -419,8 +437,8 @@ WHERE   DisabledByClient                                            = 0
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText += ";";
-                    MySelCmd.CommandText +=
-@"
+					MySelCmd.CommandText +=
+						@"
 INSERT 
 INTO    mincosts 
 SELECT  min(cost), 
@@ -462,7 +480,7 @@ ORDER BY Cost
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText +=
-@"
+						@"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
 ";
@@ -506,7 +524,7 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, uint[] PriceID , Int32 Limit, Int32 SelStart)
+		public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, uint[] PriceID, Int32 Limit, Int32 SelStart)
 		{
 			string AMPCodes;
 			List<int> AMPCodesArr = new List<int>();
@@ -515,7 +533,6 @@ DROP temporary table IF EXISTS mincosts;
 			Restart:
 			try
 			{
-			
 				if (MyCn.State == ConnectionState.Closed)
 					MyCn.Open();
 
@@ -569,7 +586,7 @@ DROP temporary table IF EXISTS mincosts;
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText =
-@"
+						@"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
 create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
@@ -579,7 +596,7 @@ INTO    prices
 ";
 				}
 				MySelCmd.CommandText += String.Format(
-@"
+					@"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode, 
         ifnull(c.CodeCr, '') CreaterCode, 
@@ -636,7 +653,8 @@ WHERE   DisabledByClient                                            = 0
         and c.firmcode                                              = intersection.costcode
         and c.synonymcode                                           = s.synonymcode 
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
-", GetClientCode().ToString());
+",
+					GetClientCode().ToString());
 
 				MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceID);
 
@@ -674,8 +692,8 @@ WHERE   DisabledByClient                                            = 0
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText += ";";
-					MySelCmd.CommandText += 
-@"
+					MySelCmd.CommandText +=
+						@"
 INSERT 
 INTO    mincosts 
 SELECT  min(cost), 
@@ -716,7 +734,7 @@ ORDER BY Cost
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText +=
-@"
+						@"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
 ";
@@ -759,7 +777,8 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet GetPricesByOriginalName(string[] OriginalName, uint[] PriceId, bool OnlyLeader, bool NewEar, Int32 Limit, Int32 SelStart)
+		public DataSet GetPricesByOriginalName(string[] OriginalName, uint[] PriceId, bool OnlyLeader, bool NewEar,
+		                                       Int32 Limit, Int32 SelStart)
 		{
 			string[] Params;
 			int Inc;
@@ -775,17 +794,17 @@ DROP temporary table IF EXISTS mincosts;
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText =
-@"
+						@"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
 create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
 create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
 INSERT 
 INTO    prices 
-";						
+";
 				}
 				MySelCmd.CommandText += String.Format(
-@"
+					@"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode, 
         ifnull(c.CodeCr, '') CreaterCode, 
@@ -842,7 +861,8 @@ WHERE   DisabledByClient                                            = 0
         and c.firmcode                                              = intersection.costcode
         and c.synonymcode                                           = s.synonymcode 
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
-", GetClientCode().ToString());
+",
+					GetClientCode().ToString());
 
 				if (NewEar)
 					MySelCmd.CommandText += " and ampc.id is null";
@@ -877,7 +897,7 @@ WHERE   DisabledByClient                                            = 0
 				{
 					MySelCmd.CommandText += ";";
 					MySelCmd.CommandText +=
-@"
+						@"
 INSERT 
 INTO    mincosts 
 SELECT  min(cost), 
@@ -918,7 +938,7 @@ ORDER BY Cost
 				if (OnlyLeader)
 				{
 					MySelCmd.CommandText +=
-@"
+						@"
 DROP temporary table IF EXISTS prices; 
 DROP temporary table IF EXISTS mincosts; 
 ";
@@ -962,20 +982,22 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2, bool[] Junk)
+		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
+		                         bool[] Junk)
 		{
-			return MethodTemplate.ExecuteMethod(new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, MyCn) as DataSet;
+			return
+				MethodTemplate.ExecuteMethod<PostOrderArgs, DataSet>(
+					new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, null, MyCn);
 		}
 
-		public static DataSet InnerPostOrder(ExecuteArgs e)
+		private static DataSet InnerPostOrder(PostOrderArgs e)
 		{
-			PostOrderArgs args = e as PostOrderArgs;			
 			string CoreIDString;
 			int Index;
 			DataSet dsRes;
 			DataTable dtPricesRes;
 
-			int[] Res = new int[args.CoreIDs.Length];
+			int[] Res = new int[e.CoreIDs.Length];
 			for (int i = 0; i < Res.Length; i++)
 			{
 				Res[i] = -1;
@@ -985,15 +1007,15 @@ DROP temporary table IF EXISTS mincosts;
 			DataTable dtOrderHead;
 
 			//Если длины не равны, то возвращаем null
-			if ((args.CoreIDs == null) || (args.Quantities == null) || (args.SynonymCodes == null) || (args.SynonymFirmCrCodes == null)
-				|| (args.Junks == null)
-				|| (args.CoreIDs.Length != args.Quantities.Length)
-				|| (args.CoreIDs.Length != args.SynonymCodes.Length) || (args.CoreIDs.Length != args.SynonymFirmCrCodes.Length)
-				|| (args.CoreIDs.Length != args.Junks.Length))
+			if ((e.CoreIDs == null) || (e.Quantities == null) || (e.SynonymCodes == null) || (e.SynonymFirmCrCodes == null)
+			    || (e.Junks == null)
+			    || (e.CoreIDs.Length != e.Quantities.Length)
+			    || (e.CoreIDs.Length != e.SynonymCodes.Length) || (e.CoreIDs.Length != e.SynonymFirmCrCodes.Length)
+			    || (e.CoreIDs.Length != e.Junks.Length))
 				return null;
 
 			CoreIDString = "(";
-			foreach (int ID in args.CoreIDs)
+			foreach (int ID in e.CoreIDs)
 			{
 				if ((CoreIDString.Length > 1) && (ID > 0))
 				{
@@ -1009,7 +1031,7 @@ DROP temporary table IF EXISTS mincosts;
 			dsPost = new DataSet();
 
 			e.DataAdapter.SelectCommand.CommandText =
-@"select
+				@"select
   cd.FirmCode ClientCode,
   cd.RegionCode,
   pc.ShowPriceCode PriceCode,
@@ -1038,7 +1060,8 @@ from
   inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = cd.RegionCode
 where
   cd.FirmCode = ?ClientCode
-and c.ID in " + CoreIDString;
+and c.ID in " +
+				CoreIDString;
 
 			e.DataAdapter.SelectCommand.Parameters.Clear();
 			e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
@@ -1046,20 +1069,20 @@ and c.ID in " + CoreIDString;
 			dtSummaryOrder = dsPost.Tables["SummaryOrder"];
 
 			DataRow[] drs;
-			dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof(string)));
-			for (int i = 0; i < args.CoreIDs.Length; i++)
+			dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof (string)));
+			for (int i = 0; i < e.CoreIDs.Length; i++)
 			{
-				drs = dtSummaryOrder.Select("Id = " + args.CoreIDs[i].ToString());
+				drs = dtSummaryOrder.Select("Id = " + e.CoreIDs[i].ToString());
 				if (drs.Length > 0)
 				{
-					drs[0]["Quantity"] = args.Quantities[i];
-					if ((args.Messages != null) && (args.Messages.Length > i))
-						drs[0]["Message"] = args.Messages[i];
+					drs[0]["Quantity"] = e.Quantities[i];
+					if ((e.Messages != null) && (e.Messages.Length > i))
+						drs[0]["Message"] = e.Messages[i];
 				}
 			}
 
 			dtOrderHead = dtSummaryOrder.DefaultView.ToTable(true, "ClientCode", "RegionCode", "PriceCode", "PriceDate");
-			dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof(ulong)));
+			dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof (ulong)));
 
 			DataRow[] drOrderList;
 			foreach (DataRow drOH in dtOrderHead.Rows)
@@ -1067,7 +1090,8 @@ and c.ID in " + CoreIDString;
 				drOrderList = dtSummaryOrder.Select("PriceCode = " + drOH["PriceCode"].ToString());
 				if (drOrderList.Length > 0)
 				{
-					e.DataAdapter.SelectCommand.CommandText = "insert into orders.ordershead (WriteTime, ClientCode, PriceCode, RegionCode, PriceDate, RowCount, ClientAddition, Processed)" +
+					e.DataAdapter.SelectCommand.CommandText =
+						"insert into orders.ordershead (WriteTime, ClientCode, PriceCode, RegionCode, PriceDate, RowCount, ClientAddition, Processed)" +
 						"values(now(), ?ClientCode, ?PriceCode, ?RegionCode, ?PriceDate, ?RowCount, ?ClientAddition, 0);";
 					e.DataAdapter.SelectCommand.CommandText += "select LAST_INSERT_ID()";
 					e.DataAdapter.SelectCommand.Parameters.Clear();
@@ -1078,7 +1102,8 @@ and c.ID in " + CoreIDString;
 					e.DataAdapter.SelectCommand.Parameters.Add("RowCount", drOrderList.Length);
 					e.DataAdapter.SelectCommand.Parameters.Add("ClientAddition", drOrderList[0]["Message"]);
 					drOH["OrderID"] = Convert.ToUInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
-					e.DataAdapter.SelectCommand.CommandText = "insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
+					e.DataAdapter.SelectCommand.CommandText =
+						"insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
 					e.DataAdapter.SelectCommand.Parameters.Clear();
 					e.DataAdapter.SelectCommand.Parameters.Add("OrderID", MySqlDbType.Int64);
 					e.DataAdapter.SelectCommand.Parameters.Add("FullCode", MySqlDbType.Int64);
@@ -1105,7 +1130,7 @@ and c.ID in " + CoreIDString;
 						e.DataAdapter.SelectCommand.Parameters["Cost"].Value = drOL["Cost"];
 						e.DataAdapter.SelectCommand.Parameters["Quantity"].Value = drOL["Quantity"];
 						e.DataAdapter.SelectCommand.ExecuteNonQuery();
-						Index = Array.IndexOf(args.CoreIDs, Convert.ToInt32(drOL["ID"]));
+						Index = Array.IndexOf(e.CoreIDs, Convert.ToInt32(drOL["ID"]));
 						if (Index > -1)
 							Res[Index] = Convert.ToInt32(drOH["OrderID"]);
 					}
@@ -1190,15 +1215,15 @@ where
 				{
 					drOK = dtPricesRes.NewRow();
 					drOK["OrderID"] = Res[i];
-					drOK["OriginalOrderID"] = args.CoreIDs[i];
+					drOK["OriginalOrderID"] = e.CoreIDs[i];
 					dtPricesRes.Rows.Add(drOK);
 				}
 				else
 				{
 					dtTemp = AMPWebService.PostOrder.GetPricesDataTable();
-					e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = args.SynonymCodes[i];
-					e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = args.SynonymFirmCrCodes[i];
-					e.DataAdapter.SelectCommand.Parameters["Junk"].Value = args.Junks[i];
+					e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = e.SynonymCodes[i];
+					e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
+					e.DataAdapter.SelectCommand.Parameters["Junk"].Value = e.Junks[i];
 					e.DataAdapter.Fill(dtTemp);
 
 					if (dtTemp.Rows.Count > 0)
@@ -1206,14 +1231,14 @@ where
 						dtTemp.DefaultView.Sort = "Cost";
 						drOK = dtPricesRes.NewRow();
 						drOK.ItemArray = dtTemp.DefaultView[0].Row.ItemArray;
-						drOK["OriginalOrderID"] = args.CoreIDs[i];
+						drOK["OriginalOrderID"] = e.CoreIDs[i];
 						dtPricesRes.Rows.Add(drOK);
 					}
 					else
 					{
 						drOK = dtPricesRes.NewRow();
 						drOK["OrderID"] = -1;
-						drOK["OriginalOrderID"] = args.CoreIDs[i];
+						drOK["OriginalOrderID"] = e.CoreIDs[i];
 						dtPricesRes.Rows.Add(drOK);
 					}
 				}
@@ -1240,11 +1265,10 @@ where
 			return dsRes;
 		}
 
-		private DataSet InnerGetPriceCodeByName(ExecuteArgs e)
+		private DataSet InnerGetPriceCodeByName(FirmNameArgs e)
 		{
-
 			e.DataAdapter.SelectCommand.CommandText =
-@"
+				@"
 SELECT  PricesData.PriceCode as PriceCode, 
 		PricesData.PriceName as PriceName,
 		PriceInfo,
@@ -1280,7 +1304,7 @@ WHERE   DisabledByClient                                            = 0
 ";
 
 
-			e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(((FirmNameArgs)e).FirmNames, "ClientsData.ShortName");
+			e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
 
 			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
@@ -1293,10 +1317,10 @@ WHERE   DisabledByClient                                            = 0
 		[WebMethod()]
 		public DataSet GetPriceCodeByName(string[] firmName)
 		{
-			return MethodTemplate.ExecuteMethod(new FirmNameArgs(firmName), InnerGetPriceCodeByName) as DataSet;
+			return MethodTemplate.ExecuteMethod<FirmNameArgs, DataSet>(new FirmNameArgs(firmName), InnerGetPriceCodeByName, null);
 		}
 
-		private DataSet InnerGetPrices(ExecuteArgs e)
+		private DataSet InnerGetPrices(GetPricesArgs e)
 		{
 			UserName = "amp";
 			FunctionName = "GetPrices";
@@ -1307,11 +1331,10 @@ WHERE   DisabledByClient                                            = 0
 			validRequestFields.Add("SalerName", "ClientsData.ShortName");
 			validRequestFields.Add("ItemID", "ampc.Code");
 			validRequestFields.Add("OriginalCR", "scr.Synonym");
-			validRequestFields.Add("OriginalName", "s.Synonym");	
+			validRequestFields.Add("OriginalName", "s.Synonym");
 			validRequestFields.Add("PriceCode", "PricesData.PriceCode");
 			validRequestFields.Add("PrepCode", "c.FullCode");
-			
-			
+
 
 			//System.Collections.Specialized.StringCollection s = new StringCollection();
 			List<string> validSortFields = new List<string>();
@@ -1337,31 +1360,34 @@ WHERE   DisabledByClient                                            = 0
 			validSortFields.Add("OrderCode1");
 			validSortFields.Add("OrderCode2");
 
-			GetPricesArgs args = e as GetPricesArgs;
-			
 			//проверка входящих параметров
-			if ((args.RangeValue ==null) || (args.RangeField == null) 
-				|| (args.RangeField.Length != args.RangeValue.Length))
+			if ((e.RangeValue == null) || (e.RangeField == null)
+			    || (e.RangeField.Length != e.RangeValue.Length))
 				throw new Exception();
 			//TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
 			//то будет Exception на этапе трансляции
 			//проверка имен полей для фильтрации
-			foreach (string fieldName in args.RangeField)
+			foreach (string fieldName in e.RangeField)
 				if (!validRequestFields.ContainsKey(fieldName))
 					throw new ArgumentException(String.Format("По полю {0} не может производиться фильтрация", fieldName), fieldName);
 			//проверка имен полей для сортировки
-			if (args.SortField != null)
+			if (e.SortField != null)
 			{
-				foreach (string fieldName in args.SortField)
-					if (!validSortFields.Exists(delegate(string value) { return String.Compare(fieldName, value, true) == 0; }))
+				foreach (string fieldName in e.SortField)
+					if (!validSortFields.Exists(delegate(string value)
+					                            	{
+					                            		return String.Compare(fieldName, value, true) == 0;
+					                            	}))
 						throw new ArgumentException(String.Format("По поляю {0} не может производиться сортировка", fieldName), fieldName);
 			}
 			//проверка направлений сортировки
-			if (args.SortDirection != null)
+			if (e.SortDirection != null)
 			{
-				foreach (string direction in args.SortDirection)
+				foreach (string direction in e.SortDirection)
 					if (!((String.Compare(direction, "Asc", true) == 0) || (String.Compare(direction, "Desc", true) == 0)))
-						throw new ArgumentException(String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"", direction), direction);
+						throw new ArgumentException(
+							String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"",
+							              direction), direction);
 			}
 
 			//словарь хранящий имена фильтруемых полей и значения фильтрации
@@ -1370,21 +1396,21 @@ WHERE   DisabledByClient                                            = 0
 			Dictionary<string, List<string>> FiltedField = new Dictionary<string, List<string>>();
 			//разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
 			//транслируются во внутренние
-			for (int i = 0; i < args.RangeField.Length; i++)
+			for (int i = 0; i < e.RangeField.Length; i++)
 			{
 				//преобразовываем клиентские названия полей во внутренние
-				string innerFieldName = validRequestFields[args.RangeField[i]];
+				string innerFieldName = validRequestFields[e.RangeField[i]];
 				//если в словаре не такого поля 
 				if (!FiltedField.ContainsKey(innerFieldName))
 					//то добавляем его и создаем массив для хранения его значений
 					FiltedField.Add(innerFieldName, new List<string>());
 				//добавляем значение для фильтрации
-				FiltedField[innerFieldName].Add(args.RangeValue[i]);
+				FiltedField[innerFieldName].Add(e.RangeValue[i]);
 			}
 
 
 			e.DataAdapter.SelectCommand.CommandText +=
-@"
+				@"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode, 
         ifnull(c.CodeCr, '') CreaterCode, 
@@ -1442,26 +1468,26 @@ WHERE   DisabledByClient                                            = 0
         and c.synonymcode                                           = s.synonymcode 
         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
 ";
-			if (args.NewEar)
+			if (e.NewEar)
 				e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
-			
+
 			foreach (string fieldName in FiltedField.Keys)
 				e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
 
-			if (!args.OnlyLeader)
+			if (!e.OnlyLeader)
 			{
 				//группируем так что бы в исходящем наборе были позиции с уникальным OrderID
 				e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
-				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(args.SortField, args.SortDirection);
-				e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(args.Offset, args.Count);
+				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
+				e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
 			}
-			
+
 			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
 			DataSet data = new DataSet();
 			e.DataAdapter.Fill(data, "PriceList");
 
-			if (args.OnlyLeader)
+			if (e.OnlyLeader)
 			{
 				DataTable resultTable = data.Tables[0].Clone();
 				DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
@@ -1471,24 +1497,24 @@ WHERE   DisabledByClient                                            = 0
 					resultTable.ImportRow(orderedRows[0]);
 				}
 
-				if (args.Offset > -1)
+				if (e.Offset > -1)
 				{
 					DataTable tempTable = resultTable;
 					resultTable = data.Tables[0].Clone();
 
 					int count;
-					if ((args.Count > tempTable.Rows.Count) || (args.Count < args.Offset))
+					if ((e.Count > tempTable.Rows.Count) || (e.Count < e.Offset))
 						count = tempTable.Rows.Count;
 					else
-						count = args.Count;
+						count = e.Count;
 
-					for (int i = args.Offset; i < count; i++)
+					for (int i = e.Offset; i < count; i++)
 						resultTable.ImportRow(tempTable.Rows[i]);
 				}
 
-				if ((args.SortField != null) && (args.SortField.Length > 0))
+				if ((e.SortField != null) && (e.SortField.Length > 0))
 				{
-					resultTable.DefaultView.Sort = Utils.FormatOrderBlock(args.SortField, args.SortDirection).Substring(10);
+					resultTable.DefaultView.Sort = Utils.FormatOrderBlock(e.SortField, e.SortDirection).Substring(10);
 					resultTable = resultTable.DefaultView.ToTable();
 				}
 				data.Tables.Remove(data.Tables[0]);
@@ -1496,7 +1522,7 @@ WHERE   DisabledByClient                                            = 0
 			}
 
 			LogQuery(e.DataAdapter.SelectCommand, data, true);
-			
+
 			return data;
 		}
 
@@ -1533,11 +1559,15 @@ WHERE   DisabledByClient                                            = 0
 		/// </param>
 		/// <returns>DataSet содержащий позиции прайс листов.</returns>
 		[WebMethod()]
-		public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField, string[] SortOrder, int Limit, int SelStart)
+		public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField,
+		                         string[] SortOrder, int Limit, int SelStart)
 		{
-			return MethodTemplate.ExecuteMethod(new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart), InnerGetPrices) as DataSet;
+			return
+				MethodTemplate.ExecuteMethod<GetPricesArgs, DataSet>(
+					new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart),
+					InnerGetPrices, null);
 		}
-		
+
 		/// <summary>
 		/// Получает список заказов для клиента AMP.
 		/// </summary>
@@ -1555,7 +1585,8 @@ WHERE   DisabledByClient                                            = 0
 		[WebMethod()]
 		public DataSet GetOrders(string[] OrderID, int PriceCode)
 		{
-			return MethodTemplate.ExecuteMethod(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders) as DataSet;
+			return
+				MethodTemplate.ExecuteMethod<GetOrdersArgs, DataSet>(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null);
 		}
 
 		private DataSet InnerGetOrders(ExecuteArgs e)
@@ -1563,7 +1594,7 @@ WHERE   DisabledByClient                                            = 0
 			GetOrdersArgs args = e as GetOrdersArgs;
 
 			args.DataAdapter.SelectCommand.CommandText +=
-@"
+				@"
 SELECT  
 		i.firmclientcode as ClientCode, 
         i.firmclientcode2 as ClientCode2, 
@@ -1603,14 +1634,13 @@ WHERE  pd.FirmCode = 62
 					else
 						args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID > " + args.OrderID[0].Replace("!", "");
 				}
-			
 			}
 			if (args.PriceCode > 0)
 				args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode.ToString();
-				
+
 			DataSet data = new DataSet();
 			args.DataAdapter.Fill(data);
-			return data;	
+			return data;
 		}
 
 		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
@@ -1654,7 +1684,9 @@ WHERE  pd.FirmCode = 62
 			UserName = "amp";
 			try
 			{
-				MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" + " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" + " and billingstatus=1" + " and allowGetData=1" + " and OSUserName='" + UserName + "'";
+				MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" +
+				                       " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" +
+				                       " and billingstatus=1" + " and allowGetData=1" + " and OSUserName='" + UserName + "'";
 				return Convert.ToUInt32(MySelCmd.ExecuteScalar());
 			}
 			catch (Exception ErrorTXT)
@@ -1672,26 +1704,34 @@ WHERE  pd.FirmCode = 62
 		{
 			string oldQuery = command.CommandText;
 			if (calculateUnique)
-				command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount) " + " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + data.Tables[0].Rows.Count + ", " + Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ", " + CalculateUniqueFullCodeCount(data.Tables[0]) + "); ";
-			else 
-				command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " + " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName + "', " + data.Tables[0].Rows.Count + ", " + Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + "); ";
+				command.CommandText =
+					" insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount) " +
+					" values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName +
+					"', " + data.Tables[0].Rows.Count + ", " +
+					Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ", " +
+					CalculateUniqueFullCodeCount(data.Tables[0]) + "); ";
+			else
+				command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " +
+				                      " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" +
+				                      FunctionName + "', " + data.Tables[0].Rows.Count + ", " +
+				                      Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + "); ";
 			command.ExecuteNonQuery();
 			command.CommandText = oldQuery;
 		}
-		
+
 		private int CalculateUniqueFullCodeCount(DataTable table)
 		{
 			int count = 0;
 			List<int> uniquePrepCodes = new List<int>();
-			
+
 			foreach (DataRow row in table.Rows)
 			{
 				if (!uniquePrepCodes.Contains(Convert.ToInt32(row["PrepCode"])))
 				{
 					uniquePrepCodes.Add(Convert.ToInt32(row["PrepCode"]));
 					count++;
-				}					
-			}	
+				}
+			}
 			return count;
 		}
 	}
