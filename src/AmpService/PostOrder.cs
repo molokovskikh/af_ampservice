@@ -14,8 +14,8 @@ namespace AMPWebService
         public static DataTable GetPricesDataTable()
         {
             DataTable dtPrices = new DataTable();
-            dtPrices.Columns.Add("OrderID", typeof(int));
-            dtPrices.Columns.Add("OriginalOrderID", typeof(int));
+            dtPrices.Columns.Add("OrderID", typeof(ulong));
+            dtPrices.Columns.Add("OriginalOrderID", typeof(ulong));
             //Надо сказать, что данная колонка не присутствует в таблице
             dtPrices.Columns.Add("SalerCode");
             dtPrices.Columns.Add("CreaterCode");

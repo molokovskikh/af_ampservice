@@ -105,7 +105,7 @@ namespace AMPWebService
 					});
 			DataTable1.TableName = "Prices";
 			DataColumn1.ColumnName = "OrderID";
-			DataColumn1.DataType = typeof (int);
+			DataColumn1.DataType = typeof (ulong);
 			DataColumn2.ColumnName = "CreaterCode";
 			DataColumn3.ColumnName = "ItemID";
 			DataColumn4.Caption = "OriginalName";
