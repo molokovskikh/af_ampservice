@@ -128,9 +128,9 @@ namespace AMPWebService
 		private int[] _synonymCodes;
 		private int[] _synonymFirmCrCodes;
 		private bool[] _junks;
-		private ulong[] _coreIDs;
+		private long[] _coreIDs;
 
-		public ulong[] CoreIDs
+		public long[] CoreIDs
 		{
 			get { return _coreIDs; }
 			set { _coreIDs = value; }
@@ -166,7 +166,7 @@ namespace AMPWebService
 			set { _junks = value; }
 		}
 
-		public PostOrderArgs(ulong[] coreIDs, int[] quantities, string[] messages, int[] synonymCodes, int[] synonymFirmCrCodes, bool[] junks)
+		public PostOrderArgs(long[] coreIDs, int[] quantities, string[] messages, int[] synonymCodes, int[] synonymFirmCrCodes, bool[] junks)
 		{
 			_coreIDs = coreIDs;
 			_quantities = quantities;

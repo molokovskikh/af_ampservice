@@ -982,7 +982,7 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet PostOrder(ulong[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
+		public DataSet PostOrder(long[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
 		                         bool[] Junk)
 		{
 			return
@@ -997,7 +997,7 @@ DROP temporary table IF EXISTS mincosts;
 			DataSet dsRes;
 			DataTable dtPricesRes;
 
-			int[] Res = new int[e.CoreIDs.Length];
+			long[] Res = new long[e.CoreIDs.Length];
 			for (int i = 0; i < Res.Length; i++)
 			{
 				Res[i] = -1;
@@ -1015,7 +1015,7 @@ DROP temporary table IF EXISTS mincosts;
 				return null;
 
 			CoreIDString = "(";
-			foreach (ulong ID in e.CoreIDs)
+			foreach (long ID in e.CoreIDs)
 			{
 				if ((CoreIDString.Length > 1) && (ID > 0))
 				{
@@ -1101,7 +1101,7 @@ and c.ID in " +
 					e.DataAdapter.SelectCommand.Parameters.Add("PriceDate", drOH["PriceDate"]);
 					e.DataAdapter.SelectCommand.Parameters.Add("RowCount", drOrderList.Length);
 					e.DataAdapter.SelectCommand.Parameters.Add("ClientAddition", drOrderList[0]["Message"]);
-					drOH["OrderID"] = Convert.ToUInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
+					drOH["OrderID"] = Convert.ToInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
 					e.DataAdapter.SelectCommand.CommandText =
 						"insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
 					e.DataAdapter.SelectCommand.Parameters.Clear();
@@ -1130,9 +1130,9 @@ and c.ID in " +
 						e.DataAdapter.SelectCommand.Parameters["Cost"].Value = drOL["Cost"];
 						e.DataAdapter.SelectCommand.Parameters["Quantity"].Value = drOL["Quantity"];
 						e.DataAdapter.SelectCommand.ExecuteNonQuery();
-						Index = Array.IndexOf(e.CoreIDs, Convert.ToInt32(drOL["ID"]));
+						Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
 						if (Index > -1)
-							Res[Index] = Convert.ToInt32(drOH["OrderID"]);
+							Res[Index] = Convert.ToInt64(drOH["OrderID"]);
 					}
 				}
 			}
