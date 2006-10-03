@@ -105,7 +105,7 @@ namespace AMPWebService
 					});
 			DataTable1.TableName = "Prices";
 			DataColumn1.ColumnName = "OrderID";
-			DataColumn1.DataType = typeof (ulong);
+			DataColumn1.DataType = typeof (long);
 			DataColumn2.ColumnName = "CreaterCode";
 			DataColumn3.ColumnName = "ItemID";
 			DataColumn4.Caption = "OriginalName";
@@ -982,7 +982,7 @@ DROP temporary table IF EXISTS mincosts;
 		}
 
 		[WebMethod()]
-		public DataSet PostOrder(Int32[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
+		public DataSet PostOrder(ulong[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
 		                         bool[] Junk)
 		{
 			return
@@ -1015,7 +1015,7 @@ DROP temporary table IF EXISTS mincosts;
 				return null;
 
 			CoreIDString = "(";
-			foreach (int ID in e.CoreIDs)
+			foreach (ulong ID in e.CoreIDs)
 			{
 				if ((CoreIDString.Length > 1) && (ID > 0))
 				{
@@ -1082,7 +1082,7 @@ and c.ID in " +
 			}
 
 			dtOrderHead = dtSummaryOrder.DefaultView.ToTable(true, "ClientCode", "RegionCode", "PriceCode", "PriceDate");
-			dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof (ulong)));
+			dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof (long)));
 
 			DataRow[] drOrderList;
 			foreach (DataRow drOH in dtOrderHead.Rows)
