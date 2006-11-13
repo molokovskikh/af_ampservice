@@ -13,1726 +13,1765 @@ using MySql.Data.MySqlClient;
 
 namespace AMPWebService
 {
-	[WebService(Namespace = "AMPNameSpace")]
-	public class AMPService : WebService
-	{
-		MySqlTransaction MyTrans;
-		string UserName;
-		string FunctionName;
-		DateTime StartTime = DateTime.Now;
-		private DataColumn dataColumn18;
-		private DataColumn dataColumn19;
+    [WebService(Namespace = "AMPNameSpace")]
+    public class AMPService : System.Web.Services.WebService
+    {
+        MySqlTransaction MyTrans;
+        string UserName;
+        string FunctionName;
+        DateTime StartTime = DateTime.Now;
+        private DataColumn dataColumn18;
+        private DataColumn dataColumn19;
 
-		public AMPService() : base()
-		{
-			InitializeComponent();
-		}
+        public AMPService()
+            : base()
+        {
+            InitializeComponent();
+        }
 
-		private IContainer components;
-		public MySqlCommand MySelCmd;
-		public MySqlConnection MyCn;
-		private MySqlDataAdapter MyDA;
-		public DataSet MyDS;
-		public DataTable DataTable1;
-		public DataColumn DataColumn1;
-		public DataColumn DataColumn2;
-		public DataColumn DataColumn3;
-		public DataColumn DataColumn4;
-		public DataColumn DataColumn5;
-		public DataColumn DataColumn6;
-		public DataColumn DataColumn7;
-		public DataColumn DataColumn8;
-		public DataColumn DataColumn9;
-		public DataColumn DataColumn10;
-		public DataColumn DataColumn11;
-		public DataColumn DataColumn12;
-		public DataColumn DataColumn13;
-		public DataColumn DataColumn14;
-		public DataColumn DataColumn15;
-		public DataColumn DataColumn16;
-		public DataColumn DataColumn17;
+        private IContainer components;
+        public MySqlCommand MySelCmd;
+        public MySqlConnection MyCn;
+        private MySqlDataAdapter MyDA;
+        public DataSet MyDS;
+        public DataTable DataTable1;
+        public DataColumn DataColumn1;
+        public DataColumn DataColumn2;
+        public DataColumn DataColumn3;
+        public DataColumn DataColumn4;
+        public DataColumn DataColumn5;
+        public DataColumn DataColumn6;
+        public DataColumn DataColumn7;
+        public DataColumn DataColumn8;
+        public DataColumn DataColumn9;
+        public DataColumn DataColumn10;
+        public DataColumn DataColumn11;
+        public DataColumn DataColumn12;
+        public DataColumn DataColumn13;
+        public DataColumn DataColumn14;
+        public DataColumn DataColumn15;
+        public DataColumn DataColumn16;
+        public DataColumn DataColumn17;
 
-		[DebuggerStepThrough()]
-		private void InitializeComponent()
-		{
-			MySelCmd = new MySqlCommand();
-			MyCn = new MySqlConnection();
-			MyDA = new MySqlDataAdapter();
-			MyDS = new DataSet();
-			DataTable1 = new DataTable();
-			DataColumn1 = new DataColumn();
-			DataColumn2 = new DataColumn();
-			DataColumn3 = new DataColumn();
-			DataColumn4 = new DataColumn();
-			DataColumn5 = new DataColumn();
-			DataColumn6 = new DataColumn();
-			DataColumn7 = new DataColumn();
-			DataColumn8 = new DataColumn();
-			DataColumn9 = new DataColumn();
-			DataColumn10 = new DataColumn();
-			DataColumn11 = new DataColumn();
-			DataColumn12 = new DataColumn();
-			DataColumn13 = new DataColumn();
-			DataColumn14 = new DataColumn();
-			DataColumn15 = new DataColumn();
-			DataColumn16 = new DataColumn();
-			DataColumn17 = new DataColumn();
-			dataColumn18 = new DataColumn();
-			dataColumn19 = new DataColumn();
-			MyDS.BeginInit();
-			DataTable1.BeginInit();
-			MySelCmd.CommandText = null;
-			MySelCmd.CommandTimeout = 0;
-			MySelCmd.CommandType = CommandType.Text;
-			MySelCmd.Connection = MyCn;
-			MySelCmd.Transaction = null;
-			MySelCmd.UpdatedRowSource = UpdateRowSource.Both;
-			MyCn.ConnectionString = Literals.ConnectionString;
-			MyDA.DeleteCommand = null;
-			MyDA.InsertCommand = null;
-			MyDA.SelectCommand = MySelCmd;
-			MyDA.UpdateCommand = null;
-			MyDS.DataSetName = "AMPDataSet";
-			MyDS.Locale = new CultureInfo("ru-RU");
-			MyDS.Tables.AddRange(new DataTable[] {DataTable1});
-			DataTable1.Columns.AddRange(
-				new DataColumn[]
-					{
-						DataColumn1, DataColumn2, DataColumn3, DataColumn4, DataColumn5, DataColumn6,
-						DataColumn7, DataColumn8, DataColumn9, DataColumn10, DataColumn11, DataColumn12,
-						DataColumn13, DataColumn14, DataColumn15, DataColumn16, DataColumn17, dataColumn18,
-						dataColumn19
-					});
-			DataTable1.TableName = "Prices";
-			DataColumn1.ColumnName = "OrderID";
-			DataColumn1.DataType = typeof (long);
-			DataColumn2.ColumnName = "CreaterCode";
-			DataColumn3.ColumnName = "ItemID";
-			DataColumn4.Caption = "OriginalName";
-			DataColumn4.ColumnName = "OriginalName";
-			DataColumn5.ColumnName = "OriginalCr";
-			DataColumn6.ColumnName = "Unit";
-			DataColumn7.ColumnName = "Volume";
-			DataColumn8.ColumnName = "Quantity";
-			DataColumn9.ColumnName = "Note";
-			DataColumn10.ColumnName = "Period";
-			DataColumn11.ColumnName = "Doc";
-			DataColumn12.ColumnName = "Junk";
-			DataColumn12.DataType = typeof (bool);
-			DataColumn13.ColumnName = "UpCost";
-			DataColumn13.DataType = typeof (decimal);
-			DataColumn14.ColumnName = "Cost";
-			DataColumn14.DataType = typeof (decimal);
-			DataColumn15.ColumnName = "SalerID";
-			DataColumn15.DataType = typeof (uint);
-			DataColumn16.ColumnName = "PriceDate";
-			DataColumn17.ColumnName = "PrepCode";
-			DataColumn17.DataType = typeof (uint);
-			dataColumn18.ColumnName = "OrderCode1";
-			dataColumn18.DataType = typeof (uint);
-			dataColumn19.ColumnName = "OrderCode2";
-			dataColumn19.DataType = typeof (uint);
-			MyDS.EndInit();
-			DataTable1.EndInit();
-		}
+        [DebuggerStepThrough()]
+        private void InitializeComponent()
+        {
+            MySelCmd = new MySqlCommand();
+            MyCn = new MySqlConnection();
+            MyDA = new MySqlDataAdapter();
+            MyDS = new DataSet();
+            DataTable1 = new DataTable();
+            DataColumn1 = new DataColumn();
+            DataColumn2 = new DataColumn();
+            DataColumn3 = new DataColumn();
+            DataColumn4 = new DataColumn();
+            DataColumn5 = new DataColumn();
+            DataColumn6 = new DataColumn();
+            DataColumn7 = new DataColumn();
+            DataColumn8 = new DataColumn();
+            DataColumn9 = new DataColumn();
+            DataColumn10 = new DataColumn();
+            DataColumn11 = new DataColumn();
+            DataColumn12 = new DataColumn();
+            DataColumn13 = new DataColumn();
+            DataColumn14 = new DataColumn();
+            DataColumn15 = new DataColumn();
+            DataColumn16 = new DataColumn();
+            DataColumn17 = new DataColumn();
+            dataColumn18 = new DataColumn();
+            dataColumn19 = new DataColumn();
+            MyDS.BeginInit();
+            DataTable1.BeginInit();
+            MySelCmd.CommandText = null;
+            MySelCmd.CommandTimeout = 0;
+            MySelCmd.CommandType = CommandType.Text;
+            MySelCmd.Connection = MyCn;
+            MySelCmd.Transaction = null;
+            MySelCmd.UpdatedRowSource = UpdateRowSource.Both;
+            MyCn.ConnectionString = Literals.ConnectionString;
+            MyDA.DeleteCommand = null;
+            MyDA.InsertCommand = null;
+            MyDA.SelectCommand = MySelCmd;
+            MyDA.UpdateCommand = null;
+            MyDS.DataSetName = "AMPDataSet";
+            MyDS.Locale = new CultureInfo("ru-RU");
+            MyDS.Tables.AddRange(new DataTable[] { DataTable1 });
+            DataTable1.Columns.AddRange(
+                    new DataColumn[]
+                                        {
+                                                DataColumn1, DataColumn2, DataColumn3, DataColumn4, DataColumn5, DataColumn6,
+                                                DataColumn7, DataColumn8, DataColumn9, DataColumn10, DataColumn11, DataColumn12,
+                                                DataColumn13, DataColumn14, DataColumn15, DataColumn16, DataColumn17, dataColumn18,
+                                                dataColumn19
+                                        });
+            DataTable1.TableName = "Prices";
+            DataColumn1.ColumnName = "OrderID";
+            DataColumn1.DataType = typeof(long);
+            DataColumn2.ColumnName = "CreaterCode";
+            DataColumn3.ColumnName = "ItemID";
+            DataColumn4.Caption = "OriginalName";
+            DataColumn4.ColumnName = "OriginalName";
+            DataColumn5.ColumnName = "OriginalCr";
+            DataColumn6.ColumnName = "Unit";
+            DataColumn7.ColumnName = "Volume";
+            DataColumn8.ColumnName = "Quantity";
+            DataColumn9.ColumnName = "Note";
+            DataColumn10.ColumnName = "Period";
+            DataColumn11.ColumnName = "Doc";
+            DataColumn12.ColumnName = "Junk";
+            DataColumn12.DataType = typeof(bool);
+            DataColumn13.ColumnName = "UpCost";
+            DataColumn13.DataType = typeof(decimal);
+            DataColumn14.ColumnName = "Cost";
+            DataColumn14.DataType = typeof(decimal);
+            DataColumn15.ColumnName = "SalerID";
+            DataColumn15.DataType = typeof(uint);
+            DataColumn16.ColumnName = "PriceDate";
+            DataColumn17.ColumnName = "PrepCode";
+            DataColumn17.DataType = typeof(uint);
+            dataColumn18.ColumnName = "OrderCode1";
+            dataColumn18.DataType = typeof(uint);
+            dataColumn19.ColumnName = "OrderCode2";
+            dataColumn19.DataType = typeof(uint);
+            MyDS.EndInit();
+            DataTable1.EndInit();
+        }
 
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				if (!((components == null)))
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose(disposing);
-		}
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (!((components == null)))
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		[WebMethod()]
-		public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit,
-		                                  int SelStart)
-		{
-			FunctionName = "GetNameFromCatalog";
-			string[] Params;
-			int Inc;
-			bool AMPCode = false;
-			MyDS.Tables.Remove("Prices");
-			Restart:
-			try
-			{
-				if (MyCn.State == ConnectionState.Closed)
-					MyCn.Open();
+        [WebMethod()]
+        public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit,
+                                          int SelStart)
+        {
+            FunctionName = "GetNameFromCatalog";
+            string[] Params;
+            int Inc;
+            bool AMPCode = false;
+            MyDS.Tables.Remove("Prices");
+        Restart:
+            try
+            {
+                if (MyCn.State == ConnectionState.Closed)
+                    MyCn.Open();
 
-				MyTrans = MyCn.BeginTransaction();
-				MySelCmd.Transaction = MyTrans;
-				MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; ";
-				MySelCmd.CommandText +=
-					"select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
-					" left join farm.formrules on formrules.firmcode=pricesdata.pricecode" +
-					" left join farm.core0 c on c.firmcode = intersection.costcode and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
-					" left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" +
-					" where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" +
-					GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" +
-					" and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
-				if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
-				{
-					Inc = 0;
-					MySelCmd.CommandText += " and (";
-					for (int i = 0; i < PriceID.Length; i++)
-					{
-						string PriceNameStr = Convert.ToString(PriceID[i]);
-						if (!String.IsNullOrEmpty(PriceNameStr))
-						{
-							if (Inc > 0)
-							{
-								MySelCmd.CommandText += " or ";
-							}
-							Params = FormatFindStr(PriceNameStr, "PriceCode" + Inc, "pricesdata.pricecode");
-							MySelCmd.Parameters.Add("PriceCode" + Inc, Params[1]);
-							MySelCmd.CommandText += Params[0];
-							Inc += 1;
-						}
-					}
-					if (Inc < 1)
-					{
-						MySelCmd.CommandText += "1";
-					}
-					MySelCmd.CommandText += ")";
-				}
-				if (!(Form == null))
-				{
-					Inc = 0;
-					MySelCmd.CommandText += " and (";
-					foreach (string PriceNameStr in Form)
-					{
-						if (!String.IsNullOrEmpty(PriceNameStr))
-						{
-							if (Inc > 0)
-							{
-								MySelCmd.CommandText += " or ";
-							}
-							Params = FormatFindStr(PriceNameStr, "Form" + Inc, "catalog.form");
-							MySelCmd.Parameters.Add("Form" + Inc, Params[1]);
-							MySelCmd.CommandText += Params[0];
-							Inc += 1;
-						}
-						if (Inc < 1)
-						{
-							MySelCmd.CommandText += "1";
-						}
-					}
-					MySelCmd.CommandText += ")";
-				}
-				MySelCmd.CommandText += " and clientsdata.firmstatus=1" + " and clientsdata.billingstatus=1" +
-				                        " and clientsdata.firmtype=0";
-				if (NewEar)
-				{
-					MySelCmd.CommandText += " and ampc.id is null";
-				}
-				if (OfferOnly || PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
-				{
-					MySelCmd.CommandText += " and c.id is not null";
-				}
-				MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" +
-				                        " and pricesregionaldata.regioncode=intersection.regioncode" +
-				                        " and pricesregionaldata.pricecode=pricesdata.pricecode" +
-				                        " and AClientsData.firmcode=intersection.clientcode" +
-				                        " and (clientsdata.maskregion & intersection.regioncode)>0" +
-				                        " and (AClientsData.maskregion & intersection.regioncode)>0" +
-				                        " and (retclientsset.workregionmask & intersection.regioncode)>0" +
-				                        " and pricesdata.agencyenabled=1" + " and pricesdata.enabled=1 and invisibleonclient=0" +
-				                        " and pricesdata.pricetype<>1" + " and pricesregionaldata.enabled=1";
-				if (!(Name == null))
-				{
-					Inc = 0;
-					MySelCmd.CommandText += " and (";
+                MyTrans = MyCn.BeginTransaction();
+                MySelCmd.Transaction = MyTrans;
+                MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; ";
+                MySelCmd.CommandText +=
+                        "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
+                        " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" +
+                        " left join farm.core0 c on c.firmcode = intersection.costcode and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
+                        " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" +
+                        " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" +
+                        GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" +
+                        " and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
+                if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
+                {
+                    Inc = 0;
+                    MySelCmd.CommandText += " and (";
+                    for (int i = 0; i < PriceID.Length; i++)
+                    {
+                        string PriceNameStr = Convert.ToString(PriceID[i]);
+                        if (!String.IsNullOrEmpty(PriceNameStr))
+                        {
+                            if (Inc > 0)
+                            {
+                                MySelCmd.CommandText += " or ";
+                            }
+                            Params = FormatFindStr(PriceNameStr, "PriceCode" + Inc, "pricesdata.pricecode");
+                            MySelCmd.Parameters.Add("PriceCode" + Inc, Params[1]);
+                            MySelCmd.CommandText += Params[0];
+                            Inc += 1;
+                        }
+                    }
+                    if (Inc < 1)
+                    {
+                        MySelCmd.CommandText += "1";
+                    }
+                    MySelCmd.CommandText += ")";
+                }
+                if (!(Form == null))
+                {
+                    Inc = 0;
+                    MySelCmd.CommandText += " and (";
+                    foreach (string PriceNameStr in Form)
+                    {
+                        if (!String.IsNullOrEmpty(PriceNameStr))
+                        {
+                            if (Inc > 0)
+                            {
+                                MySelCmd.CommandText += " or ";
+                            }
+                            Params = FormatFindStr(PriceNameStr, "Form" + Inc, "catalog.form");
+                            MySelCmd.Parameters.Add("Form" + Inc, Params[1]);
+                            MySelCmd.CommandText += Params[0];
+                            Inc += 1;
+                        }
+                        if (Inc < 1)
+                        {
+                            MySelCmd.CommandText += "1";
+                        }
+                    }
+                    MySelCmd.CommandText += ")";
+                }
+                MySelCmd.CommandText += " and clientsdata.firmstatus=1" + " and clientsdata.billingstatus=1" +
+                                        " and clientsdata.firmtype=0";
+                if (NewEar)
+                {
+                    MySelCmd.CommandText += " and ampc.id is null";
+                }
+                if (OfferOnly || PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
+                {
+                    MySelCmd.CommandText += " and c.id is not null";
+                }
+                MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" +
+                                        " and pricesregionaldata.regioncode=intersection.regioncode" +
+                                        " and pricesregionaldata.pricecode=pricesdata.pricecode" +
+                                        " and AClientsData.firmcode=intersection.clientcode" +
+                                        " and (clientsdata.maskregion & intersection.regioncode)>0" +
+                                        " and (AClientsData.maskregion & intersection.regioncode)>0" +
+                                        " and (retclientsset.workregionmask & intersection.regioncode)>0" +
+                                        " and pricesdata.agencyenabled=1" + " and pricesdata.enabled=1 and invisibleonclient=0" +
+                                        " and pricesdata.pricetype<>1" + " and pricesregionaldata.enabled=1";
+                if (!(Name == null))
+                {
+                    Inc = 0;
+                    MySelCmd.CommandText += " and (";
 
-					int temp;
-					if (int.TryParse(Name[0], out temp))
-					{
-						AMPCode = true;
-					}
-					foreach (string NameStr in Name)
-					{
-						if (!String.IsNullOrEmpty(NameStr))
-						{
-							if (Inc > 0)
-							{
-								MySelCmd.CommandText += " or ";
-							}
-							if (AMPCode)
-							{
-								Params = FormatFindStr(NameStr, "Name" + Inc, "ampc.code");
-							}
-							else
-							{
-								Params = FormatFindStr(NameStr, "Name" + Inc, "catalog.Name");
-							}
-							MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
-							MySelCmd.CommandText += Params[0];
-							Inc += 1;
-						}
-					}
-					MySelCmd.CommandText += ")";
-				}
-				MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
-				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
+                    int temp;
+                    if (int.TryParse(Name[0], out temp))
+                    {
+                        AMPCode = true;
+                    }
+                    foreach (string NameStr in Name)
+                    {
+                        if (!String.IsNullOrEmpty(NameStr))
+                        {
+                            if (Inc > 0)
+                            {
+                                MySelCmd.CommandText += " or ";
+                            }
+                            if (AMPCode)
+                            {
+                                Params = FormatFindStr(NameStr, "Name" + Inc, "ampc.code");
+                            }
+                            else
+                            {
+                                Params = FormatFindStr(NameStr, "Name" + Inc, "catalog.Name");
+                            }
+                            MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
+                            MySelCmd.CommandText += Params[0];
+                            Inc += 1;
+                        }
+                    }
+                    MySelCmd.CommandText += ")";
+                }
+                MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
+                MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 
-				Logger.Write(MyDA.SelectCommand.CommandText);
-				MyDA.Fill(MyDS, "Catalog");
-				LogQuery(MySelCmd, MyDS, false);
-				MyTrans.Commit();
-				return MyDS;
-			}
-			catch (MySqlException MySQLErr)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
-				{
-					Thread.Sleep(100);
-					goto Restart;
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
-			}
-			catch (Exception ex)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
-			}
-			finally
-			{
-				if (MyCn.State == ConnectionState.Open)
-				{
-					MyCn.Close();
-				}
-			}
-			return MyDS;
-		}
+                Logger.Write(MyDA.SelectCommand.CommandText);
+                MyDA.Fill(MyDS, "Catalog");
+                LogQuery(MySelCmd, MyDS, false);
+                MyTrans.Commit();
+                return MyDS;
+            }
+            catch (MySqlException MySQLErr)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+                if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
+                {
+                    Thread.Sleep(100);
+                    goto Restart;
+                }
+                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+            }
+            catch (Exception ex)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+            }
+            finally
+            {
+                if (MyCn.State == ConnectionState.Open)
+                {
+                    MyCn.Close();
+                }
+            }
+            return MyDS;
+        }
 
-		[WebMethod()]
-		public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
-		{
-			FunctionName = "GetPricesByPrepCode";
-			Int32 inc;
-			string PriceNameStr;
-			string[] Params;
-			string FullCodesString = "(";
-			Restart :
-			try
-			{
-				if (MyCn.State == ConnectionState.Closed)
-					MyCn.Open();
+        [WebMethod()]
+        public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
+        {
+            FunctionName = "GetPricesByPrepCode";
+            Int32 inc;
+            string PriceNameStr;
+            string[] Params;
+            string FullCodesString = "(";
 
-				MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted);
-				MySelCmd.Transaction = MyTrans;
-				foreach (int FullCode in PrepCode)
-				{
-					if ((FullCodesString.Length > 1) && (FullCode > 0))
-						FullCodesString += ", ";
-					if (FullCode > 0)
-						FullCodesString += FullCode;
-				}
-				FullCodesString += ")";
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText =
-						@"
-DROP temporary table IF EXISTS prices; 
-DROP temporary table IF EXISTS mincosts; 
-create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), PriceID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type= heap; 
-create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
-INSERT 
-INTO    prices 
+        Restart:
+
+            try
+            {
+                if (MyCn.State == ConnectionState.Closed)
+                    MyCn.Open();
+
+                MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted);
+                MySelCmd.Transaction = MyTrans;
+
+                foreach (int FullCode in PrepCode)
+                {
+                    if ((FullCodesString.Length > 1) && (FullCode > 0))
+                        FullCodesString += ", ";
+                    if (FullCode > 0)
+                        FullCodesString += FullCode;
+                }
+
+                FullCodesString += ")";
+
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText =
+                            @"
+                                                DROP temporary table IF EXISTS prices; 
+                                                DROP temporary table IF EXISTS mincosts; 
+                                                create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), PriceID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type= heap; 
+                                                create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
+                                                INSERT 
+                                                INTO    prices 
+                                                ";
+                }
+
+                MySelCmd.CommandText += String.Format(
+                        @"
+                                        SELECT  c.id OrderID,
+                                        ifnull(c.Code, '') SalerCode, 
+                                        ifnull(c.CodeCr, '') CreaterCode, 
+                                        ifnull(ampc.code, '') ItemID, 
+                                        s.synonym OriginalName, 
+                                        ifnull(scr.synonym, '') OriginalCr, 
+                                        ifnull(c.Unit, '') Unit, 
+                                        ifnull(c.Volume, '') Volume, 
+                                        ifnull(c.Quantity, '') Quantity, 
+                                        ifnull(c.Note, '') Note, 
+                                        ifnull(c.Period, '') Period, 
+                                        ifnull(c.Doc, '') Doc, 
+                                        length(c.Junk) > 0 Junk, 
+                                        intersection.PublicCostCorr As UpCost,
+                                        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+                                        pricesdata.pricecode PriceID,
+                                        ClientsData.ShortName SalerName,
+                                        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+                                        c.fullcode PrepCode,
+                                        c.synonymcode OrderCode1,
+                                        c.synonymfirmcrcode OrderCode2
+                                        FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr) 
+                                        LEFT JOIN farm.core0 ampc 
+                                        ON ampc.fullcode   = c.fullcode 
+                                        and ampc.codefirmcr= c.codefirmcr 
+                                        and ampc.firmcode  = 1864 
+                                        LEFT JOIN farm.synonymfirmcr scr 
+                                        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode) 
+                                        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+                                        WHERE   DisabledByClient                                            = 0 
+                                        and Disabledbyfirm                                          = 0 
+                                        and DisabledByAgency                                        = 0 
+                                        and intersection.clientcode                                 = {1} 
+                                        and retclientsset.clientcode                                = intersection.clientcode 
+                                        and pricesdata.pricecode                                    = intersection.pricecode 
+                                        and clientsdata.firmcode                                    = pricesdata.firmcode 
+                                        and clientsdata.firmstatus                                  = 1 
+                                        and clientsdata.billingstatus                               = 1 
+                                        and clientsdata.firmtype                                    = 0 
+                                        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+                                        and pricesregionaldata.regioncode                           = intersection.regioncode 
+                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+                                        and AClientsData.firmcode                                   = intersection.clientcode 
+                                        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+                                        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+                                        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+                                        and pricesdata.agencyenabled                                = 1 
+                                        and pricesdata.enabled                                      = 1 
+                                        and invisibleonclient                                       = 0 
+                                        and pricesdata.pricetype                                   <> 1 
+                                        and to_days(now())-to_days(datecurprice)                    < maxold 
+                                        and pricesregionaldata.enabled                              = 1 
+                                        and fr.firmcode                                             = pricesdata.pricecode 
+                                        and c.firmcode                                              = intersection.costcode 
+                                        and c.fullcode in {0} 
+                                        and c.synonymcode = s.synonymcode 
+                                        and s.firmcode    = ifnull(parentsynonym, pricesdata.pricecode) 
+                                        ",
+                        FullCodesString, GetClientCode().ToString());
+
+                if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
+                {
+                    inc = 0;
+                    MySelCmd.CommandText += " and (";
+                    for (int i = 0; i < PriceID.Length; i++)
+                    {
+                        PriceNameStr = Convert.ToString(PriceID[i]);
+
+                        if (inc > 0)
+                        {
+                            MySelCmd.CommandText += " or ";
+                        }
+
+                        Params = FormatFindStr(PriceNameStr, "ShortName" + inc, "pricesdata.pricecode");
+                        MySelCmd.Parameters.Add("ShortName" + inc, Params[1]);
+                        MySelCmd.CommandText += Params[0];
+                        inc += 1;
+                    }
+
+                    MySelCmd.CommandText += ")";
+                }
+
+                MySelCmd.CommandText += " GROUP BY 1 ";
+
+                if (!OnlyLeader)
+                    MySelCmd.CommandText += " ORDER BY Cost ";
+
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText += ";";
+                    MySelCmd.CommandText +=
+                            @"
+                                                INSERT 
+                                                INTO    mincosts 
+                                                SELECT  min(cost), 
+                                                FullCode, 
+                                                Junk                                    
+                                                FROM    (prices) 
+                                                GROUP BY FullCode, 
+                                                Junk; 
+                                                SELECT  OrderID, 
+                                                SalerCode, 
+                                                CreaterCode, 
+                                                ItemID, 
+                                                OriginalName, 
+                                                OriginalCr, 
+                                                Unit, 
+                                                Volume, 
+                                                Quantity, 
+                                                Note, 
+                                                Period, 
+                                                Doc, 
+                                                p.Junk, 
+                                                UpCost, 
+                                                Cost, 
+                                                PriceID, 
+                                                SalerName, 
+                                                PriceDate, 
+                                                p.FullCode PrepCode, 
+                                                synonymcode OrderCode1, 
+                                                synonymfirmcrcode OrderCode2 
+                                                FROM    (prices p, mincosts m) 
+                                                WHERE   p.fullcode= m.fullcode 
+                                                and p.cost= m.mincost 
+                                                and p.junk= m.junk
+                                                ORDER BY Cost
+                                                ";
+                }
+
+                MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
+
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText +=
+                            @"
+                                                DROP temporary table IF EXISTS prices; 
+                                                DROP temporary table IF EXISTS mincosts; 
+                                                ";
+                }
+
+                Logger.Write(MyDA.SelectCommand.CommandText);
+                MyDA.Fill(MyDS, "prices");
+                LogQuery(MySelCmd, MyDS, true);
+                MyTrans.Commit();
+                return MyDS;
+            }
+
+            catch (MySqlException MySQLErr)
+            {
+                if (MyTrans != null)
+                {
+                    MyTrans.Rollback();
+                }
+
+                if ((MySQLErr.Number == 1213) || (MySQLErr.Number == 1205))
+                {
+                    Thread.Sleep(100);
+                    goto Restart;
+                }
+
+                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+            }
+            catch (Exception ex)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+
+                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+            }
+            finally
+            {
+                if (MyCn.State == ConnectionState.Open)
+                {
+                    MyCn.Close();
+                }
+            }
+            return MyDS;
+        }
+
+        [WebMethod()]
+        public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, uint[] PriceID, Int32 Limit, Int32 SelStart)
+        {
+            string AMPCodes;
+            List<int> AMPCodesArr = new List<int>();
+            List<int> NotAMPCodesArr = new List<int>();
+            FunctionName = "GetPricesByItemID";
+        Restart:
+            try
+            {
+                if (MyCn.State == ConnectionState.Closed)
+                    MyCn.Open();
+
+                MyTrans = MyCn.BeginTransaction();
+                MySelCmd.Transaction = MyTrans;
+                if (ItemID != null)
+                {
+                    foreach (string item in ItemID)
+                    {
+                        bool NotID;
+                        AMPCodes = item;
+                        if (AMPCodes.Length > 0)
+                        {
+                            if (AMPCodes.StartsWith("!"))
+                            {
+                                AMPCodes = AMPCodes.Remove(0, 1);
+                                NotID = true;
+                            }
+                            else
+                            {
+                                NotID = false;
+                            }
+                            if (AMPCodes.IndexOf("..") > 0)
+                            {
+                                int SepIndex = AMPCodes.IndexOf("..");
+                                int beginIndex = Convert.ToInt32(AMPCodes.Substring(0, SepIndex));
+                                int endIndex = Convert.ToInt32(AMPCodes.Substring(SepIndex + 2, AMPCodes.Length - SepIndex - 2));
+                                if (beginIndex < endIndex)
+                                {
+                                    if ((beginIndex - endIndex) > 20000)
+                                        new Exception("Owerflow");
+                                    for (int Inc = beginIndex; Inc <= endIndex; Inc++)
+                                    {
+                                        if (NotID)
+                                            NotAMPCodesArr.Add(Inc);
+                                        else
+                                            AMPCodesArr.Add(Inc);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (NotID)
+                                    NotAMPCodesArr.Add(Convert.ToInt32(AMPCodes));
+                                else
+                                    AMPCodesArr.Add(Convert.ToInt32(AMPCodes));
+                            }
+                        }
+                    }
+                }
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText =
+                            @"
+                                                DROP temporary table IF EXISTS prices; 
+                                                DROP temporary table IF EXISTS mincosts; 
+                                                create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
+                                                create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
+                                                INSERT 
+                                                INTO    prices 
+                                                ";
+                }
+                MySelCmd.CommandText += String.Format(
+                        @"
+                                        SELECT  c.id OrderID,
+                                        ifnull(c.Code, '') SalerCode, 
+                                        ifnull(c.CodeCr, '') CreaterCode, 
+                                        ifnull(ampc.code, '') ItemID, 
+                                        s.synonym OriginalName, 
+                                        ifnull(scr.synonym, '') OriginalCr, 
+                                        ifnull(c.Unit, '') Unit, 
+                                        ifnull(c.Volume, '') Volume, 
+                                        ifnull(c.Quantity, '') Quantity, 
+                                        ifnull(c.Note, '') Note, 
+                                        ifnull(c.Period, '') Period, 
+                                        ifnull(c.Doc, '') Doc, 
+                                        length(c.Junk)> 0 Junk, 
+                                        intersection.PublicCostCorr As UpCost,
+                                        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+                                        pricesdata.pricecode SalerID,
+                                        ClientsData.ShortName SalerName,
+                                        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+                                        c.fullcode PrepCode,
+                                        c.synonymcode OrderCode1,
+                                        c.synonymfirmcrcode OrderCode2
+                                        FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
+                                        LEFT JOIN farm.core0 ampc
+                                        ON ampc.fullcode   = c.fullcode
+                                        and ampc.codefirmcr= c.codefirmcr
+                                        and ampc.firmcode  = 1864
+                                        LEFT JOIN farm.synonymfirmcr scr
+                                        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
+                                        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+                                        WHERE   DisabledByClient                                            = 0 
+                                        and Disabledbyfirm                                          = 0 
+                                        and DisabledByAgency                                        = 0 
+                                        and intersection.clientcode                                 = {0}  
+                                        and retclientsset.clientcode                                = intersection.clientcode 
+                                        and pricesdata.pricecode                                    = intersection.pricecode 
+                                        and clientsdata.firmcode                                    = pricesdata.firmcode 
+                                        and clientsdata.firmstatus                                  = 1 
+                                        and clientsdata.billingstatus                               = 1 
+                                        and clientsdata.firmtype                                    = 0 
+                                        and to_days(now())-to_days(datecurprice)                    < maxold 
+                                        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+                                        and pricesregionaldata.regioncode                           = intersection.regioncode 
+                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+                                        and AClientsData.firmcode                                   = intersection.clientcode 
+                                        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+                                        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+                                        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+                                        and pricesdata.agencyenabled                                = 1 
+                                        and pricesdata.enabled                                      = 1 
+                                        and invisibleonclient                                       = 0 
+                                        and pricesdata.pricetype                                   <> 1 
+                                        and pricesregionaldata.enabled                              = 1 
+                                        and fr.firmcode                                             = pricesdata.pricecode 
+                                        and c.firmcode                                              = intersection.costcode
+                                        and c.synonymcode                                           = s.synonymcode 
+                                        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
+                                        ",
+                        GetClientCode().ToString());
+
+                MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceID);
+
+
+                if (NotAMPCodesArr.Count > 0)
+                {
+                    MySelCmd.CommandText += " and ampc.code not in (";
+
+                    for (int Inc = 0; Inc <= NotAMPCodesArr.Count - 1; Inc++)
+                    {
+                        MySelCmd.CommandText += "'" + NotAMPCodesArr[Inc] + "'";
+
+                        if (Inc < NotAMPCodesArr.Count - 1)
+                        {
+                            MySelCmd.CommandText += ",";
+                        }
+                    }
+
+                    MySelCmd.CommandText += ")";
+                }
+
+                if (AMPCodesArr.Count > 0)
+                {
+                    MySelCmd.CommandText += " and ampc.code in (";
+
+                    for (int Inc = 0; Inc <= AMPCodesArr.Count - 1; Inc++)
+                    {
+                        MySelCmd.CommandText += AMPCodesArr[Inc];
+
+                        if (Inc < AMPCodesArr.Count - 1)
+                        {
+                            MySelCmd.CommandText += ",";
+                        }
+                    }
+
+                    MySelCmd.CommandText += ")";
+                }
+
+                MySelCmd.CommandText += " group by 1 ";
+
+                if (!OnlyLeader)
+                    MySelCmd.CommandText += " ORDER BY Cost ";
+
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText += ";";
+                    MySelCmd.CommandText +=
+                            @"
+                                                INSERT 
+                                                INTO    mincosts 
+                                                SELECT  min(cost), 
+                                                FullCode, 
+                                                Junk 
+                                                FROM    (prices) 
+                                                GROUP BY FullCode, 
+                                                Junk; 
+                                                SELECT  OrderID, 
+                                                SalerCode, 
+                                                CreaterCode, 
+                                                ItemID, 
+                                                OriginalName, 
+                                                OriginalCr, 
+                                                Unit, 
+                                                Volume, 
+                                                Quantity, 
+                                                Note, 
+                                                Period, 
+                                                Doc, 
+                                                p.Junk, 
+                                                UpCost, 
+                                                Cost, 
+                                                SalerID, 
+                                                SalerName, 
+                                                PriceDate, 
+                                                p.FullCode PrepCode, 
+                                                synonymcode OrderCode1, 
+                                                synonymfirmcrcode OrderCode2 
+                                                FROM    (prices p, mincosts m) 
+                                                WHERE   p.fullcode= m.fullcode 
+                                                and p.cost= m.mincost 
+                                                and p.junk= m.junk
+                                                ORDER BY Cost
+                                                ";
+                }
+                MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText +=
+                            @"
+                                                DROP temporary table IF EXISTS prices; 
+                                                DROP temporary table IF EXISTS mincosts; 
+                                                ";
+                }
+
+                Logger.Write(MyDA.SelectCommand.CommandText);
+                MyDA.Fill(MyDS, "Prices");
+                LogQuery(MySelCmd, MyDS, true);
+                MyTrans.Commit();
+                return MyDS;
+            }
+            catch (MySqlException MySQLErr)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+
+                if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
+                {
+                    Thread.Sleep(100);
+                    goto Restart;
+                }
+
+                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+            }
+            catch (Exception ex)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+
+                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+            }
+            finally
+            {
+                if (MyCn.State == ConnectionState.Open)
+                {
+                    MyCn.Close();
+                }
+            }
+            return MyDS;
+        }
+
+        [WebMethod()]
+        public DataSet GetPricesByOriginalName(string[] OriginalName, uint[] PriceId, bool OnlyLeader, bool NewEar,
+                                               Int32 Limit, Int32 SelStart)
+        {
+            string[] Params;
+            int Inc;
+            FunctionName = "GetPricesByName";
+        Restart:
+            try
+            {
+                if (MyCn.State == ConnectionState.Closed)
+                    MyCn.Open();
+
+                MyTrans = MyCn.BeginTransaction();
+                MySelCmd.Transaction = MyTrans;
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText =
+                            @"
+                                                DROP temporary table IF EXISTS prices; 
+                                                DROP temporary table IF EXISTS mincosts; 
+                                                create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
+                                                create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
+                                                INSERT 
+                                                INTO    prices 
+                                                ";
+                }
+                MySelCmd.CommandText += String.Format(
+                        @"
+                                        SELECT  c.id OrderID,
+                                        ifnull(c.Code, '') SalerCode, 
+                                        ifnull(c.CodeCr, '') CreaterCode, 
+                                        ifnull(ampc.code, '') ItemID, 
+                                        s.synonym OriginalName, 
+                                        ifnull(scr.synonym, '') OriginalCr, 
+                                        ifnull(c.Unit, '') Unit, 
+                                        ifnull(c.Volume, '') Volume, 
+                                        ifnull(c.Quantity, '') Quantity, 
+                                        ifnull(c.Note, '') Note, 
+                                        ifnull(c.Period, '') Period, 
+                                        ifnull(c.Doc, '') Doc, 
+                                        length(c.Junk) > 0 Junk, 
+                                        intersection.PublicCostCorr As UpCost,
+                                        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+                                        pricesdata.pricecode SalerID,
+                                        ClientsData.ShortName SalerName,
+                                        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+                                        c.fullcode PrepCode,
+                                        c.synonymcode OrderCode1,
+                                        c.synonymfirmcrcode OrderCode2
+                                        FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
+                                        LEFT JOIN farm.core0 ampc
+                                        ON ampc.fullcode   = c.fullcode
+                                        and ampc.codefirmcr= c.codefirmcr
+                                        and ampc.firmcode  = 1864
+                                        LEFT JOIN farm.synonymfirmcr scr
+                                        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
+                                        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+                                        WHERE   DisabledByClient                                            = 0 
+                                        and Disabledbyfirm                                          = 0 
+                                        and DisabledByAgency                                        = 0 
+                                        and intersection.clientcode                                 = {0}  
+                                        and retclientsset.clientcode                                = intersection.clientcode 
+                                        and pricesdata.pricecode                                    = intersection.pricecode 
+                                        and clientsdata.firmcode                                    = pricesdata.firmcode 
+                                        and clientsdata.firmstatus                                  = 1 
+                                        and clientsdata.billingstatus                               = 1 
+                                        and clientsdata.firmtype                                    = 0 
+                                        and to_days(now())-to_days(datecurprice)                    < maxold 
+                                        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+                                        and pricesregionaldata.regioncode                           = intersection.regioncode 
+                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+                                        and AClientsData.firmcode                                   = intersection.clientcode 
+                                        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+                                        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+                                        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+                                        and pricesdata.agencyenabled                                = 1 
+                                        and pricesdata.enabled                                      = 1 
+                                        and invisibleonclient                                       = 0 
+                                        and pricesdata.pricetype                                   <> 1 
+                                        and pricesregionaldata.enabled                              = 1 
+                                        and fr.firmcode                                             = pricesdata.pricecode 
+                                        and c.firmcode                                              = intersection.costcode
+                                        and c.synonymcode                                           = s.synonymcode 
+                                        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
+                                        ",
+                        GetClientCode().ToString());
+
+                if (NewEar)
+                    MySelCmd.CommandText += " and ampc.id is null";
+
+                MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceId);
+
+                if (OriginalName != null)
+                {
+                    Inc = 0;
+                    MySelCmd.CommandText += " and (";
+                    foreach (string NameStr in OriginalName)
+                    {
+                        if (NameStr.Length > 0)
+                        {
+                            if (Inc > 0)
+                            {
+                                MySelCmd.CommandText += " or ";
+                            }
+
+                            Params = FormatFindStr(NameStr, "Name" + Inc, "s.synonym");
+                            MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
+                            MySelCmd.CommandText += Params[0];
+                            Inc += 1;
+                        }
+                    }
+
+                    MySelCmd.CommandText += ")";
+                }
+
+                MySelCmd.CommandText += " group by 1";
+
+                if (!OnlyLeader)
+                    MySelCmd.CommandText += " ORDER BY Cost ";
+
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText += ";";
+                    MySelCmd.CommandText +=
+                            @"
+                                                INSERT 
+                                                INTO    mincosts 
+                                                SELECT  min(cost), 
+                                                FullCode, 
+                                                Junk 
+                                                FROM    (prices) 
+                                                GROUP BY FullCode, 
+                                                Junk; 
+                                                SELECT  OrderID, 
+                                                SalerCode, 
+                                                CreaterCode, 
+                                                ItemID, 
+                                                OriginalName, 
+                                                OriginalCr, 
+                                                Unit, 
+                                                Volume, 
+                                                Quantity, 
+                                                Note, 
+                                                Period, 
+                                                Doc, 
+                                                p.Junk, 
+                                                UpCost, 
+                                                Cost, 
+                                                SalerID, 
+                                                SalerName, 
+                                                PriceDate, 
+                                                p.FullCode PrepCode, 
+                                                synonymcode OrderCode1, 
+                                                synonymfirmcrcode OrderCode2 
+                                                FROM    (prices p, mincosts m) 
+                                                WHERE   p.fullcode= m.fullcode 
+                                                and p.cost= m.mincost 
+                                                and p.junk= m.junk
+                                                ORDER BY Cost
+                                                ";
+                }
+
+                MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
+
+                if (OnlyLeader)
+                {
+                    MySelCmd.CommandText +=
+                            @"
+                                                DROP temporary table IF EXISTS prices; 
+                                                DROP temporary table IF EXISTS mincosts; 
+                                                ";
+                }
+
+                Logger.Write(MyDA.SelectCommand.CommandText);
+                MyDA.Fill(MyDS, "Prices");
+                LogQuery(MySelCmd, MyDS, true);
+                MyTrans.Commit();
+                return MyDS;
+            }
+            catch (MySqlException MySQLErr)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+
+                if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
+                {
+                    Thread.Sleep(100);
+                    goto Restart;
+                }
+
+                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+            }
+            catch (Exception ex)
+            {
+                if (!(MyTrans == null))
+                {
+                    MyTrans.Rollback();
+                }
+
+                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+            }
+            finally
+            {
+                if (MyCn.State == ConnectionState.Open)
+                {
+                    MyCn.Close();
+                }
+            }
+            return MyDS;
+        }
+
+        [WebMethod()]
+        public DataSet PostOrder(long[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
+                                 bool[] Junk)
+        {
+            return MethodTemplate.ExecuteMethod<PostOrderArgs, DataSet>(
+                            new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, null, MyCn);
+        }
+
+        private static DataSet InnerPostOrder(PostOrderArgs e)
+        {
+            string CoreIDString;
+            int Index;
+            DataSet dsRes;
+            DataTable dtPricesRes;
+
+            long[] Res = new long[e.CoreIDs.Length];
+            for (int i = 0; i < Res.Length; i++)
+            {
+                Res[i] = -1;
+            }
+            DataSet dsPost;
+            DataTable dtSummaryOrder;
+            DataTable dtOrderHead;
+
+            //Если длины не равны, то возвращаем null
+            if ((e.CoreIDs == null) || (e.Quantities == null) || (e.SynonymCodes == null) || (e.SynonymFirmCrCodes == null)
+                || (e.Junks == null)
+                || (e.CoreIDs.Length != e.Quantities.Length)
+                || (e.CoreIDs.Length != e.SynonymCodes.Length) || (e.CoreIDs.Length != e.SynonymFirmCrCodes.Length)
+                || (e.CoreIDs.Length != e.Junks.Length))
+                return null;
+
+            CoreIDString = "(";
+            foreach (long ID in e.CoreIDs)
+            {
+                if ((CoreIDString.Length > 1) && (ID > 0))
+                {
+                    CoreIDString += ", ";
+                }
+                if (ID > 0)
+                {
+                    CoreIDString += ID.ToString();
+                }
+            }
+            CoreIDString += ")";
+
+            dsPost = new DataSet();
+
+            e.DataAdapter.SelectCommand.CommandText =
+                    @"select
+                                  cd.FirmCode ClientCode,
+                                  cd.RegionCode,
+                                  pc.ShowPriceCode PriceCode,
+                                  cast(if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) as datetime) PriceDate,
+                                  c.Id,
+                                  c.FullCode,
+                                  c.CodeFirmCr,
+                                  c.SynonymCode,
+                                  c.SynonymFirmCrCode,
+                                  c.Code,
+                                  c.CodeCr,
+                                  0 Quantity,
+                                  length(c.Junk) > 0 Junk,
+                                  length(c.Await) > 0 Await,
+                                  c.BaseCost,
+                                  round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost
+                                  from
+                                  (
+                                  usersettings.clientsdata cd,
+                                  farm.core0 c
+                                  )
+                                  inner join farm.formrules fr on fr.FirmCode = c.FirmCode
+                                  inner join usersettings.intersection ins on ins.ClientCode = cd.FirmCode and ins.RegionCode = cd.RegionCode and ins.CostCode = c.FirmCode
+                                  inner join usersettings.pricesdata pd on pd.PriceCode = ins.PriceCode
+                                  inner join usersettings.pricescosts pc on pc.CostCode = c.FirmCode
+                                  inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = cd.RegionCode
+                                  where
+                                  cd.FirmCode = ?ClientCode
+                                  and c.ID in " +
+                    CoreIDString;
+
+            e.DataAdapter.SelectCommand.Parameters.Clear();
+            e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
+            e.DataAdapter.Fill(dsPost, "SummaryOrder");
+            dtSummaryOrder = dsPost.Tables["SummaryOrder"];
+
+            DataRow[] drs;
+            dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof(string)));
+            for (int i = 0; i < e.CoreIDs.Length; i++)
+            {
+                drs = dtSummaryOrder.Select("Id = " + e.CoreIDs[i].ToString());
+                if (drs.Length > 0)
+                {
+                    drs[0]["Quantity"] = e.Quantities[i];
+                    if ((e.Messages != null) && (e.Messages.Length > i))
+                        drs[0]["Message"] = e.Messages[i];
+                }
+            }
+
+            dtOrderHead = dtSummaryOrder.DefaultView.ToTable(true, "ClientCode", "RegionCode", "PriceCode", "PriceDate");
+            dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof(long)));
+
+            DataRow[] drOrderList;
+            foreach (DataRow drOH in dtOrderHead.Rows)
+            {
+                drOrderList = dtSummaryOrder.Select("PriceCode = " + drOH["PriceCode"].ToString());
+                if (drOrderList.Length > 0)
+                {
+                    e.DataAdapter.SelectCommand.CommandText =
+                            "insert into orders.ordershead (WriteTime, ClientCode, PriceCode, RegionCode, PriceDate, RowCount, ClientAddition, Processed)" +
+                            "values(now(), ?ClientCode, ?PriceCode, ?RegionCode, ?PriceDate, ?RowCount, ?ClientAddition, 0);";
+                    e.DataAdapter.SelectCommand.CommandText += "select LAST_INSERT_ID()";
+                    e.DataAdapter.SelectCommand.Parameters.Clear();
+                    e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", drOH["ClientCode"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("PriceCode", drOH["PriceCode"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("RegionCode", drOH["RegionCode"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("PriceDate", drOH["PriceDate"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("RowCount", drOrderList.Length);
+                    e.DataAdapter.SelectCommand.Parameters.Add("ClientAddition", drOrderList[0]["Message"]);
+                    drOH["OrderID"] = Convert.ToInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
+                    e.DataAdapter.SelectCommand.CommandText =
+                            "insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
+                    e.DataAdapter.SelectCommand.Parameters.Clear();
+                    e.DataAdapter.SelectCommand.Parameters.Add("OrderID", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("FullCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("CodeFirmCr", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("SynonymFirmCrCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("Code", MySqlDbType.VarString);
+                    e.DataAdapter.SelectCommand.Parameters.Add("CodeCr", MySqlDbType.VarString);
+                    e.DataAdapter.SelectCommand.Parameters.Add("Junk", MySqlDbType.Byte);
+                    e.DataAdapter.SelectCommand.Parameters.Add("Await", MySqlDbType.Byte);
+                    e.DataAdapter.SelectCommand.Parameters.Add("Cost", MySqlDbType.Decimal);
+                    e.DataAdapter.SelectCommand.Parameters.Add("Quantity", MySqlDbType.Int32);
+                    foreach (DataRow drOL in drOrderList)
+                    {
+                        e.DataAdapter.SelectCommand.Parameters["OrderID"].Value = drOH["OrderID"];
+                        e.DataAdapter.SelectCommand.Parameters["FullCode"].Value = drOL["FullCode"];
+                        e.DataAdapter.SelectCommand.Parameters["CodeFirmCr"].Value = drOL["CodeFirmCr"];
+                        e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = drOL["SynonymCode"];
+                        e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = drOL["SynonymFirmCrCode"];
+                        e.DataAdapter.SelectCommand.Parameters["Code"].Value = drOL["Code"];
+                        e.DataAdapter.SelectCommand.Parameters["CodeCr"].Value = drOL["CodeCr"];
+                        e.DataAdapter.SelectCommand.Parameters["Junk"].Value = drOL["Junk"];
+                        e.DataAdapter.SelectCommand.Parameters["Await"].Value = drOL["Await"];
+                        e.DataAdapter.SelectCommand.Parameters["Cost"].Value = drOL["Cost"];
+                        e.DataAdapter.SelectCommand.Parameters["Quantity"].Value = drOL["Quantity"];
+                        e.DataAdapter.SelectCommand.ExecuteNonQuery();
+                        Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
+                        if (Index > -1)
+                            Res[Index] = Convert.ToInt64(drOH["OrderID"]);
+                    }
+                }
+            }
+
+            //начинаем заполнять таблицу результатов
+            dtPricesRes = AMPWebService.PostOrder.GetPricesDataTable();
+            dtPricesRes.TableName = "Prices";
+
+            DataRow drOK;
+
+            DataTable dtTemp;
+
+            e.DataAdapter.SelectCommand.CommandText =
+                    @"select
+                                  c.id OrderID,
+                                  c.id OriginalOrderID,
+                                  ifnull(c.Code, '') SalerCode,
+                                  ifnull(c.CodeCr, '') CreaterCode,
+                                  ifnull(ampc.code, '') ItemID,
+                                  s.synonym OriginalName,
+                                  ifnull(scr.synonym, '') OriginalCr,
+                                  ifnull(c.Unit, '') Unit,
+                                  ifnull(c.Volume, '') Volume,
+                                  ifnull(c.Quantity, '') Quantity,
+                                  ifnull(c.Note, '') Note,
+                                  ifnull(c.Period, '') Period,
+                                  ifnull(c.Doc, '') Doc,
+                                  length(c.Junk) > 0 Junk,
+                                  ins.PublicCostCorr As UpCost,
+                                  round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+                                  pd.pricecode SalerID,
+                                  ClientsData.ShortName SalerName,
+                                  if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+                                  c.fullcode PrepCode,
+                                  c.synonymcode OrderCode1,
+                                  c.synonymfirmcrcode OrderCode2
+                                 from
+                                  usersettings.clientsdata cd
+                                  inner join usersettings.intersection ins on ins.ClientCode = cd.FirmCode
+                                  inner join usersettings.retclientsset on retclientsset.clientcode=ins.clientcode
+                                  inner join usersettings.pricesdata pd on pd.PriceCode = ins.PriceCode
+                                  inner join usersettings.clientsdata on clientsdata.firmcode=pd.firmcode
+                                  inner join farm.core0 c on c.FirmCode = ins.CostCode
+                                  inner join farm.formrules fr on fr.FirmCode = pd.PriceCode
+                                  inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = ins.RegionCode
+                                  left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864
+                                  left join farm.synonym s on s.firmcode=ifnull(fr.parentsynonym, pd.pricecode)  and c.synonymcode=s.synonymcode
+                                  left join farm.synonymfirmcr scr on scr.firmcode=ifnull(fr.parentsynonym, pd.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode
+                                 where
+                                  cd.FirmCode = ?ClientCode
+                                  and ins.DisabledByClient=0
+                                  and ins.Disabledbyfirm=0
+                                  and ins.DisabledByAgency=0
+                                  and clientsdata.firmstatus=1
+                                  and clientsdata.billingstatus=1
+                                  and clientsdata.firmtype=0
+                                  and clientsdata.firmsegment=cd.firmsegment
+                                  and (clientsdata.maskregion & ins.regioncode)>0
+                                  and (cd.maskregion & ins.regioncode)>0
+                                  and (retclientsset.workregionmask & ins.regioncode)>0
+                                  and pd.agencyenabled=1
+                                  and pd.enabled=1
+                                  and ins.invisibleonclient=0
+                                  and pd.pricetype<>1
+                                  and to_days(now())-to_days(fr.datecurprice)<fr.maxold
+                                  and prd.enabled=1
+                                  and c.SynonymCode = ?SynonymCode
+                                  and c.SynonymFirmCrCode = ?SynonymFirmCrCode
+                                  and (length(c.Junk) > 0 = ?Junk)
+                                  ";
+            e.DataAdapter.SelectCommand.Parameters.Clear();
+            e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
+            e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int32);
+            e.DataAdapter.SelectCommand.Parameters.Add("SynonymFirmCrCode", MySqlDbType.Int32);
+            e.DataAdapter.SelectCommand.Parameters.Add("Junk", MySqlDbType.Bit);
+
+            for (int i = 0; i < Res.Length; i++)
+            {
+                if (Res[i] > -1)
+                {
+                    drOK = dtPricesRes.NewRow();
+                    drOK["OrderID"] = Res[i];
+                    drOK["OriginalOrderID"] = e.CoreIDs[i];
+                    dtPricesRes.Rows.Add(drOK);
+                }
+                else
+                {
+                    dtTemp = AMPWebService.PostOrder.GetPricesDataTable();
+                    e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = e.SynonymCodes[i];
+                    e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
+                    e.DataAdapter.SelectCommand.Parameters["Junk"].Value = e.Junks[i];
+                    e.DataAdapter.Fill(dtTemp);
+
+                    if (dtTemp.Rows.Count > 0)
+                    {
+                        dtTemp.DefaultView.Sort = "Cost";
+                        drOK = dtPricesRes.NewRow();
+                        drOK.ItemArray = dtTemp.DefaultView[0].Row.ItemArray;
+                        drOK["OriginalOrderID"] = e.CoreIDs[i];
+                        dtPricesRes.Rows.Add(drOK);
+                    }
+                    else
+                    {
+                        drOK = dtPricesRes.NewRow();
+                        drOK["OrderID"] = -1;
+                        drOK["OriginalOrderID"] = e.CoreIDs[i];
+                        dtPricesRes.Rows.Add(drOK);
+                    }
+                }
+            }
+
+
+            //Формируем результирующий датасет
+            dsRes = new DataSet();
+            dsRes.Tables.Add(dtPricesRes);
+
+            /*
+             PostOrder - отправка заказов по коду позиции
+
+            Входные данные:
+            OrderID() int(32) unsigned - массив кодов(Prices.OrderID) для заказа препаратов
+            Quantity() int(32) unsigned - массив количеств заказываемых препаратов
+
+            Ответ:
+            PostOrder() Int(32) unsigned - массив кодов подтверждения, коды принимают значения:
+            PostOrder >=0 - код сформированного заказа(Инфорум)
+            PostOrder=-1 - ошибка формирования заказа.
+
+             */
+            return dsRes;
+        }
+
+        private DataSet InnerGetPriceCodeByName(FirmNameArgs e)
+        {
+            e.DataAdapter.SelectCommand.CommandText =
+                    @"
+                                SELECT  PricesData.PriceCode as PriceCode, 
+                                        PricesData.PriceName as PriceName,
+                                        PriceInfo,
+                                        ClientsData.FirmCode,
+                                        ClientsData.ShortName as FirmName, 
+                                        RegionalData.ContactInfo,
+                                        RegionalData.OperativeInfo
+                                FROM    (intersection, c                lientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, RegionalData) 
+                                WHERE   DisabledByClient                                            = 0 
+                                        and Disabledbyfirm                                          = 0 
+                                        and DisabledByAgency                                        = 0 
+                                        and intersection.clientcode                                 = ?ClientCode 
+                                        and retclientsset.clientcode                                = intersection.clientcode 
+                                        and pricesdata.pricecode                                    = intersection.pricecode 
+                                        and clientsdata.firmcode                                    = pricesdata.firmcode 
+                                        and clientsdata.firmstatus                                  = 1 
+                                        and clientsdata.billingstatus                               = 1 
+                                        and clientsdata.firmtype                                    = 0 
+                                        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+                                        and pricesregionaldata.regioncode                           = intersection.regioncode 
+                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+                                        and AClientsData.firmcode                                   = intersection.clientcode 
+                                        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+                                        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+                                        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+                                        and pricesdata.agencyenabled                                = 1 
+                                        and pricesdata.enabled                                      = 1 
+                                        and invisibleonclient                                       = 0 
+                                        and pricesdata.pricetype                                   <> 1 
+                                        and pricesregionaldata.enabled                              = 1
+                                        and RegionalData.FirmCode = ClientsData.FirmCode
+                                        and RegionalData.RegionCode = Intersection.RegionCode
+                                        ";
+
+
+            e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
+
+            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+
+            DataSet data = new DataSet();
+            e.DataAdapter.Fill(data, "PriceList");
+
+            return data;
+        }
+
+        [WebMethod()]
+        public DataSet GetPriceCodeByName(string[] firmName)
+        {
+            return MethodTemplate.ExecuteMethod<FirmNameArgs, DataSet>(new FirmNameArgs(firmName), InnerGetPriceCodeByName, null);
+        }
+
+        private DataSet InnerGetPrices(GetPricesArgs e)
+        {
+            UserName = "amp";
+            FunctionName = "GetPrices";
+            //словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
+            Dictionary<string, string> validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer());
+            validRequestFields.Add("OrderID", "c.id");
+            validRequestFields.Add("SalerCode", "c.Code");
+            validRequestFields.Add("SalerName", "ClientsData.ShortName");
+            validRequestFields.Add("ItemID", "ampc.Code");
+            validRequestFields.Add("OriginalCR", "scr.Synonym");
+            validRequestFields.Add("OriginalName", "s.Synonym");
+            validRequestFields.Add("PriceCode", "PricesData.PriceCode");
+            validRequestFields.Add("PrepCode", "c.FullCode");
+
+
+            //System.Collections.Specialized.StringCollection s = new StringCollection();
+            List<string> validSortFields = new List<string>();
+            validSortFields.Add("OrderID");
+            validSortFields.Add("SalerCode");
+            validSortFields.Add("CreaterCode");
+            validSortFields.Add("ItemID");
+            validSortFields.Add("OriginalName");
+            validSortFields.Add("OriginalCR");
+            validSortFields.Add("Unit");
+            validSortFields.Add("Volume");
+            validSortFields.Add("Quantity");
+            validSortFields.Add("Note");
+            validSortFields.Add("Period");
+            validSortFields.Add("Doc");
+            validSortFields.Add("Junk");
+            validSortFields.Add("Upcost");
+            validSortFields.Add("Cost");
+            validSortFields.Add("PriceCode");
+            validSortFields.Add("SalerName");
+            validSortFields.Add("PriceDate");
+            validSortFields.Add("PrepCode");
+            validSortFields.Add("OrderCode1");
+            validSortFields.Add("OrderCode2");
+
+            //проверка входящих параметров
+            if ((e.RangeValue == null) || (e.RangeField == null)
+                || (e.RangeField.Length != e.RangeValue.Length))
+                throw new Exception();
+            //TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
+            //то будет Exception на этапе трансляции
+            //проверка имен полей для фильтрации
+            foreach (string fieldName in e.RangeField)
+                if (!validRequestFields.ContainsKey(fieldName))
+                    throw new ArgumentException(String.Format("По полю {0} не может производиться фильтрация", fieldName), fieldName);
+            //проверка имен полей для сортировки
+            if (e.SortField != null)
+            {
+                foreach (string fieldName in e.SortField)
+                    if (!validSortFields.Exists(delegate(string value)
+                                                    {
+                                                        return String.Compare(fieldName, value, true) == 0;
+                                                    }))
+                        throw new ArgumentException(String.Format("По поляю {0} не может производиться сортировка", fieldName), fieldName);
+            }
+            //проверка направлений сортировки
+            if (e.SortDirection != null)
+            {
+                foreach (string direction in e.SortDirection)
+                    if (!((String.Compare(direction, "Asc", true) == 0) || (String.Compare(direction, "Desc", true) == 0)))
+                        throw new ArgumentException(
+                                String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"",
+                                              direction), direction);
+            }
+
+            //словарь хранящий имена фильтруемых полей и значения фильтрации
+            //           |            |
+            //                имя поля      список значений для него
+            Dictionary<string, List<string>> FiltedField = new Dictionary<string, List<string>>();
+            //разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
+            //транслируются во внутренние
+            for (int i = 0; i < e.RangeField.Length; i++)
+            {
+                //преобразовываем клиентские названия полей во внутренние
+                string innerFieldName = validRequestFields[e.RangeField[i]];
+                //если в словаре не такого поля 
+                if (!FiltedField.ContainsKey(innerFieldName))
+                    //то добавляем его и создаем массив для хранения его значений
+                    FiltedField.Add(innerFieldName, new List<string>());
+                //добавляем значение для фильтрации
+                FiltedField[innerFieldName].Add(e.RangeValue[i]);
+            }
+
+
+            e.DataAdapter.SelectCommand.CommandText +=
+                    @"
+                                SELECT  c.id OrderID,
+                                        ifnull(c.Code, '') SalerCode, 
+                                        ifnull(c.CodeCr, '') CreaterCode, 
+                                        ifnull(ampc.code, '') ItemID, 
+                                        s.synonym OriginalName, 
+                                        ifnull(scr.synonym, '') OriginalCr, 
+                                        ifnull(c.Unit, '') Unit, 
+                                        ifnull(c.Volume, '') Volume, 
+                                        ifnull(c.Quantity, '') Quantity, 
+                                        ifnull(c.Note, '') Note, 
+                                        ifnull(c.Period, '') Period, 
+                                        ifnull(c.Doc, '') Doc, 
+                                        length(c.Junk) > 0 Junk, 
+                                        intersection.PublicCostCorr As UpCost,
+                                        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
+                                        pricesdata.pricecode PriceCode,
+                                        ClientsData.ShortName SalerName,
+                                        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
+                                        c.fullcode PrepCode,
+                                        c.synonymcode OrderCode1,
+                                        c.synonymfirmcrcode OrderCode2
+                                        FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
+                                        LEFT JOIN farm.core0 ampc
+                                        ON ampc.fullcode   = c.fullcode
+                                        and ampc.codefirmcr= c.codefirmcr
+                                        and ampc.firmcode  = 1864
+                                        LEFT JOIN farm.synonymfirmcr scr
+                                        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
+                                        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
+                                WHERE   DisabledByClient                                            = 0 
+                                        and Disabledbyfirm                                          = 0 
+                                        and DisabledByAgency                                        = 0 
+                                        and intersection.clientcode                                 = ?ClientCode  
+                                        and retclientsset.clientcode                                = intersection.clientcode 
+                                        and pricesdata.pricecode                                    = intersection.pricecode 
+                                        and clientsdata.firmcode                                    = pricesdata.firmcode 
+                                        and clientsdata.firmstatus                                  = 1 
+                                        and clientsdata.billingstatus                               = 1 
+                                        and clientsdata.firmtype                                    = 0 
+                                        and to_days(now())-to_days(datecurprice)                    < maxold 
+                                        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
+                                        and pricesregionaldata.regioncode                           = intersection.regioncode 
+                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+                                        and AClientsData.firmcode                                   = intersection.clientcode 
+                                        and (clientsdata.maskregion & intersection.regioncode)      > 0 
+                                        and (AClientsData.maskregion & intersection.regioncode)     > 0 
+                                        and (retclientsset.workregionmask & intersection.regioncode)> 0 
+                                        and pricesdata.agencyenabled                                = 1 
+                                        and pricesdata.enabled                                      = 1 
+                                        and invisibleonclient                                       = 0 
+                                        and pricesdata.pricetype                                   <> 1 
+                                        and pricesregionaldata.enabled                              = 1 
+                                        and fr.firmcode                                             = pricesdata.pricecode 
+                                        and c.firmcode                                              = intersection.costcode 
+                                        and c.synonymcode                                           = s.synonymcode 
+                                        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
+                                        ";
+            if (e.NewEar)
+                e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
+
+            foreach (string fieldName in FiltedField.Keys)
+                e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
+
+            if (!e.OnlyLeader)
+            {
+                //группируем так что бы в исходящем наборе были позиции с уникальным OrderID
+                e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
+                e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
+                e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
+            }
+
+            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+
+            DataSet data = new DataSet();
+            e.DataAdapter.Fill(data, "PriceList");
+
+            if (e.OnlyLeader)
+            {
+                DataTable resultTable = data.Tables[0].Clone();
+                DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
+                foreach (DataRow row in prepCodeTable.Rows)
+                {
+                    DataRow[] orderedRows = data.Tables[0].Select(String.Format("PrepCode = {0}", row["PrepCode"]), "Cost ASC");
+                    resultTable.ImportRow(orderedRows[0]);
+                }
+
+                if (e.Offset > -1)
+                {
+                    DataTable tempTable = resultTable;
+                    resultTable = data.Tables[0].Clone();
+
+                    int count;
+                    if ((e.Count > tempTable.Rows.Count) || (e.Count < e.Offset))
+                        count = tempTable.Rows.Count;
+                    else
+                        count = e.Count;
+
+                    for (int i = e.Offset; i < count; i++)
+                        resultTable.ImportRow(tempTable.Rows[i]);
+                }
+
+                if ((e.SortField != null) && (e.SortField.Length > 0))
+                {
+                    resultTable.DefaultView.Sort = Utils.FormatOrderBlock(e.SortField, e.SortDirection).Substring(10);
+                    resultTable = resultTable.DefaultView.ToTable();
+                }
+                data.Tables.Remove(data.Tables[0]);
+                data.Tables.Add(resultTable);
+            }
+
+            LogQuery(e.DataAdapter.SelectCommand, data, true);
+
+            return data;
+        }
+
+        /// <summary>
+        /// Выбирает список список позиций прайс листов, основываясь на полях 
+        /// фильтрации из RangeField и их значениях из RangeValue.
+        /// </summary>
+        /// <param name="OnlyLeader">Выбирать только позиции имеющие минимальную цену для заданного поставщика</param>
+        /// <param name="NewEar"></param>
+        /// <param name="RangeField">Список полей для которых осуществляется фильтрация. 
+        /// Допустимые значения: PrepCode Int, PriceCode Int, ItemID String, OriginalName String или null
+        /// </param>
+        /// <param name="RangeValue">Список значений ко которым происходит фильтрация.
+        /// Допустимые значения: Int, String - строки могут содержать метасимвол "%".
+        /// Примечание: количество значений должно совпадать с количеством полей.
+        /// </param>
+        /// <param name="SortField">Поля по которым может осуществляться сортировка. 
+        /// Допустимые значения: null, OrderID, SalerCode, CreaterCode, ItemID, OriginalName, 
+        /// OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, Junk, UpCost, Cost, PriceCode, 
+        /// SalerName, PriceDate, PrepCode, OrderCode1, OrderCode2.
+        /// </param>
+        /// <param name="SortOrder">Порядок сортировки для полей из SortField.
+        /// Допустимые значения: "ASC" - прямой порядок сортировки , "DESC" - обратный порядок сортовки.
+        /// Примечание: Количество значений может совпадать или быть меньще количества полей для сортировки.
+        /// Если количество значений меньше то для оставщихся полей бедут применен прямой порядок сортировки (ASC). 
+        /// Пример: SortField = {"OrderID", "Junk" ,"Cost"}, SortOrder = {"DESC"} - в этом случае выборка будет 
+        /// отсортированна так же как и в случае если бы  SortOrder = {"DESC", "ASC", "ASC"}
+        /// </param>
+        /// <param name="Limit">Количество записей в выборке. 
+        /// Примечание: если Limit меньше SelStart то тогда выбираются все записи начиная с SelStart.
+        /// </param>
+        /// <param name="SelStart">Значение с которого начинается выбор. 
+        /// Примечание: следует помнить что первым значением является 0 а не 1.
+        /// </param>
+        /// <returns>DataSet содержащий позиции прайс листов.</returns>
+        [WebMethod()]
+        public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField,
+                                 string[] SortOrder, int Limit, int SelStart)
+        {
+            return
+                    MethodTemplate.ExecuteMethod<GetPricesArgs, DataSet>(
+                            new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart),
+                            InnerGetPrices, null);
+        }
+
+        /// <summary>
+        /// Получает список заказов для клиента AMP.
+        /// </summary>
+        /// <param name="OrderID">Массив идентификаторов заказов
+        /// Допустимые значения: 
+        ///             1. "0" - все новые заказы (*)
+        ///             2. "Номер заказа"
+        ///             3. "!" + "Номер заказа" - все заказы у которых номер больше заданого.
+        /// </param>
+        /// <param name="PriceCode">
+        /// Номер прайса по которому сделан заказ.
+        /// Прмечание: значение равное или меньше 0 игнорируются
+        /// </param>
+        /// <returns>Список заказов</returns>
+        [WebMethod()]
+        public DataSet GetOrders(string[] OrderID, int PriceCode)
+        {
+            return
+                    MethodTemplate.ExecuteMethod<GetOrdersArgs, DataSet>(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null);
+        }
+
+        private DataSet InnerGetOrders(ExecuteArgs e)
+        {
+            GetOrdersArgs args = e as GetOrdersArgs;
+
+            args.DataAdapter.SelectCommand.CommandText +=
+                    @"
+                                SELECT  
+                                        i.firmclientcode as ClientCode, 
+                                        i.firmclientcode2 as ClientCode2, 
+                                        i.firmclientcode3 as ClientCode3, 
+                                        oh.RowID as OrderID,
+                                        cast(oh.PriceDate as char) as PriceDate, 
+                                        cast(oh.WriteTime as char) as OrderDate, 
+                                        ifnull(oh.ClientAddition, '') as Comment,
+                                        ol.Code           as ItemID, 
+                                        ol.Cost, 
+                                        ol.Quantity, 
+                                        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', cd.phone), '') as Addition,
+                                        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
+                                FROM    UserSettings.PricesData pd 
+                                INNER JOIN Orders.OrdersHead oh 
+                                ON pd.PriceCode = oh.PriceCode 
+                                INNER JOIN Orders.OrdersList ol 
+                                ON oh.RowID = ol.OrderID 
+                                INNER JOIN UserSettings.Intersection i 
+                                ON i.ClientCode = oh.ClientCode 
+                                and i.RegionCode= oh.RegionCode 
+                                and i.PriceCode = oh.PriceCode 
+                                INNER JOIN UserSettings.ClientsData cd 
+                                ON cd.FirmCode  = oh.ClientCode 
+                                WHERE  pd.FirmCode = 62
 ";
-				}
-				MySelCmd.CommandText += String.Format(
-					@"
-SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode, 
-        ifnull(c.CodeCr, '') CreaterCode, 
-        ifnull(ampc.code, '') ItemID, 
-        s.synonym OriginalName, 
-        ifnull(scr.synonym, '') OriginalCr, 
-        ifnull(c.Unit, '') Unit, 
-        ifnull(c.Volume, '') Volume, 
-        ifnull(c.Quantity, '') Quantity, 
-        ifnull(c.Note, '') Note, 
-        ifnull(c.Period, '') Period, 
-        ifnull(c.Doc, '') Doc, 
-        length(c.Junk) > 0 Junk, 
-        intersection.PublicCostCorr As UpCost,
-        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
-        pricesdata.pricecode PriceID,
-        ClientsData.ShortName SalerName,
-        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
-        c.fullcode PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr) 
-LEFT JOIN farm.core0 ampc 
-        ON ampc.fullcode   = c.fullcode 
-        and ampc.codefirmcr= c.codefirmcr 
-        and ampc.firmcode  = 1864 
-LEFT JOIN farm.synonymfirmcr scr 
-        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode) 
-        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
-WHERE   DisabledByClient                                            = 0 
-        and Disabledbyfirm                                          = 0 
-        and DisabledByAgency                                        = 0 
-        and intersection.clientcode                                 = {1} 
-        and retclientsset.clientcode                                = intersection.clientcode 
-        and pricesdata.pricecode                                    = intersection.pricecode 
-        and clientsdata.firmcode                                    = pricesdata.firmcode 
-        and clientsdata.firmstatus                                  = 1 
-        and clientsdata.billingstatus                               = 1 
-        and clientsdata.firmtype                                    = 0 
-        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
-        and pricesregionaldata.regioncode                           = intersection.regioncode 
-        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
-        and AClientsData.firmcode                                   = intersection.clientcode 
-        and (clientsdata.maskregion & intersection.regioncode)      > 0 
-        and (AClientsData.maskregion & intersection.regioncode)     > 0 
-        and (retclientsset.workregionmask & intersection.regioncode)> 0 
-        and pricesdata.agencyenabled                                = 1 
-        and pricesdata.enabled                                      = 1 
-        and invisibleonclient                                       = 0 
-        and pricesdata.pricetype                                   <> 1 
-        and to_days(now())-to_days(datecurprice)                    < maxold 
-        and pricesregionaldata.enabled                              = 1 
-        and fr.firmcode                                             = pricesdata.pricecode 
-        and c.firmcode                                              = intersection.costcode 
-        and c.fullcode in {0} 
-        and c.synonymcode = s.synonymcode 
-        and s.firmcode    = ifnull(parentsynonym, pricesdata.pricecode) 
-",
-					FullCodesString, GetClientCode().ToString());
-				if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
-				{
-					inc = 0;
-					MySelCmd.CommandText += " and (";
-					for (int i = 0; i < PriceID.Length; i++)
-					{
-						PriceNameStr = Convert.ToString(PriceID[i]);
-						if (inc > 0)
-						{
-							MySelCmd.CommandText += " or ";
-						}
-						Params = FormatFindStr(PriceNameStr, "ShortName" + inc, "pricesdata.pricecode");
-						MySelCmd.Parameters.Add("ShortName" + inc, Params[1]);
-						MySelCmd.CommandText += Params[0];
-						inc += 1;
-					}
-					MySelCmd.CommandText += ")";
-				}
-				MySelCmd.CommandText += " GROUP BY 1 ";
-				if (!OnlyLeader)
-					MySelCmd.CommandText += " ORDER BY Cost ";
-
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText += ";";
-					MySelCmd.CommandText +=
-						@"
-INSERT 
-INTO    mincosts 
-SELECT  min(cost), 
-        FullCode, 
-        Junk 
-FROM    (prices) 
-GROUP BY FullCode, 
-        Junk; 
-SELECT  OrderID, 
-        SalerCode, 
-        CreaterCode, 
-        ItemID, 
-        OriginalName, 
-        OriginalCr, 
-        Unit, 
-        Volume, 
-        Quantity, 
-        Note, 
-        Period, 
-        Doc, 
-        p.Junk, 
-        UpCost, 
-        Cost, 
-        PriceID, 
-        SalerName, 
-        PriceDate, 
-        p.FullCode PrepCode, 
-        synonymcode OrderCode1, 
-        synonymfirmcrcode OrderCode2 
-FROM    (prices p, mincosts m) 
-WHERE   p.fullcode= m.fullcode 
-        and p.cost= m.mincost 
-        and p.junk= m.junk
-ORDER BY Cost
-";
-				}
-
-				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText +=
-						@"
-DROP temporary table IF EXISTS prices; 
-DROP temporary table IF EXISTS mincosts; 
-";
-				}
-				Logger.Write(MyDA.SelectCommand.CommandText);
-				MyDA.Fill(MyDS, "prices");
-				LogQuery(MySelCmd, MyDS, true);
-				MyTrans.Commit();
-				return MyDS;
-			}
-
-			catch (MySqlException MySQLErr)
-			{
-				if (MyTrans != null)
-				{
-					MyTrans.Rollback();
-				}
-				if ((MySQLErr.Number == 1213) || (MySQLErr.Number == 1205))
-				{
-					Thread.Sleep(100);
-					goto Restart;
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
-			}
-			catch (Exception ex)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
-			}
-			finally
-			{
-				if (MyCn.State == ConnectionState.Open)
-				{
-					MyCn.Close();
-				}
-			}
-			return MyDS;
-		}
-
-		[WebMethod()]
-		public DataSet GetPricesByItemID(string[] ItemID, bool OnlyLeader, uint[] PriceID, Int32 Limit, Int32 SelStart)
-		{
-			string AMPCodes;
-			List<int> AMPCodesArr = new List<int>();
-			List<int> NotAMPCodesArr = new List<int>();
-			FunctionName = "GetPricesByItemID";
-			Restart:
-			try
-			{
-				if (MyCn.State == ConnectionState.Closed)
-					MyCn.Open();
-
-				MyTrans = MyCn.BeginTransaction();
-				MySelCmd.Transaction = MyTrans;
-				if (ItemID != null)
-				{
-					foreach (string item in ItemID)
-					{
-						bool NotID;
-						AMPCodes = item;
-						if (AMPCodes.Length > 0)
-						{
-							if (AMPCodes.StartsWith("!"))
-							{
-								AMPCodes = AMPCodes.Remove(0, 1);
-								NotID = true;
-							}
-							else
-							{
-								NotID = false;
-							}
-							if (AMPCodes.IndexOf("..") > 0)
-							{
-								int SepIndex = AMPCodes.IndexOf("..");
-								int beginIndex = Convert.ToInt32(AMPCodes.Substring(0, SepIndex));
-								int endIndex = Convert.ToInt32(AMPCodes.Substring(SepIndex + 2, AMPCodes.Length - SepIndex - 2));
-								if (beginIndex < endIndex)
-								{
-									if ((beginIndex - endIndex) > 20000)
-										new Exception("Owerflow");
-									for (int Inc = beginIndex; Inc <= endIndex; Inc++)
-									{
-										if (NotID)
-											NotAMPCodesArr.Add(Inc);
-										else
-											AMPCodesArr.Add(Inc);
-									}
-								}
-							}
-							else
-							{
-								if (NotID)
-									NotAMPCodesArr.Add(Convert.ToInt32(AMPCodes));
-								else
-									AMPCodesArr.Add(Convert.ToInt32(AMPCodes));
-							}
-						}
-					}
-				}
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText =
-						@"
-DROP temporary table IF EXISTS prices; 
-DROP temporary table IF EXISTS mincosts; 
-create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
-create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
-INSERT 
-INTO    prices 
-";
-				}
-				MySelCmd.CommandText += String.Format(
-					@"
-SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode, 
-        ifnull(c.CodeCr, '') CreaterCode, 
-        ifnull(ampc.code, '') ItemID, 
-        s.synonym OriginalName, 
-        ifnull(scr.synonym, '') OriginalCr, 
-        ifnull(c.Unit, '') Unit, 
-        ifnull(c.Volume, '') Volume, 
-        ifnull(c.Quantity, '') Quantity, 
-        ifnull(c.Note, '') Note, 
-        ifnull(c.Period, '') Period, 
-        ifnull(c.Doc, '') Doc, 
-        length(c.Junk)> 0 Junk, 
-        intersection.PublicCostCorr As UpCost,
-        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
-        pricesdata.pricecode SalerID,
-        ClientsData.ShortName SalerName,
-        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
-        c.fullcode PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
-LEFT JOIN farm.core0 ampc
-        ON ampc.fullcode   = c.fullcode
-        and ampc.codefirmcr= c.codefirmcr
-        and ampc.firmcode  = 1864
-LEFT JOIN farm.synonymfirmcr scr
-        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
-        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
-WHERE   DisabledByClient                                            = 0 
-        and Disabledbyfirm                                          = 0 
-        and DisabledByAgency                                        = 0 
-        and intersection.clientcode                                 = {0}  
-        and retclientsset.clientcode                                = intersection.clientcode 
-        and pricesdata.pricecode                                    = intersection.pricecode 
-        and clientsdata.firmcode                                    = pricesdata.firmcode 
-        and clientsdata.firmstatus                                  = 1 
-        and clientsdata.billingstatus                               = 1 
-        and clientsdata.firmtype                                    = 0 
-        and to_days(now())-to_days(datecurprice)                    < maxold 
-        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
-        and pricesregionaldata.regioncode                           = intersection.regioncode 
-        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
-        and AClientsData.firmcode                                   = intersection.clientcode 
-        and (clientsdata.maskregion & intersection.regioncode)      > 0 
-        and (AClientsData.maskregion & intersection.regioncode)     > 0 
-        and (retclientsset.workregionmask & intersection.regioncode)> 0 
-        and pricesdata.agencyenabled                                = 1 
-        and pricesdata.enabled                                      = 1 
-        and invisibleonclient                                       = 0 
-        and pricesdata.pricetype                                   <> 1 
-        and pricesregionaldata.enabled                              = 1 
-        and fr.firmcode                                             = pricesdata.pricecode 
-        and c.firmcode                                              = intersection.costcode
-        and c.synonymcode                                           = s.synonymcode 
-        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
-",
-					GetClientCode().ToString());
-
-				MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceID);
-
-
-				if (NotAMPCodesArr.Count > 0)
-				{
-					MySelCmd.CommandText += " and ampc.code not in (";
-					for (int Inc = 0; Inc <= NotAMPCodesArr.Count - 1; Inc++)
-					{
-						MySelCmd.CommandText += "'" + NotAMPCodesArr[Inc] + "'";
-						if (Inc < NotAMPCodesArr.Count - 1)
-						{
-							MySelCmd.CommandText += ",";
-						}
-					}
-					MySelCmd.CommandText += ")";
-				}
-				if (AMPCodesArr.Count > 0)
-				{
-					MySelCmd.CommandText += " and ampc.code in (";
-					for (int Inc = 0; Inc <= AMPCodesArr.Count - 1; Inc++)
-					{
-						MySelCmd.CommandText += AMPCodesArr[Inc];
-						if (Inc < AMPCodesArr.Count - 1)
-						{
-							MySelCmd.CommandText += ",";
-						}
-					}
-					MySelCmd.CommandText += ")";
-				}
-
-				MySelCmd.CommandText += " group by 1 ";
-				if (!OnlyLeader)
-					MySelCmd.CommandText += " ORDER BY Cost ";
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText += ";";
-					MySelCmd.CommandText +=
-						@"
-INSERT 
-INTO    mincosts 
-SELECT  min(cost), 
-        FullCode, 
-        Junk 
-FROM    (prices) 
-GROUP BY FullCode, 
-        Junk; 
-SELECT  OrderID, 
-        SalerCode, 
-        CreaterCode, 
-        ItemID, 
-        OriginalName, 
-        OriginalCr, 
-        Unit, 
-        Volume, 
-        Quantity, 
-        Note, 
-        Period, 
-        Doc, 
-        p.Junk, 
-        UpCost, 
-        Cost, 
-        SalerID, 
-        SalerName, 
-        PriceDate, 
-        p.FullCode PrepCode, 
-        synonymcode OrderCode1, 
-        synonymfirmcrcode OrderCode2 
-FROM    (prices p, mincosts m) 
-WHERE   p.fullcode= m.fullcode 
-        and p.cost= m.mincost 
-        and p.junk= m.junk
-ORDER BY Cost
-";
-				}
-				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText +=
-						@"
-DROP temporary table IF EXISTS prices; 
-DROP temporary table IF EXISTS mincosts; 
-";
-				}
-				Logger.Write(MyDA.SelectCommand.CommandText);
-				MyDA.Fill(MyDS, "Prices");
-				LogQuery(MySelCmd, MyDS, true);
-				MyTrans.Commit();
-				return MyDS;
-			}
-			catch (MySqlException MySQLErr)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
-				{
-					Thread.Sleep(100);
-					goto Restart;
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
-			}
-			catch (Exception ex)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
-			}
-			finally
-			{
-				if (MyCn.State == ConnectionState.Open)
-				{
-					MyCn.Close();
-				}
-			}
-			return MyDS;
-		}
-
-		[WebMethod()]
-		public DataSet GetPricesByOriginalName(string[] OriginalName, uint[] PriceId, bool OnlyLeader, bool NewEar,
-		                                       Int32 Limit, Int32 SelStart)
-		{
-			string[] Params;
-			int Inc;
-			FunctionName = "GetPricesByName";
-			Restart:
-			try
-			{
-				if (MyCn.State == ConnectionState.Closed)
-					MyCn.Open();
-
-				MyTrans = MyCn.BeginTransaction();
-				MySelCmd.Transaction = MyTrans;
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText =
-						@"
-DROP temporary table IF EXISTS prices; 
-DROP temporary table IF EXISTS mincosts; 
-create temporary table prices(OrderID int(32) unsigned, SalerCode varchar(20) not null default 0, CreaterCode varchar(20) not null default 0, ItemID varchar(50) not null default 0, OriginalName varchar(255), OriginalCr varchar(255), Unit varchar(15) not null default 0, Volume varchar(15) not null default 0, Quantity varchar(15) not null default 0, Note varchar(50) not null default 0, Period varchar(20) not null default 0, Doc varchar(20) not null default 0, Junk Bit, UpCost decimal(5,3), Cost Decimal(8,2), SalerID int(32) unsigned, SalerName varchar(20), PriceDate varchar(20), FullCode int(32) unsigned, SynonymCode int(32) unsigned, SynonymFirmCrCode int(32) unsigned, primary key ID(OrderID))type = heap; 
-create temporary table mincosts( MinCost decimal(8,2), FullCode int(32) unsigned, Junk Bit) type = heap; 
-INSERT 
-INTO    prices 
-";
-				}
-				MySelCmd.CommandText += String.Format(
-					@"
-SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode, 
-        ifnull(c.CodeCr, '') CreaterCode, 
-        ifnull(ampc.code, '') ItemID, 
-        s.synonym OriginalName, 
-        ifnull(scr.synonym, '') OriginalCr, 
-        ifnull(c.Unit, '') Unit, 
-        ifnull(c.Volume, '') Volume, 
-        ifnull(c.Quantity, '') Quantity, 
-        ifnull(c.Note, '') Note, 
-        ifnull(c.Period, '') Period, 
-        ifnull(c.Doc, '') Doc, 
-        length(c.Junk) > 0 Junk, 
-        intersection.PublicCostCorr As UpCost,
-        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
-        pricesdata.pricecode SalerID,
-        ClientsData.ShortName SalerName,
-        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
-        c.fullcode PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
-LEFT JOIN farm.core0 ampc
-        ON ampc.fullcode   = c.fullcode
-        and ampc.codefirmcr= c.codefirmcr
-        and ampc.firmcode  = 1864
-LEFT JOIN farm.synonymfirmcr scr
-        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
-        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
-WHERE   DisabledByClient                                            = 0 
-        and Disabledbyfirm                                          = 0 
-        and DisabledByAgency                                        = 0 
-        and intersection.clientcode                                 = {0}  
-        and retclientsset.clientcode                                = intersection.clientcode 
-        and pricesdata.pricecode                                    = intersection.pricecode 
-        and clientsdata.firmcode                                    = pricesdata.firmcode 
-        and clientsdata.firmstatus                                  = 1 
-        and clientsdata.billingstatus                               = 1 
-        and clientsdata.firmtype                                    = 0 
-        and to_days(now())-to_days(datecurprice)                    < maxold 
-        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
-        and pricesregionaldata.regioncode                           = intersection.regioncode 
-        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
-        and AClientsData.firmcode                                   = intersection.clientcode 
-        and (clientsdata.maskregion & intersection.regioncode)      > 0 
-        and (AClientsData.maskregion & intersection.regioncode)     > 0 
-        and (retclientsset.workregionmask & intersection.regioncode)> 0 
-        and pricesdata.agencyenabled                                = 1 
-        and pricesdata.enabled                                      = 1 
-        and invisibleonclient                                       = 0 
-        and pricesdata.pricetype                                   <> 1 
-        and pricesregionaldata.enabled                              = 1 
-        and fr.firmcode                                             = pricesdata.pricecode 
-        and c.firmcode                                              = intersection.costcode
-        and c.synonymcode                                           = s.synonymcode 
-        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
-",
-					GetClientCode().ToString());
-
-				if (NewEar)
-					MySelCmd.CommandText += " and ampc.id is null";
-
-				MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceId);
-
-				if (OriginalName != null)
-				{
-					Inc = 0;
-					MySelCmd.CommandText += " and (";
-					foreach (string NameStr in OriginalName)
-					{
-						if (NameStr.Length > 0)
-						{
-							if (Inc > 0)
-							{
-								MySelCmd.CommandText += " or ";
-							}
-							Params = FormatFindStr(NameStr, "Name" + Inc, "s.synonym");
-							MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
-							MySelCmd.CommandText += Params[0];
-							Inc += 1;
-						}
-					}
-					MySelCmd.CommandText += ")";
-				}
-				MySelCmd.CommandText += " group by 1";
-				if (!OnlyLeader)
-					MySelCmd.CommandText += " ORDER BY Cost ";
-
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText += ";";
-					MySelCmd.CommandText +=
-						@"
-INSERT 
-INTO    mincosts 
-SELECT  min(cost), 
-        FullCode, 
-        Junk 
-FROM    (prices) 
-GROUP BY FullCode, 
-        Junk; 
-SELECT  OrderID, 
-        SalerCode, 
-        CreaterCode, 
-        ItemID, 
-        OriginalName, 
-        OriginalCr, 
-        Unit, 
-        Volume, 
-        Quantity, 
-        Note, 
-        Period, 
-        Doc, 
-        p.Junk, 
-        UpCost, 
-        Cost, 
-        SalerID, 
-        SalerName, 
-        PriceDate, 
-        p.FullCode PrepCode, 
-        synonymcode OrderCode1, 
-        synonymfirmcrcode OrderCode2 
-FROM    (prices p, mincosts m) 
-WHERE   p.fullcode= m.fullcode 
-        and p.cost= m.mincost 
-        and p.junk= m.junk
-ORDER BY Cost
-";
-				}
-				MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
-				if (OnlyLeader)
-				{
-					MySelCmd.CommandText +=
-						@"
-DROP temporary table IF EXISTS prices; 
-DROP temporary table IF EXISTS mincosts; 
-";
-				}
-
-				Logger.Write(MyDA.SelectCommand.CommandText);
-				MyDA.Fill(MyDS, "Prices");
-				LogQuery(MySelCmd, MyDS, true);
-				MyTrans.Commit();
-				return MyDS;
-			}
-			catch (MySqlException MySQLErr)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
-				{
-					Thread.Sleep(100);
-					goto Restart;
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
-			}
-			catch (Exception ex)
-			{
-				if (!(MyTrans == null))
-				{
-					MyTrans.Rollback();
-				}
-				AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
-			}
-			finally
-			{
-				if (MyCn.State == ConnectionState.Open)
-				{
-					MyCn.Close();
-				}
-			}
-			return MyDS;
-		}
-
-		[WebMethod()]
-		public DataSet PostOrder(long[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
-		                         bool[] Junk)
-		{
-			return
-				MethodTemplate.ExecuteMethod<PostOrderArgs, DataSet>(
-					new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, null, MyCn);
-		}
-
-		private static DataSet InnerPostOrder(PostOrderArgs e)
-		{
-			string CoreIDString;
-			int Index;
-			DataSet dsRes;
-			DataTable dtPricesRes;
-
-			long[] Res = new long[e.CoreIDs.Length];
-			for (int i = 0; i < Res.Length; i++)
-			{
-				Res[i] = -1;
-			}
-			DataSet dsPost;
-			DataTable dtSummaryOrder;
-			DataTable dtOrderHead;
-
-			//Если длины не равны, то возвращаем null
-			if ((e.CoreIDs == null) || (e.Quantities == null) || (e.SynonymCodes == null) || (e.SynonymFirmCrCodes == null)
-			    || (e.Junks == null)
-			    || (e.CoreIDs.Length != e.Quantities.Length)
-			    || (e.CoreIDs.Length != e.SynonymCodes.Length) || (e.CoreIDs.Length != e.SynonymFirmCrCodes.Length)
-			    || (e.CoreIDs.Length != e.Junks.Length))
-				return null;
-
-			CoreIDString = "(";
-			foreach (long ID in e.CoreIDs)
-			{
-				if ((CoreIDString.Length > 1) && (ID > 0))
-				{
-					CoreIDString += ", ";
-				}
-				if (ID > 0)
-				{
-					CoreIDString += ID.ToString();
-				}
-			}
-			CoreIDString += ")";
-
-			dsPost = new DataSet();
-
-			e.DataAdapter.SelectCommand.CommandText =
-				@"select
-  cd.FirmCode ClientCode,
-  cd.RegionCode,
-  pc.ShowPriceCode PriceCode,
-  cast(if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) as datetime) PriceDate,
-  c.Id,
-  c.FullCode,
-  c.CodeFirmCr,
-  c.SynonymCode,
-  c.SynonymFirmCrCode,
-  c.Code,
-  c.CodeCr,
-  0 Quantity,
-  length(c.Junk) > 0 Junk,
-  length(c.Await) > 0 Await,
-  c.BaseCost,
-  round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost
-from
-  (
-  usersettings.clientsdata cd,
-  farm.core0 c
-  )
-  inner join farm.formrules fr on fr.FirmCode = c.FirmCode
-  inner join usersettings.intersection ins on ins.ClientCode = cd.FirmCode and ins.RegionCode = cd.RegionCode and ins.CostCode = c.FirmCode
-  inner join usersettings.pricesdata pd on pd.PriceCode = ins.PriceCode
-  inner join usersettings.pricescosts pc on pc.CostCode = c.FirmCode
-  inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = cd.RegionCode
-where
-  cd.FirmCode = ?ClientCode
-and c.ID in " +
-				CoreIDString;
-
-			e.DataAdapter.SelectCommand.Parameters.Clear();
-			e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
-			e.DataAdapter.Fill(dsPost, "SummaryOrder");
-			dtSummaryOrder = dsPost.Tables["SummaryOrder"];
-
-			DataRow[] drs;
-			dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof (string)));
-			for (int i = 0; i < e.CoreIDs.Length; i++)
-			{
-				drs = dtSummaryOrder.Select("Id = " + e.CoreIDs[i].ToString());
-				if (drs.Length > 0)
-				{
-					drs[0]["Quantity"] = e.Quantities[i];
-					if ((e.Messages != null) && (e.Messages.Length > i))
-						drs[0]["Message"] = e.Messages[i];
-				}
-			}
-
-			dtOrderHead = dtSummaryOrder.DefaultView.ToTable(true, "ClientCode", "RegionCode", "PriceCode", "PriceDate");
-			dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof (long)));
-
-			DataRow[] drOrderList;
-			foreach (DataRow drOH in dtOrderHead.Rows)
-			{
-				drOrderList = dtSummaryOrder.Select("PriceCode = " + drOH["PriceCode"].ToString());
-				if (drOrderList.Length > 0)
-				{
-					e.DataAdapter.SelectCommand.CommandText =
-						"insert into orders.ordershead (WriteTime, ClientCode, PriceCode, RegionCode, PriceDate, RowCount, ClientAddition, Processed)" +
-						"values(now(), ?ClientCode, ?PriceCode, ?RegionCode, ?PriceDate, ?RowCount, ?ClientAddition, 0);";
-					e.DataAdapter.SelectCommand.CommandText += "select LAST_INSERT_ID()";
-					e.DataAdapter.SelectCommand.Parameters.Clear();
-					e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", drOH["ClientCode"]);
-					e.DataAdapter.SelectCommand.Parameters.Add("PriceCode", drOH["PriceCode"]);
-					e.DataAdapter.SelectCommand.Parameters.Add("RegionCode", drOH["RegionCode"]);
-					e.DataAdapter.SelectCommand.Parameters.Add("PriceDate", drOH["PriceDate"]);
-					e.DataAdapter.SelectCommand.Parameters.Add("RowCount", drOrderList.Length);
-					e.DataAdapter.SelectCommand.Parameters.Add("ClientAddition", drOrderList[0]["Message"]);
-					drOH["OrderID"] = Convert.ToInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
-					e.DataAdapter.SelectCommand.CommandText =
-						"insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
-					e.DataAdapter.SelectCommand.Parameters.Clear();
-					e.DataAdapter.SelectCommand.Parameters.Add("OrderID", MySqlDbType.Int64);
-					e.DataAdapter.SelectCommand.Parameters.Add("FullCode", MySqlDbType.Int64);
-					e.DataAdapter.SelectCommand.Parameters.Add("CodeFirmCr", MySqlDbType.Int64);
-					e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int64);
-					e.DataAdapter.SelectCommand.Parameters.Add("SynonymFirmCrCode", MySqlDbType.Int64);
-					e.DataAdapter.SelectCommand.Parameters.Add("Code", MySqlDbType.VarString);
-					e.DataAdapter.SelectCommand.Parameters.Add("CodeCr", MySqlDbType.VarString);
-					e.DataAdapter.SelectCommand.Parameters.Add("Junk", MySqlDbType.Byte);
-					e.DataAdapter.SelectCommand.Parameters.Add("Await", MySqlDbType.Byte);
-					e.DataAdapter.SelectCommand.Parameters.Add("Cost", MySqlDbType.Decimal);
-					e.DataAdapter.SelectCommand.Parameters.Add("Quantity", MySqlDbType.Int32);
-					foreach (DataRow drOL in drOrderList)
-					{
-						e.DataAdapter.SelectCommand.Parameters["OrderID"].Value = drOH["OrderID"];
-						e.DataAdapter.SelectCommand.Parameters["FullCode"].Value = drOL["FullCode"];
-						e.DataAdapter.SelectCommand.Parameters["CodeFirmCr"].Value = drOL["CodeFirmCr"];
-						e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = drOL["SynonymCode"];
-						e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = drOL["SynonymFirmCrCode"];
-						e.DataAdapter.SelectCommand.Parameters["Code"].Value = drOL["Code"];
-						e.DataAdapter.SelectCommand.Parameters["CodeCr"].Value = drOL["CodeCr"];
-						e.DataAdapter.SelectCommand.Parameters["Junk"].Value = drOL["Junk"];
-						e.DataAdapter.SelectCommand.Parameters["Await"].Value = drOL["Await"];
-						e.DataAdapter.SelectCommand.Parameters["Cost"].Value = drOL["Cost"];
-						e.DataAdapter.SelectCommand.Parameters["Quantity"].Value = drOL["Quantity"];
-						e.DataAdapter.SelectCommand.ExecuteNonQuery();
-						Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
-						if (Index > -1)
-							Res[Index] = Convert.ToInt64(drOH["OrderID"]);
-					}
-				}
-			}
-
-			//начинаем заполнять таблицу результатов
-			dtPricesRes = AMPWebService.PostOrder.GetPricesDataTable();
-			dtPricesRes.TableName = "Prices";
-
-			DataRow drOK;
-
-			DataTable dtTemp;
-
-			e.DataAdapter.SelectCommand.CommandText =
-				@"select
-  c.id OrderID,
-  c.id OriginalOrderID,
-  ifnull(c.Code, '') SalerCode,
-  ifnull(c.CodeCr, '') CreaterCode,
-  ifnull(ampc.code, '') ItemID,
-  s.synonym OriginalName,
-  ifnull(scr.synonym, '') OriginalCr,
-  ifnull(c.Unit, '') Unit,
-  ifnull(c.Volume, '') Volume,
-  ifnull(c.Quantity, '') Quantity,
-  ifnull(c.Note, '') Note,
-  ifnull(c.Period, '') Period,
-  ifnull(c.Doc, '') Doc,
-  length(c.Junk) > 0 Junk,
-  ins.PublicCostCorr As UpCost,
-  round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
-  pd.pricecode SalerID,
-  ClientsData.ShortName SalerName,
-  if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
-  c.fullcode PrepCode,
-  c.synonymcode OrderCode1,
-  c.synonymfirmcrcode OrderCode2
-from
-  usersettings.clientsdata cd
-  inner join usersettings.intersection ins on ins.ClientCode = cd.FirmCode
-  inner join usersettings.retclientsset on retclientsset.clientcode=ins.clientcode
-  inner join usersettings.pricesdata pd on pd.PriceCode = ins.PriceCode
-  inner join usersettings.clientsdata on clientsdata.firmcode=pd.firmcode
-  inner join farm.core0 c on c.FirmCode = ins.CostCode
-  inner join farm.formrules fr on fr.FirmCode = pd.PriceCode
-  inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = ins.RegionCode
-  left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864
-  left join farm.synonym s on s.firmcode=ifnull(fr.parentsynonym, pd.pricecode)  and c.synonymcode=s.synonymcode
-  left join farm.synonymfirmcr scr on scr.firmcode=ifnull(fr.parentsynonym, pd.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode
-where
-  cd.FirmCode = ?ClientCode
-  and ins.DisabledByClient=0
-  and ins.Disabledbyfirm=0
-  and ins.DisabledByAgency=0
-  and clientsdata.firmstatus=1
-  and clientsdata.billingstatus=1
-  and clientsdata.firmtype=0
-  and clientsdata.firmsegment=cd.firmsegment
-  and (clientsdata.maskregion & ins.regioncode)>0
-  and (cd.maskregion & ins.regioncode)>0
-  and (retclientsset.workregionmask & ins.regioncode)>0
-  and pd.agencyenabled=1
-  and pd.enabled=1
-  and ins.invisibleonclient=0
-  and pd.pricetype<>1
-  and to_days(now())-to_days(fr.datecurprice)<fr.maxold
-  and prd.enabled=1
-  and c.SynonymCode = ?SynonymCode
-  and c.SynonymFirmCrCode = ?SynonymFirmCrCode
-  and (length(c.Junk) > 0 = ?Junk)
-";
-			e.DataAdapter.SelectCommand.Parameters.Clear();
-			e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
-			e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int32);
-			e.DataAdapter.SelectCommand.Parameters.Add("SynonymFirmCrCode", MySqlDbType.Int32);
-			e.DataAdapter.SelectCommand.Parameters.Add("Junk", MySqlDbType.Bit);
-
-			for (int i = 0; i < Res.Length; i++)
-			{
-				if (Res[i] > -1)
-				{
-					drOK = dtPricesRes.NewRow();
-					drOK["OrderID"] = Res[i];
-					drOK["OriginalOrderID"] = e.CoreIDs[i];
-					dtPricesRes.Rows.Add(drOK);
-				}
-				else
-				{
-					dtTemp = AMPWebService.PostOrder.GetPricesDataTable();
-					e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = e.SynonymCodes[i];
-					e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
-					e.DataAdapter.SelectCommand.Parameters["Junk"].Value = e.Junks[i];
-					e.DataAdapter.Fill(dtTemp);
-
-					if (dtTemp.Rows.Count > 0)
-					{
-						dtTemp.DefaultView.Sort = "Cost";
-						drOK = dtPricesRes.NewRow();
-						drOK.ItemArray = dtTemp.DefaultView[0].Row.ItemArray;
-						drOK["OriginalOrderID"] = e.CoreIDs[i];
-						dtPricesRes.Rows.Add(drOK);
-					}
-					else
-					{
-						drOK = dtPricesRes.NewRow();
-						drOK["OrderID"] = -1;
-						drOK["OriginalOrderID"] = e.CoreIDs[i];
-						dtPricesRes.Rows.Add(drOK);
-					}
-				}
-			}
-
-
-			//Формируем результирующий датасет
-			dsRes = new DataSet();
-			dsRes.Tables.Add(dtPricesRes);
-
-			/*
-			 PostOrder - отправка заказов по коду позиции
-
-			Входные данные:
-			OrderID() int(32) unsigned - массив кодов(Prices.OrderID) для заказа препаратов
-			Quantity() int(32) unsigned - массив количеств заказываемых препаратов
-
-			Ответ:
-			PostOrder() Int(32) unsigned - массив кодов подтверждения, коды принимают значения:
-			PostOrder >=0 - код сформированного заказа(Инфорум)
-			PostOrder=-1 - ошибка формирования заказа.
-
-			 */
-			return dsRes;
-		}
-
-		private DataSet InnerGetPriceCodeByName(FirmNameArgs e)
-		{
-			e.DataAdapter.SelectCommand.CommandText =
-				@"
-SELECT  PricesData.PriceCode as PriceCode, 
-		PricesData.PriceName as PriceName,
-		PriceInfo,
-		ClientsData.FirmCode,
-        ClientsData.ShortName as FirmName, 
-		RegionalData.ContactInfo,
-		RegionalData.OperativeInfo
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, RegionalData) 
-WHERE   DisabledByClient                                            = 0 
-        and Disabledbyfirm                                          = 0 
-        and DisabledByAgency                                        = 0 
-        and intersection.clientcode                                 = ?ClientCode 
-        and retclientsset.clientcode                                = intersection.clientcode 
-        and pricesdata.pricecode                                    = intersection.pricecode 
-        and clientsdata.firmcode                                    = pricesdata.firmcode 
-        and clientsdata.firmstatus                                  = 1 
-        and clientsdata.billingstatus                               = 1 
-        and clientsdata.firmtype                                    = 0 
-        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
-        and pricesregionaldata.regioncode                           = intersection.regioncode 
-        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
-        and AClientsData.firmcode                                   = intersection.clientcode 
-        and (clientsdata.maskregion & intersection.regioncode)      > 0 
-        and (AClientsData.maskregion & intersection.regioncode)     > 0 
-        and (retclientsset.workregionmask & intersection.regioncode)> 0 
-        and pricesdata.agencyenabled                                = 1 
-        and pricesdata.enabled                                      = 1 
-        and invisibleonclient                                       = 0 
-        and pricesdata.pricetype                                   <> 1 
-        and pricesregionaldata.enabled                              = 1
-        and RegionalData.FirmCode = ClientsData.FirmCode
-        and RegionalData.RegionCode = Intersection.RegionCode
-";
-
-
-			e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
-
-			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-
-			DataSet data = new DataSet();
-			e.DataAdapter.Fill(data, "PriceList");
-
-			return data;
-		}
-
-		[WebMethod()]
-		public DataSet GetPriceCodeByName(string[] firmName)
-		{
-			return MethodTemplate.ExecuteMethod<FirmNameArgs, DataSet>(new FirmNameArgs(firmName), InnerGetPriceCodeByName, null);
-		}
-
-		private DataSet InnerGetPrices(GetPricesArgs e)
-		{
-			UserName = "amp";
-			FunctionName = "GetPrices";
-			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
-			Dictionary<string, string> validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer());
-			validRequestFields.Add("OrderID", "c.id");
-			validRequestFields.Add("SalerCode", "c.Code");
-			validRequestFields.Add("SalerName", "ClientsData.ShortName");
-			validRequestFields.Add("ItemID", "ampc.Code");
-			validRequestFields.Add("OriginalCR", "scr.Synonym");
-			validRequestFields.Add("OriginalName", "s.Synonym");
-			validRequestFields.Add("PriceCode", "PricesData.PriceCode");
-			validRequestFields.Add("PrepCode", "c.FullCode");
-
-
-			//System.Collections.Specialized.StringCollection s = new StringCollection();
-			List<string> validSortFields = new List<string>();
-			validSortFields.Add("OrderID");
-			validSortFields.Add("SalerCode");
-			validSortFields.Add("CreaterCode");
-			validSortFields.Add("ItemID");
-			validSortFields.Add("OriginalName");
-			validSortFields.Add("OriginalCR");
-			validSortFields.Add("Unit");
-			validSortFields.Add("Volume");
-			validSortFields.Add("Quantity");
-			validSortFields.Add("Note");
-			validSortFields.Add("Period");
-			validSortFields.Add("Doc");
-			validSortFields.Add("Junk");
-			validSortFields.Add("Upcost");
-			validSortFields.Add("Cost");
-			validSortFields.Add("PriceCode");
-			validSortFields.Add("SalerName");
-			validSortFields.Add("PriceDate");
-			validSortFields.Add("PrepCode");
-			validSortFields.Add("OrderCode1");
-			validSortFields.Add("OrderCode2");
-
-			//проверка входящих параметров
-			if ((e.RangeValue == null) || (e.RangeField == null)
-			    || (e.RangeField.Length != e.RangeValue.Length))
-				throw new Exception();
-			//TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
-			//то будет Exception на этапе трансляции
-			//проверка имен полей для фильтрации
-			foreach (string fieldName in e.RangeField)
-				if (!validRequestFields.ContainsKey(fieldName))
-					throw new ArgumentException(String.Format("По полю {0} не может производиться фильтрация", fieldName), fieldName);
-			//проверка имен полей для сортировки
-			if (e.SortField != null)
-			{
-				foreach (string fieldName in e.SortField)
-					if (!validSortFields.Exists(delegate(string value)
-					                            	{
-					                            		return String.Compare(fieldName, value, true) == 0;
-					                            	}))
-						throw new ArgumentException(String.Format("По поляю {0} не может производиться сортировка", fieldName), fieldName);
-			}
-			//проверка направлений сортировки
-			if (e.SortDirection != null)
-			{
-				foreach (string direction in e.SortDirection)
-					if (!((String.Compare(direction, "Asc", true) == 0) || (String.Compare(direction, "Desc", true) == 0)))
-						throw new ArgumentException(
-							String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"",
-							              direction), direction);
-			}
-
-			//словарь хранящий имена фильтруемых полей и значения фильтрации
-			//           |            |
-			//		  имя поля	список значений для него
-			Dictionary<string, List<string>> FiltedField = new Dictionary<string, List<string>>();
-			//разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
-			//транслируются во внутренние
-			for (int i = 0; i < e.RangeField.Length; i++)
-			{
-				//преобразовываем клиентские названия полей во внутренние
-				string innerFieldName = validRequestFields[e.RangeField[i]];
-				//если в словаре не такого поля 
-				if (!FiltedField.ContainsKey(innerFieldName))
-					//то добавляем его и создаем массив для хранения его значений
-					FiltedField.Add(innerFieldName, new List<string>());
-				//добавляем значение для фильтрации
-				FiltedField[innerFieldName].Add(e.RangeValue[i]);
-			}
-
-
-			e.DataAdapter.SelectCommand.CommandText +=
-				@"
-SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode, 
-        ifnull(c.CodeCr, '') CreaterCode, 
-        ifnull(ampc.code, '') ItemID, 
-        s.synonym OriginalName, 
-        ifnull(scr.synonym, '') OriginalCr, 
-        ifnull(c.Unit, '') Unit, 
-        ifnull(c.Volume, '') Volume, 
-        ifnull(c.Quantity, '') Quantity, 
-        ifnull(c.Note, '') Note, 
-        ifnull(c.Period, '') Period, 
-        ifnull(c.Doc, '') Doc, 
-        length(c.Junk) > 0 Junk, 
-        intersection.PublicCostCorr As UpCost,
-        round(if((1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost< c.minboundcost, c.minboundcost, (1+pricesdata.UpCost/100)*(1+pricesregionaldata.UpCost/100) *(1+(intersection.PublicCostCorr+intersection.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
-        pricesdata.pricecode PriceCode,
-        ClientsData.ShortName SalerName,
-        if(fr.datelastform> fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
-        c.fullcode PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.core0 c, farm.synonym s, farm.formrules fr)
-LEFT JOIN farm.core0 ampc
-        ON ampc.fullcode   = c.fullcode
-        and ampc.codefirmcr= c.codefirmcr
-        and ampc.firmcode  = 1864
-LEFT JOIN farm.synonymfirmcr scr
-        ON scr.firmcode                                             = ifnull(parentsynonym, pricesdata.pricecode)
-        and c.synonymfirmcrcode                                     = scr.synonymfirmcrcode 
-WHERE   DisabledByClient                                            = 0 
-        and Disabledbyfirm                                          = 0 
-        and DisabledByAgency                                        = 0 
-        and intersection.clientcode                                 = ?ClientCode  
-        and retclientsset.clientcode                                = intersection.clientcode 
-        and pricesdata.pricecode                                    = intersection.pricecode 
-        and clientsdata.firmcode                                    = pricesdata.firmcode 
-        and clientsdata.firmstatus                                  = 1 
-        and clientsdata.billingstatus                               = 1 
-        and clientsdata.firmtype                                    = 0 
-        and to_days(now())-to_days(datecurprice)                    < maxold 
-        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
-        and pricesregionaldata.regioncode                           = intersection.regioncode 
-        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
-        and AClientsData.firmcode                                   = intersection.clientcode 
-        and (clientsdata.maskregion & intersection.regioncode)      > 0 
-        and (AClientsData.maskregion & intersection.regioncode)     > 0 
-        and (retclientsset.workregionmask & intersection.regioncode)> 0 
-        and pricesdata.agencyenabled                                = 1 
-        and pricesdata.enabled                                      = 1 
-        and invisibleonclient                                       = 0 
-        and pricesdata.pricetype                                   <> 1 
-        and pricesregionaldata.enabled                              = 1 
-        and fr.firmcode                                             = pricesdata.pricecode 
-        and c.firmcode                                              = intersection.costcode 
-        and c.synonymcode                                           = s.synonymcode 
-        and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
-";
-			if (e.NewEar)
-				e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
-
-			foreach (string fieldName in FiltedField.Keys)
-				e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
-
-			if (!e.OnlyLeader)
-			{
-				//группируем так что бы в исходящем наборе были позиции с уникальным OrderID
-				e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
-				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
-				e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
-			}
-
-			e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-
-			DataSet data = new DataSet();
-			e.DataAdapter.Fill(data, "PriceList");
-
-			if (e.OnlyLeader)
-			{
-				DataTable resultTable = data.Tables[0].Clone();
-				DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
-				foreach (DataRow row in prepCodeTable.Rows)
-				{
-					DataRow[] orderedRows = data.Tables[0].Select(String.Format("PrepCode = {0}", row["PrepCode"]), "Cost ASC");
-					resultTable.ImportRow(orderedRows[0]);
-				}
-
-				if (e.Offset > -1)
-				{
-					DataTable tempTable = resultTable;
-					resultTable = data.Tables[0].Clone();
-
-					int count;
-					if ((e.Count > tempTable.Rows.Count) || (e.Count < e.Offset))
-						count = tempTable.Rows.Count;
-					else
-						count = e.Count;
-
-					for (int i = e.Offset; i < count; i++)
-						resultTable.ImportRow(tempTable.Rows[i]);
-				}
-
-				if ((e.SortField != null) && (e.SortField.Length > 0))
-				{
-					resultTable.DefaultView.Sort = Utils.FormatOrderBlock(e.SortField, e.SortDirection).Substring(10);
-					resultTable = resultTable.DefaultView.ToTable();
-				}
-				data.Tables.Remove(data.Tables[0]);
-				data.Tables.Add(resultTable);
-			}
-
-			LogQuery(e.DataAdapter.SelectCommand, data, true);
-
-			return data;
-		}
-
-		/// <summary>
-		/// Выбирает список список позиций прайс листов, основываясь на полях 
-		/// фильтрации из RangeField и их значениях из RangeValue.
-		/// </summary>
-		/// <param name="OnlyLeader">Выбирать только позиции имеющие минимальную цену для заданного поставщика</param>
-		/// <param name="NewEar"></param>
-		/// <param name="RangeField">Список полей для которых осуществляется фильтрация. 
-		/// Допустимые значения: PrepCode Int, PriceCode Int, ItemID String, OriginalName String или null
-		/// </param>
-		/// <param name="RangeValue">Список значений ко которым происходит фильтрация.
-		/// Допустимые значения: Int, String - строки могут содержать метасимвол "%".
-		/// Примечание: количество значений должно совпадать с количеством полей.
-		/// </param>
-		/// <param name="SortField">Поля по которым может осуществляться сортировка. 
-		/// Допустимые значения: null, OrderID, SalerCode, CreaterCode, ItemID, OriginalName, 
-		/// OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, Junk, UpCost, Cost, PriceCode, 
-		/// SalerName, PriceDate, PrepCode, OrderCode1, OrderCode2.
-		/// </param>
-		/// <param name="SortOrder">Порядок сортировки для полей из SortField.
-		/// Допустимые значения: "ASC" - прямой порядок сортировки , "DESC" - обратный порядок сортовки.
-		/// Примечание: Количество значений может совпадать или быть меньще количества полей для сортировки.
-		/// Если количество значений меньше то для оставщихся полей бедут применен прямой порядок сортировки (ASC). 
-		/// Пример: SortField = {"OrderID", "Junk" ,"Cost"}, SortOrder = {"DESC"} - в этом случае выборка будет 
-		/// отсортированна так же как и в случае если бы  SortOrder = {"DESC", "ASC", "ASC"}
-		/// </param>
-		/// <param name="Limit">Количество записей в выборке. 
-		/// Примечание: если Limit меньше SelStart то тогда выбираются все записи начиная с SelStart.
-		/// </param>
-		/// <param name="SelStart">Значение с которого начинается выбор. 
-		/// Примечание: следует помнить что первым значением является 0 а не 1.
-		/// </param>
-		/// <returns>DataSet содержащий позиции прайс листов.</returns>
-		[WebMethod()]
-		public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField,
-		                         string[] SortOrder, int Limit, int SelStart)
-		{
-			return
-				MethodTemplate.ExecuteMethod<GetPricesArgs, DataSet>(
-					new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart),
-					InnerGetPrices, null);
-		}
-
-		/// <summary>
-		/// Получает список заказов для клиента AMP.
-		/// </summary>
-		/// <param name="OrderID">Массив идентификаторов заказов
-		/// Допустимые значения: 
-		///		1. "0" - все новые заказы (*)
-		///		2. "Номер заказа"
-		///		3. "!" + "Номер заказа" - все заказы у которых номер больше заданого.
-		/// </param>
-		/// <param name="PriceCode">
-		/// Номер прайса по которому сделан заказ.
-		/// Прмечание: значение равное или меньше 0 игнорируются
-		/// </param>
-		/// <returns>Список заказов</returns>
-		[WebMethod()]
-		public DataSet GetOrders(string[] OrderID, int PriceCode)
-		{
-			return
-				MethodTemplate.ExecuteMethod<GetOrdersArgs, DataSet>(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null);
-		}
-
-		private DataSet InnerGetOrders(ExecuteArgs e)
-		{
-			GetOrdersArgs args = e as GetOrdersArgs;
-
-			args.DataAdapter.SelectCommand.CommandText +=
-				@"
-SELECT  
-		i.firmclientcode as ClientCode, 
-        i.firmclientcode2 as ClientCode2, 
-        i.firmclientcode3 as ClientCode3, 
-		oh.RowID as OrderID,
-        cast(oh.PriceDate as char) as PriceDate, 
-        cast(oh.WriteTime as char) as OrderDate, 
-		ifnull(oh.ClientAddition, '') as Comment,
-        ol.Code           as ItemID, 
-        ol.Cost, 
-        ol.Quantity, 
-        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', cd.phone), '') as Addition,
-		if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
-FROM    UserSettings.PricesData pd 
-INNER JOIN Orders.OrdersHead oh 
-        ON pd.PriceCode = oh.PriceCode 
-INNER JOIN Orders.OrdersList ol 
-        ON oh.RowID = ol.OrderID 
-INNER JOIN UserSettings.Intersection i 
-        ON i.ClientCode = oh.ClientCode 
-        and i.RegionCode= oh.RegionCode 
-        and i.PriceCode = oh.PriceCode 
-INNER JOIN UserSettings.ClientsData cd 
-        ON cd.FirmCode  = oh.ClientCode 
-WHERE  pd.FirmCode = 62
-";
-			if (args.OrderID != null)
-			{
-				if (args.OrderID[0] == "0")
-				{
-					args.DataAdapter.SelectCommand.CommandText += " and oh.Processed = 0 ";
-				}
-				else
-				{
-					if (args.OrderID[0].IndexOf("!") < 0)
-						args.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(args.OrderID, "ol.OrderID");
-					else
-						args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID > " + args.OrderID[0].Replace("!", "");
-				}
-			}
-			if (args.PriceCode > 0)
-				args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode.ToString();
-
-			DataSet data = new DataSet();
-			args.DataAdapter.Fill(data);
-			return data;
-		}
-
-		private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
-		{
-			bool UseLike = false;
-			string TmpRes = FieldName;
-			string[] Result = new string[2];
-			if (InpStr.IndexOf("*") >= 0)
-			{
-				UseLike = true;
-			}
-			if (InpStr.IndexOf("!") >= 0)
-			{
-				InpStr = InpStr.Remove(0, 1);
-				if (UseLike)
-					TmpRes += " not like ";
-				else
-					TmpRes += " <> ";
-			}
-			else
-			{
-				if (UseLike)
-					TmpRes += " like ";
-				else
-					TmpRes += " = ";
-			}
-			InpStr = InpStr.Replace("*", "%");
-			TmpRes += "?" + ParameterName;
-			Result[0] = TmpRes;
-			Result[1] = InpStr;
-			return Result;
-		}
-
-		private UInt32 GetClientCode()
-		{
-			UserName = HttpContext.Current.User.Identity.Name;
-			if (UserName.Substring(0, 7) == "ANALIT\\")
-			{
-				UserName = UserName.Substring(7);
-			}
-			UserName = "amp";
-			try
-			{
-				MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" +
-				                       " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" +
-				                       " and billingstatus=1" + " and allowGetData=1" + " and OSUserName='" + UserName + "'";
-				return Convert.ToUInt32(MySelCmd.ExecuteScalar());
-			}
-			catch (Exception ErrorTXT)
-			{
-				AMPWebService.PostOrder.MailErr("GetClientCode", ErrorTXT.Message, ErrorTXT.Source, UserName);
-			}
-			finally
-			{
-			}
-
-			return 0;
-		}
-
-		private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique)
-		{
-			string oldQuery = command.CommandText;
-			if (calculateUnique)
-				command.CommandText =
-					" insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount) " +
-					" values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName +
-					"', " + data.Tables[0].Rows.Count + ", " +
-					Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ", " +
-					CalculateUniqueFullCodeCount(data.Tables[0]) + "); ";
-			else
-				command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " +
-				                      " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" +
-				                      FunctionName + "', " + data.Tables[0].Rows.Count + ", " +
-				                      Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + "); ";
-			command.ExecuteNonQuery();
-			command.CommandText = oldQuery;
-		}
-
-		private int CalculateUniqueFullCodeCount(DataTable table)
-		{
-			int count = 0;
-			List<int> uniquePrepCodes = new List<int>();
-
-			foreach (DataRow row in table.Rows)
-			{
-				if (!uniquePrepCodes.Contains(Convert.ToInt32(row["PrepCode"])))
-				{
-					uniquePrepCodes.Add(Convert.ToInt32(row["PrepCode"]));
-					count++;
-				}
-			}
-			return count;
-		}
-	}
+            if (args.OrderID != null)
+            {
+                if (args.OrderID[0] == "0")
+                {
+                    args.DataAdapter.SelectCommand.CommandText += " and oh.Processed = 0 ";
+                }
+                else
+                {
+                    if (args.OrderID[0].IndexOf("!") < 0)
+                        args.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(args.OrderID, "ol.OrderID");
+                    else
+                        args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID > " + args.OrderID[0].Replace("!", "");
+                }
+            }
+            if (args.PriceCode > 0)
+                args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode.ToString();
+
+            DataSet data = new DataSet();
+            args.DataAdapter.Fill(data);
+            return data;
+        }
+
+        private string[] FormatFindStr(string InpStr, string ParameterName, string FieldName)
+        {
+            bool UseLike = false;
+            string TmpRes = FieldName;
+            string[] Result = new string[2];
+            if (InpStr.IndexOf("*") >= 0)
+            {
+                UseLike = true;
+            }
+            if (InpStr.IndexOf("!") >= 0)
+            {
+                InpStr = InpStr.Remove(0, 1);
+                if (UseLike)
+                    TmpRes += " not like ";
+                else
+                    TmpRes += " <> ";
+            }
+            else
+            {
+                if (UseLike)
+                    TmpRes += " like ";
+                else
+                    TmpRes += " = ";
+            }
+            InpStr = InpStr.Replace("*", "%");
+            TmpRes += "?" + ParameterName;
+            Result[0] = TmpRes;
+            Result[1] = InpStr;
+            return Result;
+        }
+
+        private UInt32 GetClientCode()
+        {
+            UserName = HttpContext.Current.User.Identity.Name;
+            if (UserName.Substring(0, 7) == "ANALIT\\")
+            {
+                UserName = UserName.Substring(7);
+            }
+            UserName = "amp";
+            try
+            {
+                MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" +
+                                       " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" +
+                                       " and billingstatus=1" + " and allowGetData=1" + " and OSUserName='" + UserName + "'";
+                return Convert.ToUInt32(MySelCmd.ExecuteScalar());
+            }
+            catch (Exception ErrorTXT)
+            {
+                AMPWebService.PostOrder.MailErr("GetClientCode", ErrorTXT.Message, ErrorTXT.Source, UserName);
+            }
+            finally
+            {
+            }
+
+            return 0;
+        }
+
+        private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique)
+        {
+            string oldQuery = command.CommandText;
+            if (calculateUnique)
+                command.CommandText =
+                        " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount) " +
+                        " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName +
+                        "', " + data.Tables[0].Rows.Count + ", " +
+                        Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ", " +
+                        CalculateUniqueFullCodeCount(data.Tables[0]) + "); ";
+            else
+                command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " +
+                                      " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" +
+                                      FunctionName + "', " + data.Tables[0].Rows.Count + ", " +
+                                      Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + "); ";
+            command.ExecuteNonQuery();
+            command.CommandText = oldQuery;
+        }
+
+        private int CalculateUniqueFullCodeCount(DataTable table)
+        {
+            int count = 0;
+            List<int> uniquePrepCodes = new List<int>();
+
+            foreach (DataRow row in table.Rows)
+            {
+                if (!uniquePrepCodes.Contains(Convert.ToInt32(row["PrepCode"])))
+                {
+                    uniquePrepCodes.Add(Convert.ToInt32(row["PrepCode"]));
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
 }
