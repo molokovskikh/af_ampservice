@@ -1714,9 +1714,9 @@ namespace AMPWebService
             return Result;
         }
 
-		public static ulong GetClientCode(MySqlConnection connection, string userName)
+		private static ulong GetClientCode(MySqlConnection connection, string userName)
 		{
-			if (userName.Substring(0, 7) == "ANALIT\\")
+			if (userName.IndexOf("ANALIT\\") == 0)
 				userName = userName.Substring(7);
 
 			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(connection,
