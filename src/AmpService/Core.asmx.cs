@@ -1315,7 +1315,7 @@ namespace AMPWebService
                                         ClientsData.ShortName as FirmName, 
                                         RegionalData.ContactInfo,
                                         RegionalData.OperativeInfo
-                                FROM    (intersection, c                lientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, RegionalData) 
+                                FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, RegionalData) 
                                 WHERE   DisabledByClient                                            = 0 
                                         and Disabledbyfirm                                          = 0 
                                         and DisabledByAgency                                        = 0 
