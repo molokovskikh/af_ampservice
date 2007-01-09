@@ -1725,7 +1725,7 @@ namespace AMPWebService
             {
                 MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" +
                                        " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" +
-                                       " and billingstatus=1" + " and allowGetData=1" + " and OSUserName='" + UserName + "'";
+                                       " and billingstatus=1" + " and OSUserName='" + UserName + "'";
                 return Convert.ToUInt32(MySelCmd.ExecuteScalar());
             }
             catch (Exception ErrorTXT)
