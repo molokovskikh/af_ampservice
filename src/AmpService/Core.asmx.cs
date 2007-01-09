@@ -173,7 +173,7 @@ namespace AMPWebService
                         " left join farm.core0 c on c.firmcode = intersection.costcode and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
                         " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" +
                         " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" +
-                        GetClientCode().ToString() + " and retclientsset.clientcode=intersection.clientcode" +
+						GetClientCode(MyCn, HttpContext.Current.User.Identity.Name).ToString() + " and retclientsset.clientcode=intersection.clientcode" +
                         " and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
                 if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
                 {
@@ -418,7 +418,7 @@ namespace AMPWebService
                                         and c.synonymcode = s.synonymcode 
                                         and s.firmcode    = ifnull(parentsynonym, pricesdata.pricecode) 
                                         ",
-                        FullCodesString, GetClientCode().ToString());
+						FullCodesString, GetClientCode(MyCn, HttpContext.Current.User.Identity.Name).ToString());
 
                 if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
                 {
@@ -672,7 +672,7 @@ namespace AMPWebService
                                         and c.synonymcode                                           = s.synonymcode 
                                         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
                                         ",
-                        GetClientCode().ToString());
+						GetClientCode(MyCn, HttpContext.Current.User.Identity.Name).ToString());
 
                 MySelCmd.CommandText += Utils.FormatPriceIDForQuery(PriceID);
 
@@ -893,7 +893,7 @@ namespace AMPWebService
                                         and c.synonymcode                                           = s.synonymcode 
                                         and s.firmcode                                              = ifnull(parentsynonym, pricesdata.pricecode)
                                         ",
-                        GetClientCode().ToString());
+						GetClientCode(MyCn, HttpContext.Current.User.Identity.Name).ToString());
 
                 if (NewEar)
                     MySelCmd.CommandText += " and ampc.id is null";
@@ -1026,7 +1026,8 @@ namespace AMPWebService
                                  bool[] Junk)
         {
             return MethodTemplate.ExecuteMethod<PostOrderArgs, DataSet>(
-                            new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk), InnerPostOrder, null, MyCn);
+				new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk),
+				InnerPostOrder, null, MyCn, GetClientCode);
         }
 
         private static DataSet InnerPostOrder(PostOrderArgs e)
@@ -1356,7 +1357,8 @@ namespace AMPWebService
         [WebMethod()]
         public DataSet GetPriceCodeByName(string[] firmName)
         {
-            return MethodTemplate.ExecuteMethod<FirmNameArgs, DataSet>(new FirmNameArgs(firmName), InnerGetPriceCodeByName, null);
+            return MethodTemplate.ExecuteMethod<FirmNameArgs, DataSet>(
+				new FirmNameArgs(firmName), InnerGetPriceCodeByName, null, GetClientCode);
         }
 
         private DataSet InnerGetPrices(GetPricesArgs e)
@@ -1601,10 +1603,9 @@ namespace AMPWebService
         public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField,
                                  string[] SortOrder, int Limit, int SelStart)
         {
-            return
-                    MethodTemplate.ExecuteMethod<GetPricesArgs, DataSet>(
-                            new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart),
-                            InnerGetPrices, null);
+            return MethodTemplate.ExecuteMethod<GetPricesArgs, DataSet>(
+				new GetPricesArgs(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart),
+				InnerGetPrices, null, GetClientCode);
         }
 
         /// <summary>
@@ -1624,8 +1625,8 @@ namespace AMPWebService
         [WebMethod()]
         public DataSet GetOrders(string[] OrderID, int PriceCode)
         {
-            return
-                    MethodTemplate.ExecuteMethod<GetOrdersArgs, DataSet>(new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null);
+            return MethodTemplate.ExecuteMethod<GetOrdersArgs, DataSet>(
+				new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null, GetClientCode);
         }
 
         private DataSet InnerGetOrders(ExecuteArgs e)
@@ -1713,31 +1714,24 @@ namespace AMPWebService
             return Result;
         }
 
-        private UInt32 GetClientCode()
-        {
-            UserName = HttpContext.Current.User.Identity.Name;
-            if (UserName.Substring(0, 7) == "ANALIT\\")
-            {
-                UserName = UserName.Substring(7);
-            }
-            UserName = "amp";
-            try
-            {
-                MySelCmd.CommandText = " SELECT osuseraccessright.clientcode" + " FROM (clientsdata, osuseraccessright)" +
-                                       " where osuseraccessright.clientcode=clientsdata.firmcode" + " and firmstatus=1" +
-                                       " and billingstatus=1" + " and OSUserName='" + UserName + "'";
-                return Convert.ToUInt32(MySelCmd.ExecuteScalar());
-            }
-            catch (Exception ErrorTXT)
-            {
-                AMPWebService.PostOrder.MailErr("GetClientCode", ErrorTXT.Message, ErrorTXT.Source, UserName);
-            }
-            finally
-            {
-            }
+		public static ulong GetClientCode(MySqlConnection connection, string userName)
+		{
+			if (userName.Substring(0, 7) == "ANALIT\\")
+				userName = userName.Substring(7);
 
-            return 0;
-        }
+			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(connection,
+@"
+SELECT 
+    osuseraccessright.clientcode 
+FROM clientsdata, 
+    osuseraccessright 
+WHERE osuseraccessright.clientcode = clientsdata.firmcode 
+    AND firmstatus = 1 
+    AND billingstatus = 1 
+    AND OSUserName = ?UserName
+",
+					new MySqlParameter[] { new MySqlParameter("UserName", userName) }));
+		}
 
         private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique)
         {
@@ -1760,18 +1754,13 @@ namespace AMPWebService
 
         private int CalculateUniqueFullCodeCount(DataTable table)
         {
-            int count = 0;
             List<int> uniquePrepCodes = new List<int>();
-
             foreach (DataRow row in table.Rows)
             {
                 if (!uniquePrepCodes.Contains(Convert.ToInt32(row["PrepCode"])))
-                {
                     uniquePrepCodes.Add(Convert.ToInt32(row["PrepCode"]));
-                    count++;
-                }
             }
-            return count;
+			return uniquePrepCodes.Count;
         }
     }
 }
