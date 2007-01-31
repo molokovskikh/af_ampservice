@@ -228,7 +228,7 @@ namespace AMPWebService
                                         " and clientsdata.firmtype=0";
                 if (NewEar)
                 {
-                    MySelCmd.CommandText += " and ampc.id is null";
+                    //MySelCmd.CommandText += " and ampc.id is null";
                 }
                 if (OfferOnly || PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
                 {
