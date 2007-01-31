@@ -1486,7 +1486,7 @@ namespace AMPWebService
                                         and DisabledByAgency                                        = 0 
                                         and intersection.clientcode                                 = ?ClientCode  
                                         and retclientsset.clientcode                                = intersection.clientcode 
-                                        and pricesdata.pricecode                                    = intersection.pricecode 
+//                                        and pricesdata.pricecode                                    = intersection.pricecode 
                                         and clientsdata.firmcode                                    = pricesdata.firmcode 
                                         and clientsdata.firmstatus                                  = 1 
                                         and clientsdata.billingstatus                               = 1 
@@ -1494,7 +1494,7 @@ namespace AMPWebService
                                         and to_days(now())-to_days(datecurprice)                    < maxold 
                                         and clientsdata.firmsegment                                 = AClientsData.firmsegment 
                                         and pricesregionaldata.regioncode                           = intersection.regioncode 
-                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
+//                                        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
                                         and AClientsData.firmcode                                   = intersection.clientcode 
                                         and (clientsdata.maskregion & intersection.regioncode)      > 0 
                                         and (AClientsData.maskregion & intersection.regioncode)     > 0 
