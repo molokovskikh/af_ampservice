@@ -17,8 +17,6 @@ namespace AMPWebService
     public class AMPService : System.Web.Services.WebService
     {
         MySqlTransaction MyTrans;
-        string UserName;
-        string FunctionName;
         DateTime StartTime = DateTime.Now;
         private DataColumn dataColumn18;
         private DataColumn dataColumn19;
@@ -153,7 +151,7 @@ namespace AMPWebService
         public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit,
                                           int SelStart)
         {
-            FunctionName = "GetNameFromCatalog";
+            string functionName = "GetNameFromCatalog";
             string[] Params;
             int Inc;
             bool AMPCode = false;
@@ -279,9 +277,8 @@ namespace AMPWebService
                 MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
                 MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 
-                Logger.Write(MyDA.SelectCommand.CommandText);
                 MyDA.Fill(MyDS, "Catalog");
-                LogQuery(MySelCmd, MyDS, false);
+				LogQuery(MySelCmd, MyDS, false, functionName);
                 MyTrans.Commit();
                 return MyDS;
             }
@@ -296,7 +293,7 @@ namespace AMPWebService
                     Thread.Sleep(100);
                     goto Restart;
                 }
-                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
             }
             catch (Exception ex)
             {
@@ -304,7 +301,7 @@ namespace AMPWebService
                 {
                     MyTrans.Rollback();
                 }
-                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
             }
             finally
             {
@@ -319,7 +316,7 @@ namespace AMPWebService
         [WebMethod()]
         public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
         {
-            FunctionName = "GetPricesByPrepCode";
+			string functionName = "GetPricesByPrepCode";
             Int32 inc;
             string PriceNameStr;
             string[] Params;
@@ -500,9 +497,8 @@ namespace AMPWebService
                                                 ";
                 }
 
-                Logger.Write(MyDA.SelectCommand.CommandText);
                 MyDA.Fill(MyDS, "prices");
-                LogQuery(MySelCmd, MyDS, true);
+				LogQuery(MySelCmd, MyDS, true, functionName);
                 MyTrans.Commit();
                 return MyDS;
             }
@@ -520,7 +516,7 @@ namespace AMPWebService
                     goto Restart;
                 }
 
-                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
             }
             catch (Exception ex)
             {
@@ -529,7 +525,7 @@ namespace AMPWebService
                     MyTrans.Rollback();
                 }
 
-                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
             }
             finally
             {
@@ -547,7 +543,7 @@ namespace AMPWebService
             string AMPCodes;
             List<int> AMPCodesArr = new List<int>();
             List<int> NotAMPCodesArr = new List<int>();
-            FunctionName = "GetPricesByItemID";
+            string functionName = "GetPricesByItemID";
         Restart:
             try
             {
@@ -767,9 +763,8 @@ namespace AMPWebService
                                                 ";
                 }
 
-                Logger.Write(MyDA.SelectCommand.CommandText);
                 MyDA.Fill(MyDS, "Prices");
-                LogQuery(MySelCmd, MyDS, true);
+				LogQuery(MySelCmd, MyDS, true, "GetPricesByItemID");
                 MyTrans.Commit();
                 return MyDS;
             }
@@ -786,7 +781,7 @@ namespace AMPWebService
                     goto Restart;
                 }
 
-                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
             }
             catch (Exception ex)
             {
@@ -795,7 +790,7 @@ namespace AMPWebService
                     MyTrans.Rollback();
                 }
 
-                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
             }
             finally
             {
@@ -813,7 +808,7 @@ namespace AMPWebService
         {
             string[] Params;
             int Inc;
-            FunctionName = "GetPricesByName";
+            string functionName = "GetPricesByName";
         Restart:
             try
             {
@@ -981,9 +976,8 @@ namespace AMPWebService
                                                 ";
                 }
 
-                Logger.Write(MyDA.SelectCommand.CommandText);
                 MyDA.Fill(MyDS, "Prices");
-                LogQuery(MySelCmd, MyDS, true);
+				LogQuery(MySelCmd, MyDS, true, functionName);
                 MyTrans.Commit();
                 return MyDS;
             }
@@ -1000,7 +994,7 @@ namespace AMPWebService
                     goto Restart;
                 }
 
-                AMPWebService.PostOrder.MailErr(FunctionName, MySQLErr.Message, MySQLErr.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
             }
             catch (Exception ex)
             {
@@ -1009,7 +1003,7 @@ namespace AMPWebService
                     MyTrans.Rollback();
                 }
 
-                AMPWebService.PostOrder.MailErr(FunctionName, ex.Message, ex.Source, UserName);
+				AMPWebService.PostOrder.MailErr(functionName, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
             }
             finally
             {
@@ -1030,7 +1024,7 @@ namespace AMPWebService
 				InnerPostOrder, null, MyCn, GetClientCode);
         }
 
-        private static DataSet InnerPostOrder(PostOrderArgs e)
+        private DataSet InnerPostOrder(PostOrderArgs e)
         {
             string CoreIDString;
             int Index;
@@ -1302,6 +1296,7 @@ namespace AMPWebService
             PostOrder=-1 - ошибка формирования заказа.
 
              */
+			LogQuery(e.DataAdapter.SelectCommand, dsRes, false, "PostOrder");
             return dsRes;
         }
 
@@ -1350,7 +1345,7 @@ namespace AMPWebService
 
             DataSet data = new DataSet();
             e.DataAdapter.Fill(data, "PriceList");
-
+			this.LogQuery(e.DataAdapter.SelectCommand, data, false, "GetPriceCodeByName");
             return data;
         }
 
@@ -1363,8 +1358,7 @@ namespace AMPWebService
 
         private DataSet InnerGetPrices(GetPricesArgs e)
         {
-            UserName = "amp";
-            FunctionName = "GetPrices";
+            string functionName = "GetPrices";
             //словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
             Dictionary<string, string> validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer());
             validRequestFields.Add("OrderID", "c.id");
@@ -1376,8 +1370,6 @@ namespace AMPWebService
             validRequestFields.Add("PriceCode", "PricesData.PriceCode");
             validRequestFields.Add("PrepCode", "c.FullCode");
 
-
-            //System.Collections.Specialized.StringCollection s = new StringCollection();
             List<string> validSortFields = new List<string>();
             validSortFields.Add("OrderID");
             validSortFields.Add("SalerCode");
@@ -1407,6 +1399,7 @@ namespace AMPWebService
                 throw new Exception();
             //TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
             //то будет Exception на этапе трансляции
+
             //проверка имен полей для фильтрации
             foreach (string fieldName in e.RangeField)
                 if (!validRequestFields.ContainsKey(fieldName))
@@ -1562,7 +1555,7 @@ namespace AMPWebService
                 data.Tables.Add(resultTable);
             }
 
-            LogQuery(e.DataAdapter.SelectCommand, data, true);
+			LogQuery(e.DataAdapter.SelectCommand, data, true, functionName);
 
             return data;
         }
@@ -1680,6 +1673,8 @@ namespace AMPWebService
 
             DataSet data = new DataSet();
             args.DataAdapter.Fill(data);
+
+			LogQuery(e.DataAdapter.SelectCommand, data, false, "GetOrders");
             return data;
         }
 
@@ -1733,21 +1728,33 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 					new MySqlParameter[] { new MySqlParameter("UserName", userName) }));
 		}
 
-        private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique)
+        private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, string functionName)
         {
+			int rowCount = 0;
+			foreach (DataTable table in data.Tables)
+				rowCount += table.Rows.Count;
+
             string oldQuery = command.CommandText;
-            if (calculateUnique)
-                command.CommandText =
-                        " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount) " +
-                        " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" + FunctionName +
-                        "', " + data.Tables[0].Rows.Count + ", " +
-                        Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + ", " +
-                        CalculateUniqueFullCodeCount(data.Tables[0]) + "); ";
-            else
-                command.CommandText = " insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) " +
-                                      " values(now(), '" + HttpContext.Current.Request.UserHostAddress + "', '" + UserName + "', '" +
-                                      FunctionName + "', " + data.Tables[0].Rows.Count + ", " +
-                                      Convert.ToInt32(DateTime.Now.Subtract(StartTime).TotalMilliseconds).ToString() + "); ";
+			if (calculateUnique)
+			{
+				command.CommandText = @" 
+insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount)
+values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?UniqueCount);
+";
+				command.Parameters.Add("UniqueCount", CalculateUniqueFullCodeCount(data.Tables[0]));
+			}
+			else
+				command.CommandText = 
+@" 
+insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) 
+values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime);
+";			
+			command.Parameters.Add("Host", HttpContext.Current.Request.UserHostAddress);
+			command.Parameters.Add("UserName", HttpContext.Current.User.Identity.Name);
+			command.Parameters.Add("functionName", functionName);
+			command.Parameters.Add("RowCount", rowCount);
+			command.Parameters.Add("ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
+
             command.ExecuteNonQuery();
             command.CommandText = oldQuery;
         }
