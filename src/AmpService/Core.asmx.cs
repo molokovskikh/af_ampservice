@@ -10,6 +10,9 @@ using System.Web.Services;
 using ExecuteTemplate;
 using Microsoft.Practices.EnterpriseLibrary.Logging;
 using MySql.Data.MySqlClient;
+using System.Reflection;
+using System.Text;
+using System.Collections;
 
 namespace AMPWebService
 {
@@ -148,8 +151,8 @@ namespace AMPWebService
         }
 
         [WebMethod()]
-        public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, bool OfferOnly, uint[] PriceID, int Limit,
-                                          int SelStart)
+        public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, 
+			bool OfferOnly, uint[] PriceID, int Limit, int SelStart)
         {
             string functionName = "GetNameFromCatalog";
             string[] Params;
@@ -278,7 +281,8 @@ namespace AMPWebService
                 MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 
                 MyDA.Fill(MyDS, "Catalog");
-				LogQuery(MySelCmd, MyDS, false, functionName);
+				LogQuery(MySelCmd, MyDS, false, MethodBase.GetCurrentMethod().Name, 
+					Name, Form, NewEar, OfferOnly, PriceID, Limit, SelStart);
                 MyTrans.Commit();
                 return MyDS;
             }
@@ -314,7 +318,8 @@ namespace AMPWebService
         }
 
         [WebMethod()]
-        public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, Int32 Limit, Int32 SelStart)
+        public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, 
+			Int32 Limit, Int32 SelStart)
         {
 			string functionName = "GetPricesByPrepCode";
             Int32 inc;
@@ -1728,7 +1733,8 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 					new MySqlParameter[] { new MySqlParameter("UserName", userName) }));
 		}
 
-        private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, string functionName)
+        private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, 
+			string functionName, params object[] arguments)
         {
 			int rowCount = 0;
 			foreach (DataTable table in data.Tables)
@@ -1738,26 +1744,47 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 			if (calculateUnique)
 			{
 				command.CommandText = @" 
-insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount)
-values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?UniqueCount);
+insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount, Arguments)
+values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?UniqueCount, ?Arguments);
 ";
 				command.Parameters.Add("UniqueCount", CalculateUniqueFullCodeCount(data.Tables[0]));
 			}
 			else
-				command.CommandText = 
+				command.CommandText =
 @" 
-insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime) 
-values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime);
+insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, Arguments) 
+values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime, ?Arguments);
 ";			
 			command.Parameters.Add("Host", HttpContext.Current.Request.UserHostAddress);
 			command.Parameters.Add("UserName", HttpContext.Current.User.Identity.Name);
 			command.Parameters.Add("functionName", functionName);
 			command.Parameters.Add("RowCount", rowCount);
 			command.Parameters.Add("ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
+			command.Parameters.Add("Arguments", SerializeArguments(arguments));
 
             command.ExecuteNonQuery();
             command.CommandText = oldQuery;
         }
+
+		private string SerializeArguments(IEnumerable arguments)
+		{			
+			StringBuilder result = new StringBuilder();
+			if (arguments != null)
+			{
+				result.AppendFormat("{0} = (", arguments.GetType().Name);
+				List<string> serializedArguments = new List<string>();
+				foreach (object argument in arguments)
+				{
+					if (argument is IEnumerable && !(argument is String))
+						serializedArguments.Add(SerializeArguments((IEnumerable)argument));
+					else
+						serializedArguments.Add(argument.ToString());
+				}
+				result.Append(String.Join(", ", serializedArguments.ToArray()));
+				result.AppendFormat(")");
+			}
+			return result.ToString();
+		}
 
         private int CalculateUniqueFullCodeCount(DataTable table)
         {
