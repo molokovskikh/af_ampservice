@@ -154,7 +154,6 @@ namespace AMPWebService
         public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, 
 			bool OfferOnly, uint[] PriceID, int Limit, int SelStart)
         {
-            string functionName = "GetNameFromCatalog";
             string[] Params;
             int Inc;
             bool AMPCode = false;
@@ -165,9 +164,8 @@ namespace AMPWebService
                 if (MyCn.State == ConnectionState.Closed)
                     MyCn.Open();
 
-                MyTrans = MyCn.BeginTransaction();
+                MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted);
                 MySelCmd.Transaction = MyTrans;
-                MySelCmd.CommandText = "SET SQL_BIG_SELECTS=1; ";
                 MySelCmd.CommandText +=
                         "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
                         " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" +
@@ -281,8 +279,15 @@ namespace AMPWebService
                 MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 
                 MyDA.Fill(MyDS, "Catalog");
-				LogQuery(MySelCmd, MyDS, false, MethodBase.GetCurrentMethod().Name, 
-					Name, Form, NewEar, OfferOnly, PriceID, Limit, SelStart);
+
+				LogQuery(MySelCmd, MyDS, false, MethodBase.GetCurrentMethod().Name,
+					new KeyValuePair<string, object>("Name", Name), 
+					new KeyValuePair<string, object>("Form", Form), 
+					new KeyValuePair<string, object>("NewEar", NewEar),
+					new KeyValuePair<string, object>("OfferOnly", OfferOnly),
+					new KeyValuePair<string, object>("PriceID", PriceID),
+					new KeyValuePair<string, object>("Limit", Limit),
+					new KeyValuePair<string, object>("SelStart", SelStart));
                 MyTrans.Commit();
                 return MyDS;
             }
@@ -297,7 +302,7 @@ namespace AMPWebService
                     Thread.Sleep(100);
                     goto Restart;
                 }
-				AMPWebService.PostOrder.MailErr(functionName, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
+				AMPWebService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
             }
             catch (Exception ex)
             {
@@ -305,7 +310,7 @@ namespace AMPWebService
                 {
                     MyTrans.Rollback();
                 }
-				AMPWebService.PostOrder.MailErr(functionName, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
+				AMPWebService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
             }
             finally
             {
@@ -1734,7 +1739,7 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 		}
 
         private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, 
-			string functionName, params object[] arguments)
+			string functionName, params KeyValuePair<string, object>[] arguments)
         {
 			int rowCount = 0;
 			foreach (DataTable table in data.Tables)
@@ -1766,24 +1771,23 @@ values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime, ?Argume
             command.CommandText = oldQuery;
         }
 
-		private string SerializeArguments(IEnumerable arguments)
+		private string SerializeArguments(KeyValuePair<string, object>[] arguments)
 		{			
-			StringBuilder result = new StringBuilder();
-			if (arguments != null)
-			{
-				result.AppendFormat("{0} = (", arguments.GetType().Name);
-				List<string> serializedArguments = new List<string>();
-				foreach (object argument in arguments)
-				{
-					if (argument is IEnumerable && !(argument is String))
-						serializedArguments.Add(SerializeArguments((IEnumerable)argument));
-					else
-						serializedArguments.Add(argument.ToString());
-				}
-				result.Append(String.Join(", ", serializedArguments.ToArray()));
-				result.AppendFormat(")");
-			}
-			return result.ToString();
+			List<string> serializedArguments = new List<string>();
+			foreach (KeyValuePair<string, object> argument in arguments)
+				serializedArguments.Add(String.Format("{0} = ({1})", argument.Key, SerializeValue(argument.Value)));
+			return String.Join(", ", serializedArguments.ToArray());
+		}
+
+		private string SerializeValue(object value)
+		{
+			List<string> serializedValue = new List<string>();
+			if (value is IEnumerable && !(value is String))
+				foreach (object item in (IEnumerable)value)
+					serializedValue.Add(item.ToString());
+			else
+				serializedValue.Add(value.ToString());
+			return String.Join(", ", serializedValue.ToArray());
 		}
 
         private int CalculateUniqueFullCodeCount(DataTable table)
