@@ -164,7 +164,7 @@ namespace AMPWebService
                 if (MyCn.State == ConnectionState.Closed)
                     MyCn.Open();
 
-                MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted);
+                MyTrans = MyCn.BeginTransaction(IsolationLevel.RepeatableRead);
                 MySelCmd.Transaction = MyTrans;
                 MySelCmd.CommandText +=
                         "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
@@ -326,7 +326,7 @@ namespace AMPWebService
         public DataSet GetPricesByPrepCode(Int32[] PrepCode, bool OnlyLeader, UInt32[] PriceID, 
 			Int32 Limit, Int32 SelStart)
         {
-			string functionName = "GetPricesByPrepCode";
+			string functionName = MethodBase.GetCurrentMethod().Name;
             Int32 inc;
             string PriceNameStr;
             string[] Params;
@@ -339,7 +339,7 @@ namespace AMPWebService
                 if (MyCn.State == ConnectionState.Closed)
                     MyCn.Open();
 
-                MyTrans = MyCn.BeginTransaction(IsolationLevel.ReadCommitted);
+                MyTrans = MyCn.BeginTransaction(IsolationLevel.RepeatableRead);
                 MySelCmd.Transaction = MyTrans;
 
                 foreach (int FullCode in PrepCode)
@@ -553,14 +553,14 @@ namespace AMPWebService
             string AMPCodes;
             List<int> AMPCodesArr = new List<int>();
             List<int> NotAMPCodesArr = new List<int>();
-            string functionName = "GetPricesByItemID";
+            string functionName = MethodBase.GetCurrentMethod().Name;
         Restart:
             try
             {
                 if (MyCn.State == ConnectionState.Closed)
                     MyCn.Open();
 
-                MyTrans = MyCn.BeginTransaction();
+                MyTrans = MyCn.BeginTransaction(IsolationLevel.RepeatableRead);
                 MySelCmd.Transaction = MyTrans;
                 if (ItemID != null)
                 {
@@ -818,14 +818,14 @@ namespace AMPWebService
         {
             string[] Params;
             int Inc;
-            string functionName = "GetPricesByName";
+            string functionName = MethodBase.GetCurrentMethod().Name;
         Restart:
             try
             {
                 if (MyCn.State == ConnectionState.Closed)
                     MyCn.Open();
 
-                MyTrans = MyCn.BeginTransaction();
+                MyTrans = MyCn.BeginTransaction(IsolationLevel.RepeatableRead);
                 MySelCmd.Transaction = MyTrans;
                 if (OnlyLeader)
                 {
