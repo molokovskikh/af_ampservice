@@ -779,8 +779,7 @@ FROM    (farm.formrules fr,
         usersettings.clientsdata,
         (farm.core0 c, ActivePrices ap)
           LEFT JOIN farm.corecosts
-            ON corecosts.cost           is not null
-              AND corecosts.Core_Id     = c.id
+            ON corecosts.Core_Id     = c.id
               AND corecosts.PC_CostCode = ap.CostCode)
           LEFT JOIN farm.core0 ampc
       			ON ampc.fullcode            = c.fullcode
@@ -797,7 +796,9 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
     AND ap.DisabledByClient                 = 0
     and c.synonymcode                       = s.synonymcode
     and s.firmcode                          = ifnull(fr.parentsynonym, ap.pricecode)
-    and clientsdata.firmcode                = ap.firmcode";
+    and clientsdata.firmcode                = ap.firmcode
+	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
+";
             if (e.NewEar)
                 e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
 
