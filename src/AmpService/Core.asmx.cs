@@ -409,8 +409,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 	AND c.ID in " + CoreIDString;
 
             e.DataAdapter.SelectCommand.Parameters.Clear();
-            //e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
-			e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", 369);
+            e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
             e.DataAdapter.Fill(dsPost, "SummaryOrder");
             dtSummaryOrder = dsPost.Tables["SummaryOrder"];
 
