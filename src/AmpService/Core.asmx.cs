@@ -494,7 +494,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 CALL GetActivePrices(?ClientCode, 0);
 
 SELECT  c.id OrderID,
-		c.id OriginalOrderID
+		c.id OriginalOrderID,
         ifnull(c.Code, '') SalerCode,
         ifnull(c.CodeCr, '') CreaterCode,
         ifnull(ampc.code, '') ItemID,
@@ -508,7 +508,7 @@ SELECT  c.id OrderID,
         ifnull(c.Doc, '') Doc,
         length(c.Junk) > 0 Junk,
         ap.PublicUpCost As UpCost,
-		round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
+		round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost,
         ap.pricecode SalerID,
         ClientsData.ShortName SalerName,
         ap.PriceDate,
