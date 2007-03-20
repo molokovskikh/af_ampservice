@@ -514,7 +514,7 @@ SELECT  c.id OrderID,
         ap.PriceDate,
         c.fullcode PrepCode,
         c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2,
+        c.synonymfirmcrcode OrderCode2
 FROM    (farm.formrules fr,
         farm.synonym s,
         usersettings.clientsdata,
