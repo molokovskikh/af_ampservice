@@ -371,41 +371,46 @@ namespace AMPWebService
 
             dsPost = new DataSet();
 
-            e.DataAdapter.SelectCommand.CommandText =
-                    @"select
-                                  cd.FirmCode ClientCode,
-                                  cd.RegionCode,
-                                  pc.ShowPriceCode PriceCode,
-                                  cast(if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) as datetime) PriceDate,
-                                  c.Id,
-                                  c.FullCode,
-                                  c.CodeFirmCr,
-                                  c.SynonymCode,
-                                  c.SynonymFirmCrCode,
-                                  c.Code,
-                                  c.CodeCr,
-                                  0 Quantity,
-                                  length(c.Junk) > 0 Junk,
-                                  length(c.Await) > 0 Await,
-                                  c.BaseCost,
-                                  round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost
-                                  from
-                                  (
-                                  usersettings.clientsdata cd,
-                                  farm.core0 c
-                                  )
-                                  inner join farm.formrules fr on fr.FirmCode = c.FirmCode
-                                  inner join usersettings.intersection ins on ins.ClientCode = cd.FirmCode and ins.RegionCode = cd.RegionCode and ins.CostCode = c.FirmCode
-                                  inner join usersettings.pricesdata pd on pd.PriceCode = ins.PriceCode
-                                  inner join usersettings.pricescosts pc on pc.CostCode = c.FirmCode
-                                  inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = cd.RegionCode
-                                  where
-                                  cd.FirmCode = ?ClientCode
-                                  and c.ID in " +
-                    CoreIDString;
+            e.DataAdapter.SelectCommand.CommandText = @"
+CALL GetActivePrices(?ClientCode, 0);
+
+SELECT  cd.FirmCode as ClientCode,
+		cd.RegionCode,
+		ap.PriceCode,
+		ap.PriceDate,
+		c.Id,
+        c.FullCode,
+        c.CodeFirmCr,
+        c.SynonymCode,
+        c.SynonymFirmCrCode,
+        c.Code,
+		c.CodeCr,
+		0 Quantity,
+        length(c.Junk) > 0 Junk,
+		length(c.Await) > 0 Await,
+		c.BaseCost,
+		round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
+FROM    (farm.formrules fr,
+        usersettings.clientsdata,
+        (farm.core0 c, ActivePrices ap)
+          LEFT JOIN farm.corecosts
+            ON corecosts.Core_Id     = c.id
+              AND corecosts.PC_CostCode = ap.CostCode),
+		UserSettings.ClientsData cd
+WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
+    AND fr.firmcode                         = ap.pricecode
+    AND Fresh                               = 1
+    AND to_days(now())-to_days(datecurprice)< maxold
+    AND ap.AlowInt                          = 0
+    AND ap.DisabledByClient                 = 0
+    AND clientsdata.firmcode                = ap.firmcode
+	AND if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
+	AND cd.FirmCode							= ?ClientCode
+	AND c.ID in " + CoreIDString;
 
             e.DataAdapter.SelectCommand.Parameters.Clear();
-            e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
+            //e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
+			e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", 369);
             e.DataAdapter.Fill(dsPost, "SummaryOrder");
             dtSummaryOrder = dsPost.Tables["SummaryOrder"];
 
@@ -486,64 +491,58 @@ namespace AMPWebService
 
             DataTable dtTemp;
 
-            e.DataAdapter.SelectCommand.CommandText =
-                    @"select
-                                  c.id OrderID,
-                                  c.id OriginalOrderID,
-                                  ifnull(c.Code, '') SalerCode,
-                                  ifnull(c.CodeCr, '') CreaterCode,
-                                  ifnull(ampc.code, '') ItemID,
-                                  s.synonym OriginalName,
-                                  ifnull(scr.synonym, '') OriginalCr,
-                                  ifnull(c.Unit, '') Unit,
-                                  ifnull(c.Volume, '') Volume,
-                                  ifnull(c.Quantity, '') Quantity,
-                                  ifnull(c.Note, '') Note,
-                                  ifnull(c.Period, '') Period,
-                                  ifnull(c.Doc, '') Doc,
-                                  length(c.Junk) > 0 Junk,
-                                  ins.PublicCostCorr As UpCost,
-                                  round(if((1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost<c.minboundcost, c.minboundcost, (1+pd.UpCost/100)*(1+prd.UpCost/100) *(1+(ins.PublicCostCorr+ins.FirmCostCorr)/100) *c.BaseCost), 2) Cost,
-                                  pd.pricecode SalerID,
-                                  ClientsData.ShortName SalerName,
-                                  if(fr.datelastform>fr.DateCurPrice, fr.DateCurPrice, fr.DatePrevPrice) PriceDate,
-                                  c.fullcode PrepCode,
-                                  c.synonymcode OrderCode1,
-                                  c.synonymfirmcrcode OrderCode2
-                                 from
-                                  usersettings.clientsdata cd
-                                  inner join usersettings.intersection ins on ins.ClientCode = cd.FirmCode
-                                  inner join usersettings.retclientsset on retclientsset.clientcode=ins.clientcode
-                                  inner join usersettings.pricesdata pd on pd.PriceCode = ins.PriceCode
-                                  inner join usersettings.clientsdata on clientsdata.firmcode=pd.firmcode
-                                  inner join farm.core0 c on c.FirmCode = ins.CostCode
-                                  inner join farm.formrules fr on fr.FirmCode = pd.PriceCode
-                                  inner join usersettings.pricesregionaldata prd on prd.PriceCode = ins.PriceCode and prd.RegionCode = ins.RegionCode
-                                  left join farm.core0 ampc on ampc.fullcode=c.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864
-                                  left join farm.synonym s on s.firmcode=ifnull(fr.parentsynonym, pd.pricecode)  and c.synonymcode=s.synonymcode
-                                  left join farm.synonymfirmcr scr on scr.firmcode=ifnull(fr.parentsynonym, pd.pricecode)  and c.synonymfirmcrcode=scr.synonymfirmcrcode
-                                 where
-                                  cd.FirmCode = ?ClientCode
-                                  and ins.DisabledByClient=0
-                                  and ins.Disabledbyfirm=0
-                                  and ins.DisabledByAgency=0
-                                  and clientsdata.firmstatus=1
-                                  and clientsdata.billingstatus=1
-                                  and clientsdata.firmtype=0
-                                  and clientsdata.firmsegment=cd.firmsegment
-                                  and (clientsdata.maskregion & ins.regioncode)>0
-                                  and (cd.maskregion & ins.regioncode)>0
-                                  and (retclientsset.workregionmask & ins.regioncode)>0
-                                  and pd.agencyenabled=1
-                                  and pd.enabled=1
-                                  and ins.invisibleonclient=0
-                                  and pd.pricetype<>1
-                                  and to_days(now())-to_days(fr.datecurprice)<fr.maxold
-                                  and prd.enabled=1
-                                  and c.SynonymCode = ?SynonymCode
-                                  and c.SynonymFirmCrCode = ?SynonymFirmCrCode
-                                  and (length(c.Junk) > 0 = ?Junk)
-                                  ";
+            e.DataAdapter.SelectCommand.CommandText = @"
+CALL GetActivePrices(?ClientCode, 0);
+
+SELECT  c.id OrderID,
+        ifnull(c.Code, '') SalerCode,
+        ifnull(c.CodeCr, '') CreaterCode,
+        ifnull(ampc.code, '') ItemID,
+        s.synonym OriginalName,
+        ifnull(scr.synonym, '') OriginalCr,
+        ifnull(c.Unit, '') Unit,
+        ifnull(c.Volume, '') Volume,
+        ifnull(c.Quantity, '') Quantity,
+        ifnull(c.Note, '') Note,
+        ifnull(c.Period, '') Period,
+        ifnull(c.Doc, '') Doc,
+        length(c.Junk) > 0 Junk,
+        ap.PublicUpCost As UpCost,
+        ap.pricecode PriceCode,
+        ClientsData.ShortName SalerName,
+        ap.PriceDate,
+        c.fullcode PrepCode,
+        c.synonymcode OrderCode1,
+        c.synonymfirmcrcode OrderCode2,
+        round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
+FROM    (farm.formrules fr,
+        farm.synonym s,
+        usersettings.clientsdata,
+        (farm.core0 c, ActivePrices ap)
+          LEFT JOIN farm.corecosts
+            ON corecosts.Core_Id     = c.id
+              AND corecosts.PC_CostCode = ap.CostCode)
+          LEFT JOIN farm.core0 ampc
+      			ON ampc.fullcode            = c.fullcode
+ 			      	and ampc.codefirmcr       = c.codefirmcr
+      				and ampc.firmcode         = 1864
+          LEFT JOIN farm.synonymfirmcr scr
+            ON scr.firmcode             = ifnull(fr.ParentSynonym, ap.pricecode)
+            and c.synonymfirmcrcode     = scr.synonymfirmcrcode
+WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
+    AND fr.firmcode                         = ap.pricecode
+    AND Fresh                               = 1
+    AND to_days(now())-to_days(datecurprice)< maxold
+    AND ap.AlowInt                          = 0
+    AND ap.DisabledByClient                 = 0
+    and c.synonymcode                       = s.synonymcode
+    and s.firmcode                          = ifnull(fr.parentsynonym, ap.pricecode)
+    and clientsdata.firmcode                = ap.firmcode
+	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
+    and c.SynonymCode = ?SynonymCode
+    and c.SynonymFirmCrCode = ?SynonymFirmCrCode
+    and (length(c.Junk) > 0 = ?Junk)";
+
             e.DataAdapter.SelectCommand.Parameters.Clear();
             e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
             e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int32);
