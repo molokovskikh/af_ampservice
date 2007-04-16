@@ -189,7 +189,7 @@ namespace AMPWebService
                                 MySelCmd.CommandText += " or ";
                             }
                             Params = FormatFindStr(PriceNameStr, "PriceCode" + Inc, "pricesdata.pricecode");
-                            MySelCmd.Parameters.Add("PriceCode" + Inc, Params[1]);
+                            MySelCmd.Parameters.Add("?PriceCode" + Inc, Params[1]);
                             MySelCmd.CommandText += Params[0];
                             Inc += 1;
                         }
@@ -213,7 +213,7 @@ namespace AMPWebService
                                 MySelCmd.CommandText += " or ";
                             }
                             Params = FormatFindStr(PriceNameStr, "Form" + Inc, "catalog.form");
-                            MySelCmd.Parameters.Add("Form" + Inc, Params[1]);
+                            MySelCmd.Parameters.Add("?Form" + Inc, Params[1]);
                             MySelCmd.CommandText += Params[0];
                             Inc += 1;
                         }
@@ -269,7 +269,7 @@ namespace AMPWebService
                             {
                                 Params = FormatFindStr(NameStr, "Name" + Inc, "catalog.Name");
                             }
-                            MySelCmd.Parameters.Add("Name" + Inc, Params[1]);
+                            MySelCmd.Parameters.Add("?Name" + Inc, Params[1]);
                             MySelCmd.CommandText += Params[0];
                             Inc += 1;
                         }
@@ -409,7 +409,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 	AND c.ID in " + CoreIDString;
 
             e.DataAdapter.SelectCommand.Parameters.Clear();
-            e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
+            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
             e.DataAdapter.Fill(dsPost, "SummaryOrder");
             dtSummaryOrder = dsPost.Tables["SummaryOrder"];
 
@@ -440,40 +440,40 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                             "values(now(), ?ClientCode, ?PriceCode, ?RegionCode, ?PriceDate, ?RowCount, ?ClientAddition, 0);";
                     e.DataAdapter.SelectCommand.CommandText += "select LAST_INSERT_ID()";
                     e.DataAdapter.SelectCommand.Parameters.Clear();
-                    e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", drOH["ClientCode"]);
-                    e.DataAdapter.SelectCommand.Parameters.Add("PriceCode", drOH["PriceCode"]);
-                    e.DataAdapter.SelectCommand.Parameters.Add("RegionCode", drOH["RegionCode"]);
-                    e.DataAdapter.SelectCommand.Parameters.Add("PriceDate", drOH["PriceDate"]);
-                    e.DataAdapter.SelectCommand.Parameters.Add("RowCount", drOrderList.Length);
-                    e.DataAdapter.SelectCommand.Parameters.Add("ClientAddition", drOrderList[0]["Message"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", drOH["ClientCode"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?PriceCode", drOH["PriceCode"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?RegionCode", drOH["RegionCode"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?PriceDate", drOH["PriceDate"]);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?RowCount", drOrderList.Length);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?ClientAddition", drOrderList[0]["Message"]);
                     drOH["OrderID"] = Convert.ToInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
                     e.DataAdapter.SelectCommand.CommandText =
                             "insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
                     e.DataAdapter.SelectCommand.Parameters.Clear();
-                    e.DataAdapter.SelectCommand.Parameters.Add("OrderID", MySqlDbType.Int64);
-                    e.DataAdapter.SelectCommand.Parameters.Add("FullCode", MySqlDbType.Int64);
-                    e.DataAdapter.SelectCommand.Parameters.Add("CodeFirmCr", MySqlDbType.Int64);
-                    e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int64);
-                    e.DataAdapter.SelectCommand.Parameters.Add("SynonymFirmCrCode", MySqlDbType.Int64);
-                    e.DataAdapter.SelectCommand.Parameters.Add("Code", MySqlDbType.VarString);
-                    e.DataAdapter.SelectCommand.Parameters.Add("CodeCr", MySqlDbType.VarString);
-                    e.DataAdapter.SelectCommand.Parameters.Add("Junk", MySqlDbType.Byte);
-                    e.DataAdapter.SelectCommand.Parameters.Add("Await", MySqlDbType.Byte);
-                    e.DataAdapter.SelectCommand.Parameters.Add("Cost", MySqlDbType.Decimal);
-                    e.DataAdapter.SelectCommand.Parameters.Add("Quantity", MySqlDbType.Int32);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?OrderID", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?FullCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?CodeFirmCr", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?SynonymCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?SynonymFirmCrCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?Code", MySqlDbType.VarString);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?CodeCr", MySqlDbType.VarString);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?Junk", MySqlDbType.Byte);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?Await", MySqlDbType.Byte);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?Cost", MySqlDbType.Decimal);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?Quantity", MySqlDbType.Int32);
                     foreach (DataRow drOL in drOrderList)
                     {
-                        e.DataAdapter.SelectCommand.Parameters["OrderID"].Value = drOH["OrderID"];
-                        e.DataAdapter.SelectCommand.Parameters["FullCode"].Value = drOL["FullCode"];
-                        e.DataAdapter.SelectCommand.Parameters["CodeFirmCr"].Value = drOL["CodeFirmCr"];
-                        e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = drOL["SynonymCode"];
-                        e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = drOL["SynonymFirmCrCode"];
-                        e.DataAdapter.SelectCommand.Parameters["Code"].Value = drOL["Code"];
-                        e.DataAdapter.SelectCommand.Parameters["CodeCr"].Value = drOL["CodeCr"];
-                        e.DataAdapter.SelectCommand.Parameters["Junk"].Value = drOL["Junk"];
-                        e.DataAdapter.SelectCommand.Parameters["Await"].Value = drOL["Await"];
-                        e.DataAdapter.SelectCommand.Parameters["Cost"].Value = drOL["Cost"];
-                        e.DataAdapter.SelectCommand.Parameters["Quantity"].Value = drOL["Quantity"];
+                        e.DataAdapter.SelectCommand.Parameters["?OrderID"].Value = drOH["OrderID"];
+                        e.DataAdapter.SelectCommand.Parameters["?FullCode"].Value = drOL["FullCode"];
+                        e.DataAdapter.SelectCommand.Parameters["?CodeFirmCr"].Value = drOL["CodeFirmCr"];
+                        e.DataAdapter.SelectCommand.Parameters["?SynonymCode"].Value = drOL["SynonymCode"];
+                        e.DataAdapter.SelectCommand.Parameters["?SynonymFirmCrCode"].Value = drOL["SynonymFirmCrCode"];
+                        e.DataAdapter.SelectCommand.Parameters["?Code"].Value = drOL["Code"];
+                        e.DataAdapter.SelectCommand.Parameters["?CodeCr"].Value = drOL["CodeCr"];
+                        e.DataAdapter.SelectCommand.Parameters["?Junk"].Value = drOL["Junk"];
+                        e.DataAdapter.SelectCommand.Parameters["?Await"].Value = drOL["Await"];
+                        e.DataAdapter.SelectCommand.Parameters["?Cost"].Value = drOL["Cost"];
+                        e.DataAdapter.SelectCommand.Parameters["?Quantity"].Value = drOL["Quantity"];
                         e.DataAdapter.SelectCommand.ExecuteNonQuery();
                         Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
                         if (Index > -1)
@@ -543,10 +543,10 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
     and (length(c.Junk) > 0 = ?Junk)";
 
             e.DataAdapter.SelectCommand.Parameters.Clear();
-            e.DataAdapter.SelectCommand.Parameters.Add("ClientCode", e.ClientCode);
-            e.DataAdapter.SelectCommand.Parameters.Add("SynonymCode", MySqlDbType.Int32);
-            e.DataAdapter.SelectCommand.Parameters.Add("SynonymFirmCrCode", MySqlDbType.Int32);
-            e.DataAdapter.SelectCommand.Parameters.Add("Junk", MySqlDbType.Bit);
+            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+            e.DataAdapter.SelectCommand.Parameters.Add("?SynonymCode", MySqlDbType.Int32);
+            e.DataAdapter.SelectCommand.Parameters.Add("?SynonymFirmCrCode", MySqlDbType.Int32);
+            e.DataAdapter.SelectCommand.Parameters.Add("?Junk", MySqlDbType.Bit);
 
             for (int i = 0; i < Res.Length; i++)
             {
@@ -560,9 +560,9 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                 else
                 {
                     dtTemp = AMPWebService.PostOrder.GetPricesDataTable();
-                    e.DataAdapter.SelectCommand.Parameters["SynonymCode"].Value = e.SynonymCodes[i];
-                    e.DataAdapter.SelectCommand.Parameters["SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
-                    e.DataAdapter.SelectCommand.Parameters["Junk"].Value = e.Junks[i];
+                    e.DataAdapter.SelectCommand.Parameters["?SynonymCode"].Value = e.SynonymCodes[i];
+                    e.DataAdapter.SelectCommand.Parameters["?SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
+                    e.DataAdapter.SelectCommand.Parameters["?Junk"].Value = e.Junks[i];
                     e.DataAdapter.Fill(dtTemp);
 
                     if (dtTemp.Rows.Count > 0)
@@ -1036,7 +1036,7 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount, Arguments)
 values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?UniqueCount, ?Arguments);
 ";
-				command.Parameters.Add("UniqueCount", CalculateUniqueFullCodeCount(data.Tables[0]));
+				command.Parameters.Add("?UniqueCount", CalculateUniqueFullCodeCount(data.Tables[0]));
 			}
 			else
 				command.CommandText =
@@ -1044,12 +1044,12 @@ values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?Uniqu
 insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, Arguments) 
 values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime, ?Arguments);
 ";			
-			command.Parameters.Add("Host", HttpContext.Current.Request.UserHostAddress);
-			command.Parameters.Add("UserName", HttpContext.Current.User.Identity.Name);
-			command.Parameters.Add("functionName", functionName);
-			command.Parameters.Add("RowCount", rowCount);
-			command.Parameters.Add("ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
-			command.Parameters.Add("Arguments", SerializeArguments(arguments));
+			command.Parameters.Add("?Host", HttpContext.Current.Request.UserHostAddress);
+			command.Parameters.Add("?UserName", HttpContext.Current.User.Identity.Name);
+			command.Parameters.Add("?functionName", functionName);
+			command.Parameters.Add("?RowCount", rowCount);
+			command.Parameters.Add("?ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
+			command.Parameters.Add("?Arguments", SerializeArguments(arguments));
 
             command.ExecuteNonQuery();
             command.CommandText = oldQuery;
