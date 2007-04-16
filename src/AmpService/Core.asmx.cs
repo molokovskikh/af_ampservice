@@ -373,7 +373,7 @@ namespace AMPWebService
             dsPost = new DataSet();
 
             e.DataAdapter.SelectCommand.CommandText = @"
-CALL GetActivePrices(?ClientCode, 0);
+CALL GetActivePrices(?ClientCode);
 
 SELECT  cd.FirmCode as ClientCode,
 		cd.RegionCode,
@@ -491,7 +491,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             DataTable dtTemp;
 
             e.DataAdapter.SelectCommand.CommandText = @"
-CALL GetActivePrices(?ClientCode, 0);
+CALL GetActivePrices(?ClientCode);
 
 SELECT  c.id OrderID,
 		c.id OriginalOrderID,
@@ -749,7 +749,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 
 
             e.DataAdapter.SelectCommand.CommandText += @"
-CALL GetActivePrices(?ClientCode, 0);
+CALL GetActivePrices(?ClientCode);
 
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode,
