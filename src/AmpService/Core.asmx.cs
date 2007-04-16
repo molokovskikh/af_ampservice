@@ -169,7 +169,8 @@ namespace AMPWebService
                 MySelCmd.CommandText +=
                         "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
                         " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" +
-                        " left join farm.core0 c on c.firmcode = intersection.costcode and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
+						" left join farm.core0 c on c.firmcode = if(pricesdata.costtype = 0, intersection.priceCode, intersection.costCode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
+						" LEFT JOIN farm.corecosts cc ON cc.pc_costcode = intersection.costcode and cc.core_id = c.id " +
                         " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" +
                         " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" +
 						GetClientCode(MyCn, HttpContext.Current.User.Identity.Name).ToString() + " and retclientsset.clientcode=intersection.clientcode" +
@@ -231,7 +232,7 @@ namespace AMPWebService
                 }
                 if (OfferOnly || PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
                 {
-                    MySelCmd.CommandText += " and c.id is not null";
+                    MySelCmd.CommandText += " and cc.id is not null";
                 }
                 MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" +
                                         " and pricesregionaldata.regioncode=intersection.regioncode" +
