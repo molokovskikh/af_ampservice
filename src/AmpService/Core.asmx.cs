@@ -1019,7 +1019,7 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
     AND billingstatus = 1 
     AND OSUserName = ?UserName
 ",
-					new MySqlParameter[] { new MySqlParameter("UserName", userName) }));
+					new MySqlParameter[] { new MySqlParameter("?UserName", userName) }));
 		}
 
         private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, 
