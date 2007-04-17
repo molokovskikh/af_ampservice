@@ -400,9 +400,6 @@ FROM    (farm.formrules fr,
 		UserSettings.ClientsData cd
 WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
     AND fr.firmcode                         = ap.pricecode
-    AND ap.Actual							= 1
-    AND ap.AlowInt                          = 0
-    AND ap.DisabledByClient                 = 0
     AND clientsdata.firmcode                = ap.firmcode
 	AND if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
 	AND cd.FirmCode							= ?ClientCode
@@ -531,9 +528,6 @@ FROM    (farm.formrules fr,
             and c.synonymfirmcrcode     = scr.synonymfirmcrcode
 WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
     AND fr.firmcode                         = ap.pricecode
-    AND ap.Actual							= 1
-    AND ap.AlowInt                          = 0
-    AND ap.DisabledByClient                 = 0
     and c.synonymcode                       = s.synonymcode
     and s.firmcode                          = ifnull(fr.parentsynonym, ap.pricecode)
     and clientsdata.firmcode                = ap.firmcode
@@ -788,9 +782,6 @@ FROM    (farm.formrules fr,
             and c.synonymfirmcrcode     = scr.synonymfirmcrcode
 WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
     AND fr.firmcode                         = ap.pricecode
-    AND ap.Actual							= 1
-    AND ap.AlowInt                          = 0
-    AND ap.DisabledByClient                 = 0
     and c.synonymcode                       = s.synonymcode
     and s.firmcode                          = ifnull(fr.parentsynonym, ap.pricecode)
     and clientsdata.firmcode                = ap.firmcode

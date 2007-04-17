@@ -1,4 +1,5 @@
 using ExecuteTemplate;
+using System;
 
 
 namespace AMPWebService
@@ -6,9 +7,9 @@ namespace AMPWebService
 	/// <summary>
 	/// Аргументы для передачи в делегат, генерирующий SQL запрос
 	/// </summary>
-	internal class FirmNameArgs : ExecuteArgs
+	[Serializable]
+	public class FirmNameArgs : ExecuteArgs
 	{
-
 		private string[] _firmNames;
 
 		public string[] FirmNames
@@ -17,14 +18,18 @@ namespace AMPWebService
 			set { _firmNames = value; }
 		}
 
+		protected FirmNameArgs()
+		{ }
+
 		public FirmNameArgs(string[] firmNames)
 			: base()
 		{
 			_firmNames = firmNames;
 		}
 	}
-	
-	internal class GetOrdersArgs : ExecuteArgs
+
+	[Serializable]
+	public class GetOrdersArgs : ExecuteArgs
 	{
 		private string[] _orderID;
 		private int _priceCode;
@@ -34,6 +39,9 @@ namespace AMPWebService
 			get { return _orderID; }
 			set { _orderID = value; }
 		}
+
+		protected GetOrdersArgs()
+		{ }
 		
 		public int PriceCode
 		{
@@ -48,7 +56,8 @@ namespace AMPWebService
 		}
 	}
 
-	internal class GetPricesArgs : ExecuteArgs
+	[Serializable]
+	public class GetPricesArgs : ExecuteArgs
 	{
 		private int _count;
 		private int _offset;
@@ -107,6 +116,9 @@ namespace AMPWebService
 			set { _sortDirection = value; }
 		}
 
+		protected GetPricesArgs()
+		{ }
+
 		public GetPricesArgs(bool onlyLeader, bool newEar, string[] rangeField, string[] rangeValue, string[] sortField, string[] sortDirection, int count, int offset)
 			: base()
 		{
@@ -121,7 +133,8 @@ namespace AMPWebService
 		}
 	}
 
-	internal class PostOrderArgs : ExecuteArgs
+	[Serializable]
+	public class PostOrderArgs : ExecuteArgs
 	{
 		private int[] _quantities;
 		private string[] _messages;
@@ -165,6 +178,9 @@ namespace AMPWebService
 			get { return _junks; }
 			set { _junks = value; }
 		}
+
+		protected PostOrderArgs()
+		{ }
 
 		public PostOrderArgs(long[] coreIDs, int[] quantities, string[] messages, int[] synonymCodes, int[] synonymFirmCrCodes, bool[] junks)
 		{
