@@ -8,14 +8,15 @@ using System.Web.UI.WebControls;
 using System.Web.UI.WebControls.WebParts;
 using System.Web.UI.HtmlControls;
 
-/// <summary>
-/// Summary description for Literals
-/// </summary>
-public class Literals
+namespace AmpService
 {
-	public static string ConnectionString
-	{
-		get { return Convert.ToString(ConfigurationManager.ConnectionStrings["DB"]); }
-	}
 
+	public class Literals
+	{
+		public static string ConnectionString
+		{
+			get { return Convert.ToString(ConfigurationManager.ConnectionStrings["DB"]); }
+		}
+
+	}
 }

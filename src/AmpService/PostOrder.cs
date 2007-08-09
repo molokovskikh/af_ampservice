@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 using System.Net.Mail;
 
 
-namespace AMPWebService
+namespace AmpService
 {
     public class PostOrder
     {
@@ -43,7 +43,11 @@ namespace AMPWebService
         public static void MailErr(string ProcessName, string ErrMessage, string ErrSource, string UserName)
         {
             MailMessage Message = new MailMessage();
+#if !DEBUG
             MailAddress Address = new MailAddress("service@analit.net");
+#else
+			MailAddress Address = new MailAddress("r.kvasov@analit.net");
+#endif
             SmtpClient Client = new SmtpClient("box.analit.net");
             try
             {

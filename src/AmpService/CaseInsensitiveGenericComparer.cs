@@ -9,18 +9,18 @@ using System.Web.UI.WebControls;
 using System.Web.UI.WebControls.WebParts;
 using System.Web.UI.HtmlControls;
 
-/// <summary>
-/// Summary description for CaseInsensitiveGenericComparer
-/// </summary>
-public class CaseInsensitiveStringComparer : IEqualityComparer<string>
+namespace AmpService
 {
-	public bool Equals(string x, string y)
+	public class CaseInsensitiveStringComparer : IEqualityComparer<string>
 	{
-		return String.Compare(x, y, true) == 0;
-	}
+		public bool Equals(string x, string y)
+		{
+			return String.Compare(x, y, true) == 0;
+		}
 
-	public int GetHashCode(string obj)
-	{
-		return base.GetHashCode();
+		public int GetHashCode(string obj)
+		{
+			return base.GetHashCode();
+		}
 	}
 }

@@ -13,11 +13,13 @@ using MySql.Data.MySqlClient;
 using System.Reflection;
 using System.Text;
 using System.Collections;
+using AmpService;
 
-namespace AMPWebService
+namespace AmpService
 {
-    [WebService(Namespace = "AMPNameSpace")]
-    public class AMPService : System.Web.Services.WebService
+	//(Namespace = "AMPNameSpace")
+    [WebService]
+    public class AMPService : WebService
     {
         MySqlTransaction MyTrans;
         DateTime StartTime = DateTime.Now;
@@ -54,7 +56,7 @@ namespace AMPWebService
         public DataColumn DataColumn16;
         public DataColumn DataColumn17;
 
-        [DebuggerStepThrough()]
+        //[DebuggerStepThrough()]
         private void InitializeComponent()
         {
             MySelCmd = new MySqlCommand();
@@ -83,7 +85,6 @@ namespace AMPWebService
             dataColumn19 = new DataColumn();
             MyDS.BeginInit();
             DataTable1.BeginInit();
-            MySelCmd.CommandText = null;
             MySelCmd.CommandTimeout = 0;
             MySelCmd.CommandType = CommandType.Text;
             MySelCmd.Connection = MyCn;
@@ -151,174 +152,111 @@ namespace AMPWebService
         }
 
         [WebMethod()]
-        public DataSet GetNameFromCatalog(string[] Name, string[] Form, bool NewEar, 
-			bool OfferOnly, uint[] PriceID, int Limit, int SelStart)
+        public DataSet GetNameFromCatalog(string[] Name, 
+										  string[] Form, 
+										  bool NewEar, 
+										  bool OfferOnly, 
+										  uint[] PriceID, 
+										  int Limit, 
+										  int SelStart)
         {
-            string[] Params;
-            int Inc;
-            bool AMPCode = false;
             MyDS.Tables.Remove("Prices");
-        Restart:
+	        Restart:
             try
             {
-                if (MyCn.State == ConnectionState.Closed)
-                    MyCn.Open();
+				using (MySqlConnection connection = new MySqlConnection(Literals.ConnectionString))
+				{
+					connection.Open();
+					using (MySqlTransaction transaction = connection.BeginTransaction(IsolationLevel.RepeatableRead))
+					{
+						try
+						{
+							StringBuilder commandText = new StringBuilder();
 
-                MyTrans = MyCn.BeginTransaction(IsolationLevel.RepeatableRead);
-                MySelCmd.Transaction = MyTrans;
-                MySelCmd.CommandText +=
-                        "select distinct catalog.FullCode PrepCode, catalog.Name, catalog.Form from (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, farm.catalog)" +
-                        " left join farm.formrules on formrules.firmcode=pricesdata.pricecode" +
-						" left join farm.core0 c on c.firmcode = if(pricesdata.costtype = 0, intersection.priceCode, intersection.costCode) and catalog.fullcode=c.fullcode and to_days(now())-to_days(datecurprice)<maxold" +
-						" LEFT JOIN farm.corecosts cc ON cc.pc_costcode = intersection.costcode and cc.core_id = c.id " +
-                        " left join farm.core0 ampc on ampc.fullcode=catalog.fullcode and ampc.codefirmcr=c.codefirmcr and ampc.firmcode=1864" +
-                        " where DisabledByClient=0" + " and Disabledbyfirm=0" + " and DisabledByAgency=0" + " and intersection.clientcode=" +
-						GetClientCode(MyCn, HttpContext.Current.User.Identity.Name).ToString() + " and retclientsset.clientcode=intersection.clientcode" +
-                        " and pricesdata.pricecode=intersection.pricecode and clientsdata.firmcode=pricesdata.firmcode";
-                if (PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
-                {
-                    Inc = 0;
-                    MySelCmd.CommandText += " and (";
-                    for (int i = 0; i < PriceID.Length; i++)
-                    {
-                        string PriceNameStr = Convert.ToString(PriceID[i]);
-                        if (!String.IsNullOrEmpty(PriceNameStr))
-                        {
-                            if (Inc > 0)
-                            {
-                                MySelCmd.CommandText += " or ";
-                            }
-                            Params = FormatFindStr(PriceNameStr, "PriceCode" + Inc, "pricesdata.pricecode");
-                            MySelCmd.Parameters.Add("?PriceCode" + Inc, Params[1]);
-                            MySelCmd.CommandText += Params[0];
-                            Inc += 1;
-                        }
-                    }
-                    if (Inc < 1)
-                    {
-                        MySelCmd.CommandText += "1";
-                    }
-                    MySelCmd.CommandText += ")";
-                }
-                if (!(Form == null))
-                {
-                    Inc = 0;
-                    MySelCmd.CommandText += " and (";
-                    foreach (string PriceNameStr in Form)
-                    {
-                        if (!String.IsNullOrEmpty(PriceNameStr))
-                        {
-                            if (Inc > 0)
-                            {
-                                MySelCmd.CommandText += " or ";
-                            }
-                            Params = FormatFindStr(PriceNameStr, "Form" + Inc, "catalog.form");
-                            MySelCmd.Parameters.Add("?Form" + Inc, Params[1]);
-                            MySelCmd.CommandText += Params[0];
-                            Inc += 1;
-                        }
-                        if (Inc < 1)
-                        {
-                            MySelCmd.CommandText += "1";
-                        }
-                    }
-                    MySelCmd.CommandText += ")";
-                }
-                MySelCmd.CommandText += " and clientsdata.firmstatus=1" + " and clientsdata.billingstatus=1" +
-                                        " and clientsdata.firmtype=0";
-                if (NewEar)
-                {
-                    MySelCmd.CommandText += " and ampc.id is null";
-                }
-                if (OfferOnly || PriceID != null && !(PriceID.Length == 1 && PriceID[0] == 0))
-                {
-                    MySelCmd.CommandText += " and cc.id is not null";
-                }
-                MySelCmd.CommandText += " and clientsdata.firmsegment=AClientsData.firmsegment" +
-                                        " and pricesregionaldata.regioncode=intersection.regioncode" +
-                                        " and pricesregionaldata.pricecode=pricesdata.pricecode" +
-                                        " and AClientsData.firmcode=intersection.clientcode" +
-                                        " and (clientsdata.maskregion & intersection.regioncode)>0" +
-                                        " and (AClientsData.maskregion & intersection.regioncode)>0" +
-                                        " and (retclientsset.workregionmask & intersection.regioncode)>0" +
-                                        " and pricesdata.agencyenabled=1" + " and pricesdata.enabled=1 and invisibleonclient=0" +
-                                        " and pricesdata.pricetype<>1" + " and pricesregionaldata.enabled=1";
-                if (!(Name == null))
-                {
-                    Inc = 0;
-                    MySelCmd.CommandText += " and (";
+							int i;
+							bool searchByApmCode = Name != null && Name.Length > 0 && int.TryParse(Name[0], out i);
 
-                    int temp;
-                    if (int.TryParse(Name[0], out temp))
-                    {
-                        AMPCode = true;
-                    }
-                    foreach (string NameStr in Name)
-                    {
-                        if (!String.IsNullOrEmpty(NameStr))
-                        {
-                            if (Inc > 0)
-                            {
-                                MySelCmd.CommandText += " or ";
-                            }
-                            if (AMPCode)
-                            {
-                                Params = FormatFindStr(NameStr, "Name" + Inc, "ampc.code");
-                            }
-                            else
-                            {
-                                Params = FormatFindStr(NameStr, "Name" + Inc, "catalog.Name");
-                            }
-                            MySelCmd.Parameters.Add("?Name" + Inc, Params[1]);
-                            MySelCmd.CommandText += Params[0];
-                            Inc += 1;
-                        }
-                    }
-                    MySelCmd.CommandText += ")";
-                }
-                MySelCmd.CommandText += " order by catalog.Name, catalog.Form";
-                MySelCmd.CommandText += Utils.GetLimitString(SelStart, Limit);
 
-                MyDA.Fill(MyDS, "Catalog");
+							if (OfferOnly)
+							{
+								commandText.AppendLine(@"
+CALL GetActivePrices(?ClientCode);
 
-				LogQuery(MySelCmd, MyDS, false, MethodBase.GetCurrentMethod().Name,
-					new KeyValuePair<string, object>("Name", Name), 
-					new KeyValuePair<string, object>("Form", Form), 
-					new KeyValuePair<string, object>("NewEar", NewEar),
-					new KeyValuePair<string, object>("OfferOnly", OfferOnly),
-					new KeyValuePair<string, object>("PriceID", PriceID),
-					new KeyValuePair<string, object>("Limit", Limit),
-					new KeyValuePair<string, object>("SelStart", SelStart));
-                MyTrans.Commit();
-                return MyDS;
+SELECT distinct catalog.FullCode PrepCode, 
+		catalog.Name, 
+		catalog.Form 
+FROM farm.catalog catalog
+	JOIN Farm.Core0 offers ON catalog.fullcode = offers.fullcode
+		JOIN activeprices ap ON ap.pricecode = offers.firmcode
+	LEFT JOIN farm.core0 ampc on ampc.fullcode = catalog.fullcode and ampc.codefirmcr = offers.codefirmcr and ampc.firmcode=1864
+WHERE");
+
+							}
+							else
+							{
+								commandText.AppendLine(@"
+SELECT distinct catalog.FullCode PrepCode, 
+		catalog.Name, 
+		catalog.Form 
+FROM farm.catalog catalog
+	LEFT JOIN farm.core0 ampc on ampc.fullcode = catalog.fullcode and ampc.firmcode=1864
+WHERE");
+							}
+
+							WhereBlockBuilder
+								.ForCommandTest(commandText)
+								.AddCriteria(Utils.StringArrayToQuery(PriceID, "ap.pricecode"), 
+											 OfferOnly 
+											 && PriceID != null 
+											 && !(PriceID.Length == 1 
+												  && PriceID[0] == 0))
+								.AddCriteria(Utils.StringArrayToQuery(Form, "catalog.Form"))
+								.AddCriteria(Utils.StringArrayToQuery(Name, "ampc.code"), searchByApmCode)
+								.AddCriteria(Utils.StringArrayToQuery(Name, "catalog.Name"), !searchByApmCode)
+								.AddCriteria("ampc.id is null", NewEar);
+
+							commandText.AppendLine("ORDER BY catalog.Name, catalog.Form");
+							commandText.AppendLine(Utils.GetLimitString(SelStart, Limit));
+
+							MySqlDataAdapter adapter = new MySqlDataAdapter(commandText.ToString(), connection);
+							adapter.SelectCommand.Transaction = transaction;
+							adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", GetClientCode(MyCn, HttpContext.Current.User.Identity.Name));
+							adapter.Fill(MyDS, "Catalog");
+
+							LogQuery(adapter.SelectCommand, MyDS, false, MethodBase.GetCurrentMethod().Name,
+								new KeyValuePair<string, object>("Name", Name),
+								new KeyValuePair<string, object>("Form", Form),
+								new KeyValuePair<string, object>("NewEar", NewEar),
+								new KeyValuePair<string, object>("OfferOnly", OfferOnly),
+								new KeyValuePair<string, object>("PriceID", PriceID),
+								new KeyValuePair<string, object>("Limit", Limit),
+								new KeyValuePair<string, object>("SelStart", SelStart));
+
+							transaction.Commit();
+							return MyDS;
+						}
+						catch (Exception)
+						{
+							if (transaction != null)
+								transaction.Rollback();
+
+							throw;
+						}
+					}
+				}
             }
             catch (MySqlException MySQLErr)
             {
-                if (!(MyTrans == null))
-                {
-                    MyTrans.Rollback();
-                }
                 if (MySQLErr.Number == 1213 | MySQLErr.Number == 1205)
                 {
                     Thread.Sleep(100);
                     goto Restart;
                 }
-				AMPWebService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
+				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
             }
             catch (Exception ex)
             {
-                if (!(MyTrans == null))
-                {
-                    MyTrans.Rollback();
-                }
-				AMPWebService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
-            }
-            finally
-            {
-                if (MyCn.State == ConnectionState.Open)
-                {
-                    MyCn.Close();
-                }
+				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
             }
             return MyDS;
         }
@@ -480,7 +418,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             }
 
             //начинаем заполнять таблицу результатов
-            dtPricesRes = AMPWebService.PostOrder.GetPricesDataTable();
+			dtPricesRes = AmpService.PostOrder.GetPricesDataTable();
             dtPricesRes.TableName = "Prices";
 
             DataRow drOK;
@@ -553,7 +491,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                 }
                 else
                 {
-                    dtTemp = AMPWebService.PostOrder.GetPricesDataTable();
+					dtTemp = AmpService.PostOrder.GetPricesDataTable();
                     e.DataAdapter.SelectCommand.Parameters["?SynonymCode"].Value = e.SynonymCodes[i];
                     e.DataAdapter.SelectCommand.Parameters["?SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
                     e.DataAdapter.SelectCommand.Parameters["?Junk"].Value = e.Junks[i];
@@ -638,7 +576,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                                         ";
 
 
-            e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
+            e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
 
             e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
@@ -791,7 +729,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                 e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
 
             foreach (string fieldName in FiltedField.Keys)
-                e.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
+                e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
 
             if (!e.OnlyLeader)
             {
@@ -948,7 +886,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                 else
                 {
                     if (args.OrderID[0].IndexOf("!") < 0)
-                        args.DataAdapter.SelectCommand.CommandText += Utils.StringArrayToQuery(args.OrderID, "ol.OrderID");
+                        args.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(args.OrderID, "ol.OrderID");
                     else
                         args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID > " + args.OrderID[0].Replace("!", "");
                 }
@@ -999,7 +937,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 			if (userName.IndexOf("ANALIT\\") == 0)
 				userName = userName.Substring(7);
 
-			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(connection,
+			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(Literals.ConnectionString,
 @"
 SELECT 
     osuseraccessright.clientcode 

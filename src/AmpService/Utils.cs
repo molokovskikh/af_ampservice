@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AMPWebService
+namespace AmpService
 {
 	/// <summary>
 	/// Класс содержит вспомогательные функции для генерации SQL запросов
@@ -39,24 +39,30 @@ namespace AMPWebService
 		/// <param name="array">Аргументы поиска</param>
 		/// <param name="fieldName">Имя поля по которому происходит поиск</param>
 		/// <returns>Отформатированная строка</returns>
-		public static string StringArrayToQuery(IList<string> array, string fieldName)
+		public static string StringArrayToQuery<T>(IEnumerable<T> array, string fieldName)
 		{
 			StringBuilder builder = new StringBuilder();
-			if ((array != null) && (array.Count > 0))
+			int index = 0;
+			if (array != null)
 			{
-				builder.Append(" and (");
-				foreach (string item in array)
+				builder.Append(" (");
+				foreach (T item in array)
 				{
-					if (item.IndexOf("*") > -1)
-						builder.Append(fieldName + " like '" + item.Replace("*", "%") + "'");
+					string value = item.ToString();
+					if (value.IndexOf("*") > -1)
+						builder.Append(fieldName + " like '" + value.Replace("*", "%") + "'");
 					else
-						builder.Append(fieldName + " = '" + item + "'");
+						builder.Append(fieldName + " = '" + value + "'");
 					builder.Append(" or ");
+					index++;
 				}
 				builder.Remove(builder.Length - 4, 4);
 				builder.Append(") ");
 			}
-			return builder.ToString();
+			if (index > 0)
+				return builder.ToString();
+			else
+				return "";
 		}
 		/// <summary>
 		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.

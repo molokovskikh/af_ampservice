@@ -2,7 +2,7 @@ using ExecuteTemplate;
 using System;
 
 
-namespace AMPWebService
+namespace AmpService
 {
 	/// <summary>
 	/// Аргументы для передачи в делегат, генерирующий SQL запрос

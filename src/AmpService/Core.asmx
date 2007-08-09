@@ -1,1 +1,1 @@
-<%@ WebService Language="C#" CodeBehind="~/App_Code/Core.asmx.cs" Class="AMPWebService.AMPService" %>
+<%@ WebService Language="C#" CodeBehind="Core.asmx.cs" Class="AmpService.AMPService" %>
