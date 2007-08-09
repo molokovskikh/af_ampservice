@@ -1,40 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "D:\...\AMPService\", "AMPService", "{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpServiceProject", "AmpServiceProject\AmpServiceProject.csproj", "{1807FDE0-8023-47E3-992A-E20431791F97}"
 	ProjectSection(WebsiteProperties) = preProject
-		SccProjectName = ""$/Inforoom/NET2.0/AMPService/src", EEFAAAAA"
-		SccAuxPath = ""
-		SccLocalPath = ".."
-		SccProvider = "MSSCCI:Microsoft Visual SourceSafe"
-		Debug.AspNetCompiler.VirtualPath = "/AMPService"
-		Debug.AspNetCompiler.PhysicalPath = "AMPService\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\AMPService\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/AMPService"
-		Release.AspNetCompiler.PhysicalPath = "AMPService\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\AMPService\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "3335"
-		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
 		SccNumberOfProjects = 2
 		SccLocalPath0 = .
-		SccWebProject1 = true
-		SccProjectUniqueName1 = AMPService
-		SccProjectName1 = \u0022$/Inforoom/NET2.0/AMPService/src\u0022,\u0020EEFAAAAA
+		SccProjectUniqueName1 = AmpServiceProject\\AmpServiceProject.csproj
 		SccLocalPath1 = .
-		SccProjectFilePathRelativizedFromConnection1 = AMPService\\
-		SccProjectEnlistmentChoice1 = 2
+		SccProjectFilePathRelativizedFromConnection1 = AmpServiceProject\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -45,16 +24,16 @@ Global
 		Release|Mixed Platforms = Release|Mixed Platforms
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|.NET.ActiveCfg = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|.NET.Build.0 = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|Any CPU.ActiveCfg = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|Mixed Platforms.ActiveCfg = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Debug|Mixed Platforms.Build.0 = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|.NET.ActiveCfg = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|.NET.Build.0 = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|Any CPU.ActiveCfg = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|Mixed Platforms.ActiveCfg = Debug|.NET
-		{C08A4805-3DD7-44C9-BC6E-30FF81FAC7BA}.Release|Mixed Platforms.Build.0 = Debug|.NET
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|.NET.ActiveCfg = Release|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
