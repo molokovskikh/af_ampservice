@@ -43,8 +43,8 @@
 
 		<copy todir="${ReleasePath}">
 			<fileset basedir=".\${ProjectName}\">
-				<include name="**.dll"/>
-				<include name="**.asmx"/>
+				<include name="bin\*.dll"/>
+				<include name="*.asmx"/>
 			</fileset>
 		</copy>
 
