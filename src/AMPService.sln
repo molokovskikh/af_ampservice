@@ -1,19 +1,24 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpServiceProject", "AmpServiceProject\AmpServiceProject.csproj", "{1807FDE0-8023-47E3-992A-E20431791F97}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpService", "AmpService\AmpService.csproj", "{1807FDE0-8023-47E3-992A-E20431791F97}"
 	ProjectSection(WebsiteProperties) = preProject
+		SccProjectName = ""$/Inforoom/NET2.0/AMPService/src", EEFAAAAA"
+		SccAuxPath = ""
+		SccLocalPath = ".."
+		SccProvider = "MSSCCI:Microsoft Visual SourceSafe"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "3335"
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SourceCodeControl) = preSolution
 		SccNumberOfProjects = 2
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = AmpServiceProject\\AmpServiceProject.csproj
+		SccProjectUniqueName1 = AmpService\\AmpService.csproj
 		SccLocalPath1 = .
-		SccProjectFilePathRelativizedFromConnection1 = AmpServiceProject\\
+		SccProjectFilePathRelativizedFromConnection1 = AmpService\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
