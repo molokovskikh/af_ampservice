@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<project name="MyProject" default="compile" basedir=".">
+
+	<property name="ProjectName" value="AmpService" />
+	<property name="VssUser" value="Kvasov" />
+	<property name="VssPassword" value="gthtcnhjqrf" />
+	<property name="VssDbPath" value="\\offdc\VSS\Inforoom\srcsafe.ini" />
+	<property name="VssPath" value="$/inforoom/NET2.0/${ProjectName}/release/" />
+	<property name="ReleasePath" value="..\release\" />
+		
+
+	<target name="compile">
+
+		<loadtasks assembly="D:\Tools\nantcontrib-0.85\bin\NAnt.Contrib.Tasks.dll" />
+
+		<vsscheckout 
+					username="${VssUser}"
+					password="${VssPassword}" 
+					localpath="${ReleasePath}"
+					recursive="true"
+					writable="true"
+					dbpath="${VssDbPath}"
+					path="${VssPath}" 
+		/>
+
+		<delete>
+			<fileset basedir=".\${ProjectName}\bin\">
+				<include name="**.*"/>
+			</fileset>			
+		</delete>
+
+		<msbuild project="${ProjectName}.sln">
+			<arg value="/property:Configuration=release" />                                  
+			<arg value="/t:Rebuild" />
+		</msbuild>
+
+		<delete>
+			<fileset basedir="${ReleasePath}">
+				<include name="**.*"/>
+				<exclude name="**.scc" />
+			</fileset>			
+		</delete>
+
+		<copy todir="${ReleasePath}">
+			<fileset basedir=".\${ProjectName}\">
+				<include name="**.dll"/>
+				<include name="**.asmx"/>
+			</fileset>
+		</copy>
+
+		<copy 
+			file="${ProjectName}\Web.Release.config"
+			tofile="${ReleasePath}Web.config"
+		/>
+
+		<vssadd dbpath="${VssDbPath}" username="${VssUser}" password="${VssPassword}" path="${VssPath}">
+			<fileset basedir="${ReleasePath}">
+				<include name="**.*"/>
+				<exclude name="**.scc" />
+			</fileset>
+		</vssadd>
+
+		<vsscheckin 
+					username="${VssUser}"
+					password="${VssPassword}" 
+					localpath="${ReleasePath}"
+					recursive="true"
+					writable="true"
+					dbpath="${VssDbPath}"
+					path="${VssPath}" 
+					comment="Build script checkin"
+		/> 
+	</target>	
+</project>
