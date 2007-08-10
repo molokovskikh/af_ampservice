@@ -17,8 +17,7 @@ using AmpService;
 
 namespace AmpService
 {
-	//(Namespace = "AMPNameSpace")
-    [WebService]
+	[WebService(Namespace = "AMPNameSpace")]
     public class AMPService : WebService
     {
         MySqlTransaction MyTrans;
