@@ -2,8 +2,6 @@
 <project name="MyProject" default="compile" basedir=".">
 
 	<property name="ProjectName" value="AmpService" />
-	<property name="VssUser" value="Kvasov" />
-	<property name="VssPassword" value="gthtcnhjqrf" />
 	<property name="VssDbPath" value="\\offdc\VSS\Inforoom\srcsafe.ini" />
 	<property name="VssPath" value="$/inforoom/NET2.0/${ProjectName}/release/" />
 	<property name="ReleasePath" value="..\release\" />
@@ -14,8 +12,8 @@
 		<loadtasks assembly="D:\Tools\nantcontrib-0.85\bin\NAnt.Contrib.Tasks.dll" />
 
 		<vsscheckout 
-					username="${VssUser}"
-					password="${VssPassword}" 
+					username="${User}"
+					password="${Password}" 
 					localpath="${ReleasePath}"
 					recursive="true"
 					writable="true"
@@ -53,7 +51,7 @@
 			tofile="${ReleasePath}Web.config"
 		/>
 
-		<vssadd dbpath="${VssDbPath}" username="${VssUser}" password="${VssPassword}" path="${VssPath}">
+		<vssadd dbpath="${VssDbPath}" username="${User}" password="${Password}" path="${VssPath}">
 			<fileset basedir="${ReleasePath}">
 				<include name="**.*"/>
 				<exclude name="**.scc" />
@@ -61,8 +59,8 @@
 		</vssadd>
 
 		<vsscheckin 
-					username="${VssUser}"
-					password="${VssPassword}" 
+					username="${User}"
+					password="${Password}" 
 					localpath="${ReleasePath}"
 					recursive="true"
 					writable="true"
