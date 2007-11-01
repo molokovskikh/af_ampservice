@@ -33,9 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ExecuteTemplate, Version=1.1.15.26226, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ExecuteTemplate, Version=1.1.16.22647, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\ExecuteTemplate.dll</HintPath>
+      <HintPath>..\..\..\ExecuteTemplate\src\ExecuteTemplate\bin\$(Configuration)\ExecuteTemplate.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.81.0.1407, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <SpecificVersion>False</SpecificVersion>
