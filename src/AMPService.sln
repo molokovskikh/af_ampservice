@@ -12,10 +12,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpService", "AmpService\Am
 		VWDPort = "3335"
 	EndProjectSection
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "AMPServiceTester", "AMPServiceTester\AMPServiceTester.vbproj", "{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpService.Tests", "AmpService.Tests\AmpService.Tests.csproj", "{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{1807FDE0-8023-47E3-992A-E20431791F97} = {1807FDE0-8023-47E3-992A-E20431791F97}
 	EndProjectSection
 EndProject
 Global
@@ -25,9 +28,9 @@ Global
 		SccProjectUniqueName1 = AmpService\\AmpService.csproj
 		SccLocalPath1 = .
 		SccProjectFilePathRelativizedFromConnection1 = AmpService\\
-		SccProjectUniqueName2 = AMPServiceTester\\AMPServiceTester.vbproj
-		SccProjectName2 = \u0022$/Inforoom/NET2.0/AMPService/src/AMPServiceTester\u0022,\u0020JPGAAAAA
-		SccLocalPath2 = AMPServiceTester
+		SccProjectUniqueName2 = AmpService.Tests\\AmpService.Tests.csproj
+		SccLocalPath2 = .
+		SccProjectFilePathRelativizedFromConnection2 = AmpService.Tests\\
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -48,16 +51,16 @@ Global
 		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1807FDE0-8023-47E3-992A-E20431791F97}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|.NET.ActiveCfg = Release|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{DBD9EC2D-AE1A-4ED8-9DDC-53AFA9892497}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|.NET.ActiveCfg = Release|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

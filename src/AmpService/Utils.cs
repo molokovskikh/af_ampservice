@@ -43,7 +43,7 @@ namespace AmpService
 		{
 			StringBuilder builder = new StringBuilder();
 			int index = 0;
-			if (array != null)
+			if (array != null && Count(array) > 0)
 			{
 				builder.Append(" (");
 				foreach (T item in array)
@@ -110,6 +110,15 @@ namespace AmpService
 			}
 
 			return result + ";";
+		}
+
+		private static int Count<T>(IEnumerable<T> enumerable)
+		{
+			int i = 0;
+			foreach (T item in enumerable)
+
+				i++;
+			return i;
 		}
 	}
 }

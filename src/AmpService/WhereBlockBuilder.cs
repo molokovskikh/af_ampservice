@@ -28,6 +28,9 @@ namespace AmpService
 
 		public WhereBlockBuilder AddCriteria(string criteriaString)
 		{
+			if (criteriaString == null
+				|| criteriaString.Trim() == "")
+				return this;
 			if (_isAdd)
 				_whereBlock.Append(" and ");
 			_whereBlock.AppendLine(criteriaString);

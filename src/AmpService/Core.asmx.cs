@@ -1,19 +1,16 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Services;
 using ExecuteTemplate;
-using Microsoft.Practices.EnterpriseLibrary.Logging;
 using MySql.Data.MySqlClient;
-using System.Reflection;
-using System.Text;
-using System.Collections;
-using AmpService;
 
 namespace AmpService
 {
@@ -26,7 +23,6 @@ namespace AmpService
         private DataColumn dataColumn19;
 
         public AMPService()
-            : base()
         {
             InitializeComponent();
         }
@@ -55,7 +51,6 @@ namespace AmpService
         public DataColumn DataColumn16;
         public DataColumn DataColumn17;
 
-        //[DebuggerStepThrough()]
         private void InitializeComponent()
         {
             MySelCmd = new MySqlCommand();
@@ -150,7 +145,7 @@ namespace AmpService
             base.Dispose(disposing);
         }
 
-        [WebMethod()]
+        [WebMethod]
         public DataSet GetNameFromCatalog(string[] Name, 
 										  string[] Form, 
 										  bool NewEar, 
@@ -170,6 +165,7 @@ namespace AmpService
 					{
 						try
 						{
+							ulong clientCode = GetClientCode(MyCn);
 							StringBuilder commandText = new StringBuilder();
 
 							int i;
@@ -178,27 +174,35 @@ namespace AmpService
 
 							if (OfferOnly)
 							{
-								commandText.AppendLine(@"
-CALL GetActivePrices(?ClientCode);
+								MySqlCommand command = new MySqlCommand("CALL GetActivePrices(?ClientCode);", connection, transaction);
+								command.Parameters.AddWithValue("?ClientCode", clientCode);
+								command.ExecuteNonQuery();
 
-SELECT distinct catalog.FullCode PrepCode, 
-		catalog.Name, 
-		catalog.Form 
-FROM farm.catalog catalog
-	JOIN Farm.Core0 offers ON catalog.fullcode = offers.fullcode
-		JOIN activeprices ap ON ap.pricecode = offers.firmcode
-	LEFT JOIN farm.core0 ampc on ampc.fullcode = catalog.fullcode and ampc.codefirmcr = offers.codefirmcr and ampc.firmcode=1864
+								commandText.AppendLine(@"
+SELECT	distinct c.id as PrepCode, 
+		cn.Name, 
+		cf.Form
+FROM Catalogs.Catalog c
+	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
+	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
+	JOIN Catalogs.Products p on p.CatalogId = c.Id
+	JOIN Farm.Core0 c0 on c0.ProductId = p.Id
+		JOIN activeprices ap on ap.PriceCode = c0.PriceCode
+	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.firmcode=1864
 WHERE");
 
 							}
 							else
 							{
 								commandText.AppendLine(@"
-SELECT distinct catalog.FullCode PrepCode, 
-		catalog.Name, 
-		catalog.Form 
-FROM farm.catalog catalog
-	LEFT JOIN farm.core0 ampc on ampc.fullcode = catalog.fullcode and ampc.firmcode=1864
+SELECT	c.id as PrepCode,  
+		cn.Name, 
+		cf.Form
+FROM Catalogs.Catalog c 
+	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
+	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
+	JOIN Catalogs.Products p on p.CatalogId = c.Id
+	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.firmcode=1864
 WHERE");
 							}
 
@@ -209,17 +213,18 @@ WHERE");
 											 && PriceID != null 
 											 && !(PriceID.Length == 1 
 												  && PriceID[0] == 0))
-								.AddCriteria(Utils.StringArrayToQuery(Form, "catalog.Form"))
+								.AddCriteria(Utils.StringArrayToQuery(Form, "cf.Form"))
 								.AddCriteria(Utils.StringArrayToQuery(Name, "ampc.code"), searchByApmCode)
-								.AddCriteria(Utils.StringArrayToQuery(Name, "catalog.Name"), !searchByApmCode)
-								.AddCriteria("ampc.id is null", NewEar);
+								.AddCriteria(Utils.StringArrayToQuery(Name, "cn.Name"), !searchByApmCode)
+								.AddCriteria("ampc.id is null", NewEar)
+								.AddCriteria("c.Hidden = 0");
 
-							commandText.AppendLine("ORDER BY catalog.Name, catalog.Form");
+							commandText.AppendLine("ORDER BY cn.Name, cf.Form");
 							commandText.AppendLine(Utils.GetLimitString(SelStart, Limit));
 
 							MySqlDataAdapter adapter = new MySqlDataAdapter(commandText.ToString(), connection);
 							adapter.SelectCommand.Transaction = transaction;
-							adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", GetClientCode(MyCn, HttpContext.Current.User.Identity.Name));
+							adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
 							adapter.Fill(MyDS, "Catalog");
 
 							LogQuery(adapter.SelectCommand, MyDS, false, MethodBase.GetCurrentMethod().Name,
@@ -251,11 +256,11 @@ WHERE");
                     Thread.Sleep(100);
                     goto Restart;
                 }
-				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, MySQLErr.Message, MySQLErr.Source, HttpContext.Current.User.Identity.Name);
+				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, MySQLErr.Message, MySQLErr.Source, GetUserName());
             }
             catch (Exception ex)
             {
-				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, ex.Message, ex.Source, HttpContext.Current.User.Identity.Name);
+				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, ex.Message, ex.Source, GetUserName());
             }
             return MyDS;
         }
@@ -309,15 +314,19 @@ WHERE");
 
             dsPost = new DataSet();
 
-            e.DataAdapter.SelectCommand.CommandText = @"
-CALL GetActivePrices(?ClientCode);
+        	e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+			e.DataAdapter.SelectCommand.Parameters.Clear();
+			e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+        	e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
+
+            e.DataAdapter.SelectCommand.CommandText = @"
 SELECT  cd.FirmCode as ClientCode,
 		cd.RegionCode,
 		ap.PriceCode,
 		ap.PriceDate,
 		c.Id,
-        c.FullCode,
+        c.ProductId,
         c.CodeFirmCr,
         c.SynonymCode,
         c.SynonymFirmCrCode,
@@ -351,7 +360,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof(string)));
             for (int i = 0; i < e.CoreIDs.Length; i++)
             {
-                drs = dtSummaryOrder.Select("Id = " + e.CoreIDs[i].ToString());
+                drs = dtSummaryOrder.Select(string.Format("Id = {0}", e.CoreIDs[i]));
                 if (drs.Length > 0)
                 {
                     drs[0]["Quantity"] = e.Quantities[i];
@@ -382,10 +391,10 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                     e.DataAdapter.SelectCommand.Parameters.Add("?ClientAddition", drOrderList[0]["Message"]);
                     drOH["OrderID"] = Convert.ToInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
                     e.DataAdapter.SelectCommand.CommandText =
-                            "insert into orders.orderslist (OrderID, FullCode, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?FullCode, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
+                            "insert into orders.orderslist (OrderID, ProductId, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?ProductId, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
                     e.DataAdapter.SelectCommand.Parameters.Clear();
                     e.DataAdapter.SelectCommand.Parameters.Add("?OrderID", MySqlDbType.Int64);
-                    e.DataAdapter.SelectCommand.Parameters.Add("?FullCode", MySqlDbType.Int64);
+                    e.DataAdapter.SelectCommand.Parameters.Add("?ProductId", MySqlDbType.Int64);
                     e.DataAdapter.SelectCommand.Parameters.Add("?CodeFirmCr", MySqlDbType.Int64);
                     e.DataAdapter.SelectCommand.Parameters.Add("?SynonymCode", MySqlDbType.Int64);
                     e.DataAdapter.SelectCommand.Parameters.Add("?SynonymFirmCrCode", MySqlDbType.Int64);
@@ -398,7 +407,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                     foreach (DataRow drOL in drOrderList)
                     {
                         e.DataAdapter.SelectCommand.Parameters["?OrderID"].Value = drOH["OrderID"];
-                        e.DataAdapter.SelectCommand.Parameters["?FullCode"].Value = drOL["FullCode"];
+						e.DataAdapter.SelectCommand.Parameters["?ProductId"].Value = drOL["ProductId"];
                         e.DataAdapter.SelectCommand.Parameters["?CodeFirmCr"].Value = drOL["CodeFirmCr"];
                         e.DataAdapter.SelectCommand.Parameters["?SynonymCode"].Value = drOL["SynonymCode"];
                         e.DataAdapter.SelectCommand.Parameters["?SynonymFirmCrCode"].Value = drOL["SynonymFirmCrCode"];
@@ -446,7 +455,7 @@ SELECT  c.id OrderID,
         ap.pricecode SalerID,
         ClientsData.ShortName SalerName,
         ap.PriceDate,
-        c.fullcode PrepCode,
+        c.ProductId PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2
 FROM    (farm.formrules fr,
@@ -457,16 +466,16 @@ FROM    (farm.formrules fr,
             ON corecosts.Core_Id     = c.id
               AND corecosts.PC_CostCode = ap.CostCode)
           LEFT JOIN farm.core0 ampc
-      			ON ampc.fullcode            = c.fullcode
+      			ON ampc.ProductId            = c.ProductId
  			      	and ampc.codefirmcr       = c.codefirmcr
       				and ampc.firmcode         = 1864
           LEFT JOIN farm.synonymfirmcr scr
-            ON scr.firmcode             = ifnull(fr.ParentSynonym, ap.pricecode)
+            ON scr.PriceCode             = ifnull(fr.ParentSynonym, ap.pricecode)
             and c.synonymfirmcrcode     = scr.synonymfirmcrcode
 WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
     AND fr.firmcode                         = ap.pricecode
     and c.synonymcode                       = s.synonymcode
-    and s.firmcode                          = ifnull(fr.parentsynonym, ap.pricecode)
+    and s.PriceCode                         = ifnull(fr.parentsynonym, ap.pricecode)
     and clientsdata.firmcode                = ap.firmcode
 	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
     and c.SynonymCode = ?SynonymCode
@@ -604,7 +613,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             validRequestFields.Add("OriginalCR", "scr.Synonym");
             validRequestFields.Add("OriginalName", "s.Synonym");
             validRequestFields.Add("PriceCode", "ap.PriceCode");
-            validRequestFields.Add("PrepCode", "c.FullCode");
+            validRequestFields.Add("PrepCode", "p.CatalogId");
 
             List<string> validSortFields = new List<string>();
             validSortFields.Add("OrderID");
@@ -679,9 +688,11 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             }
 
 
-            e.DataAdapter.SelectCommand.CommandText += @"
-CALL GetActivePrices(?ClientCode);
+        	e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+        	e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+        	e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
+            e.DataAdapter.SelectCommand.CommandText += @"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode,
         ifnull(c.CodeCr, '') CreaterCode,
@@ -699,29 +710,30 @@ SELECT  c.id OrderID,
         ap.pricecode PriceCode,
         ClientsData.ShortName SalerName,
         ap.PriceDate,
-        c.fullcode PrepCode,
+        c.ProductId PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2,
         round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
 FROM    (farm.formrules fr,
         farm.synonym s,
         usersettings.clientsdata,
-        (farm.core0 c, ActivePrices ap)
+        (farm.core0 c, ActivePrices ap, Catalogs.Products p)
           LEFT JOIN farm.corecosts
             ON corecosts.Core_Id     = c.id
               AND corecosts.PC_CostCode = ap.CostCode)
           LEFT JOIN farm.core0 ampc
-      			ON ampc.fullcode            = c.fullcode
+      			ON ampc.ProductId            = c.ProductId
  			      	and ampc.codefirmcr       = c.codefirmcr
       				and ampc.firmcode         = 1864
           LEFT JOIN farm.synonymfirmcr scr
-            ON scr.firmcode             = ifnull(fr.ParentSynonym, ap.pricecode)
+            ON scr.PriceCode             = ifnull(fr.ParentSynonym, ap.pricecode)
             and c.synonymfirmcrcode     = scr.synonymfirmcrcode
-WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
-    AND fr.firmcode                         = ap.pricecode
-    and c.synonymcode                       = s.synonymcode
-    and s.firmcode                          = ifnull(fr.parentsynonym, ap.pricecode)
-    and clientsdata.firmcode                = ap.firmcode
+WHERE c.firmcode                = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
+    AND fr.firmcode				= ap.pricecode
+	and c.ProductId				= p.Id
+    and c.synonymcode           = s.synonymcode
+    and s.PriceCode             = ifnull(fr.parentsynonym, ap.pricecode)
+    and clientsdata.firmcode	= ap.firmcode
 	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
 ";
             if (e.NewEar)
@@ -738,6 +750,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                 e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
             }
 
+			e.DataAdapter.SelectCommand.Parameters.Clear();
             e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
             DataSet data = new DataSet();
@@ -846,7 +859,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 
         private DataSet InnerGetOrders(ExecuteArgs e)
         {
-            GetOrdersArgs args = e as GetOrdersArgs;
+            GetOrdersArgs args = e as GetOrdersArgs;	
 
             args.DataAdapter.SelectCommand.CommandText +=
                     @"
@@ -931,6 +944,11 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             return Result;
         }
 
+		private static ulong GetClientCode(MySqlConnection connection)
+		{
+			return GetClientCode(connection, GetUserName());
+		}
+
 		private static ulong GetClientCode(MySqlConnection connection, string userName)
 		{
 			if (userName.IndexOf("ANALIT\\") == 0)
@@ -950,7 +968,26 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 					new MySqlParameter[] { new MySqlParameter("?UserName", userName) }));
 		}
 
-        private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, 
+
+		private static string GetUserName()
+		{
+#if DEBUG
+			return "kvasov";
+#else
+			return HttpContext.Current.User.Identity.Name;
+#endif
+		}
+
+		private static string GetHost()
+		{
+#if DEBUG
+			return "prg3";
+#else
+			return HttpContext.Current.Request.UserHostAddress;
+#endif
+		}
+
+		private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique, 
 			string functionName, params KeyValuePair<string, object>[] arguments)
         {
 			int rowCount = 0;
@@ -972,8 +1009,8 @@ values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?Uniqu
 insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, Arguments) 
 values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime, ?Arguments);
 ";			
-			command.Parameters.Add("?Host", HttpContext.Current.Request.UserHostAddress);
-			command.Parameters.Add("?UserName", HttpContext.Current.User.Identity.Name);
+			command.Parameters.Add("?Host", GetHost());
+			command.Parameters.Add("?UserName", GetUserName());
 			command.Parameters.Add("?functionName", functionName);
 			command.Parameters.Add("?RowCount", rowCount);
 			command.Parameters.Add("?ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
@@ -993,6 +1030,8 @@ values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime, ?Argume
 
 		private string SerializeValue(object value)
 		{
+			if (value == null)
+				return "null";
 			List<string> serializedValue = new List<string>();
 			if (value is IEnumerable && !(value is String))
 				foreach (object item in (IEnumerable)value)
