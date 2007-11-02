@@ -195,7 +195,7 @@ WHERE");
 							else
 							{
 								commandText.AppendLine(@"
-SELECT	c.id as PrepCode,  
+SELECT distinct	c.id as PrepCode,  
 		cn.Name, 
 		cf.Form
 FROM Catalogs.Catalog c 
