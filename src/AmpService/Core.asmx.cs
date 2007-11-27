@@ -9,8 +9,10 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Services;
+using Common.MySql;
 using ExecuteTemplate;
 using MySql.Data.MySqlClient;
+using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AmpService
 {
@@ -171,14 +173,16 @@ namespace AmpService
 							int i;
 							bool searchByApmCode = Name != null && Name.Length > 0 && int.TryParse(Name[0], out i);
 
-
-							if (OfferOnly)
+							using (CleanUp.AfterGetActivePrices(new MySqlHelper(connection, transaction)))
 							{
-								MySqlCommand command = new MySqlCommand("CALL GetActivePrices(?ClientCode);", connection, transaction);
-								command.Parameters.AddWithValue("?ClientCode", clientCode);
-								command.ExecuteNonQuery();
+								if (OfferOnly)
+								{
+									MySqlCommand command = new MySqlCommand("CALL GetActivePrices(?ClientCode);", connection, transaction);
+									command.Parameters.AddWithValue("?ClientCode", clientCode);
+									command.ExecuteNonQuery();
 
-								commandText.AppendLine(@"
+									commandText.AppendLine(
+										@"
 SELECT	distinct c.id as PrepCode, 
 		cn.Name, 
 		cf.Form
@@ -190,11 +194,11 @@ FROM Catalogs.Catalog c
 		JOIN activeprices ap on ap.PriceCode = c0.PriceCode
 	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.firmcode=1864
 WHERE");
-
-							}
-							else
-							{
-								commandText.AppendLine(@"
+								}
+								else
+								{
+									commandText.AppendLine(
+										@"
 SELECT distinct	c.id as PrepCode,  
 		cn.Name, 
 		cf.Form
@@ -204,37 +208,38 @@ FROM Catalogs.Catalog c
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
 	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.firmcode=1864
 WHERE");
+								}
+
+								WhereBlockBuilder
+									.ForCommandTest(commandText)
+									.AddCriteria(Utils.StringArrayToQuery(PriceID, "ap.pricecode"),
+									             OfferOnly
+									             && PriceID != null
+									             && !(PriceID.Length == 1
+									                  && PriceID[0] == 0))
+									.AddCriteria(Utils.StringArrayToQuery(Form, "cf.Form"))
+									.AddCriteria(Utils.StringArrayToQuery(Name, "ampc.code"), searchByApmCode)
+									.AddCriteria(Utils.StringArrayToQuery(Name, "cn.Name"), !searchByApmCode)
+									.AddCriteria("ampc.id is null", NewEar)
+									.AddCriteria("c.Hidden = 0");
+
+								commandText.AppendLine("ORDER BY cn.Name, cf.Form");
+								commandText.AppendLine(Utils.GetLimitString(SelStart, Limit));
+
+								MySqlDataAdapter adapter = new MySqlDataAdapter(commandText.ToString(), connection);
+								adapter.SelectCommand.Transaction = transaction;
+								adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
+								adapter.Fill(MyDS, "Catalog");
+
+								LogQuery(adapter.SelectCommand, MyDS, false, MethodBase.GetCurrentMethod().Name,
+								         new KeyValuePair<string, object>("Name", Name),
+								         new KeyValuePair<string, object>("Form", Form),
+								         new KeyValuePair<string, object>("NewEar", NewEar),
+								         new KeyValuePair<string, object>("OfferOnly", OfferOnly),
+								         new KeyValuePair<string, object>("PriceID", PriceID),
+								         new KeyValuePair<string, object>("Limit", Limit),
+								         new KeyValuePair<string, object>("SelStart", SelStart));
 							}
-
-							WhereBlockBuilder
-								.ForCommandTest(commandText)
-								.AddCriteria(Utils.StringArrayToQuery(PriceID, "ap.pricecode"), 
-											 OfferOnly 
-											 && PriceID != null 
-											 && !(PriceID.Length == 1 
-												  && PriceID[0] == 0))
-								.AddCriteria(Utils.StringArrayToQuery(Form, "cf.Form"))
-								.AddCriteria(Utils.StringArrayToQuery(Name, "ampc.code"), searchByApmCode)
-								.AddCriteria(Utils.StringArrayToQuery(Name, "cn.Name"), !searchByApmCode)
-								.AddCriteria("ampc.id is null", NewEar)
-								.AddCriteria("c.Hidden = 0");
-
-							commandText.AppendLine("ORDER BY cn.Name, cf.Form");
-							commandText.AppendLine(Utils.GetLimitString(SelStart, Limit));
-
-							MySqlDataAdapter adapter = new MySqlDataAdapter(commandText.ToString(), connection);
-							adapter.SelectCommand.Transaction = transaction;
-							adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
-							adapter.Fill(MyDS, "Catalog");
-
-							LogQuery(adapter.SelectCommand, MyDS, false, MethodBase.GetCurrentMethod().Name,
-								new KeyValuePair<string, object>("Name", Name),
-								new KeyValuePair<string, object>("Form", Form),
-								new KeyValuePair<string, object>("NewEar", NewEar),
-								new KeyValuePair<string, object>("OfferOnly", OfferOnly),
-								new KeyValuePair<string, object>("PriceID", PriceID),
-								new KeyValuePair<string, object>("Limit", Limit),
-								new KeyValuePair<string, object>("SelStart", SelStart));
 
 							transaction.Commit();
 							return MyDS;
@@ -314,13 +319,16 @@ WHERE");
 
             dsPost = new DataSet();
 
-        	e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
-			e.DataAdapter.SelectCommand.Parameters.Clear();
-			e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
-        	e.DataAdapter.SelectCommand.ExecuteNonQuery();
+			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
+			{
+				e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+				e.DataAdapter.SelectCommand.Parameters.Clear();
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+				e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
 
-            e.DataAdapter.SelectCommand.CommandText = @"
+				e.DataAdapter.SelectCommand.CommandText =
+					@"
 SELECT  cd.FirmCode as ClientCode,
 		cd.RegionCode,
 		ap.PriceCode,
@@ -349,12 +357,14 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
     AND clientsdata.firmcode                = ap.firmcode
 	AND if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
 	AND cd.FirmCode							= ?ClientCode
-	AND c.ID in " + CoreIDString;
+	AND c.ID in " +
+					CoreIDString;
 
-            e.DataAdapter.SelectCommand.Parameters.Clear();
-            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-            e.DataAdapter.Fill(dsPost, "SummaryOrder");
-            dtSummaryOrder = dsPost.Tables["SummaryOrder"];
+				e.DataAdapter.SelectCommand.Parameters.Clear();
+				e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+				e.DataAdapter.Fill(dsPost, "SummaryOrder");
+			}
+        	dtSummaryOrder = dsPost.Tables["SummaryOrder"];
 
             DataRow[] drs;
             dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof(string)));
@@ -433,7 +443,10 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 
             DataTable dtTemp;
 
-            e.DataAdapter.SelectCommand.CommandText = @"
+			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
+			{
+				e.DataAdapter.SelectCommand.CommandText =
+					@"
 CALL GetActivePrices(?ClientCode);
 
 SELECT  c.id OrderID,
@@ -482,49 +495,50 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
     and c.SynonymFirmCrCode = ?SynonymFirmCrCode
     and (length(c.Junk) > 0 = ?Junk)";
 
-            e.DataAdapter.SelectCommand.Parameters.Clear();
-            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-            e.DataAdapter.SelectCommand.Parameters.Add("?SynonymCode", MySqlDbType.Int32);
-            e.DataAdapter.SelectCommand.Parameters.Add("?SynonymFirmCrCode", MySqlDbType.Int32);
-            e.DataAdapter.SelectCommand.Parameters.Add("?Junk", MySqlDbType.Bit);
+				e.DataAdapter.SelectCommand.Parameters.Clear();
+				e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+				e.DataAdapter.SelectCommand.Parameters.Add("?SynonymCode", MySqlDbType.Int32);
+				e.DataAdapter.SelectCommand.Parameters.Add("?SynonymFirmCrCode", MySqlDbType.Int32);
+				e.DataAdapter.SelectCommand.Parameters.Add("?Junk", MySqlDbType.Bit);
 
-            for (int i = 0; i < Res.Length; i++)
-            {
-                if (Res[i] > -1)
-                {
-                    drOK = dtPricesRes.NewRow();
-                    drOK["OrderID"] = Res[i];
-                    drOK["OriginalOrderID"] = e.CoreIDs[i];
-                    dtPricesRes.Rows.Add(drOK);
-                }
-                else
-                {
-					dtTemp = AmpService.PostOrder.GetPricesDataTable();
-                    e.DataAdapter.SelectCommand.Parameters["?SynonymCode"].Value = e.SynonymCodes[i];
-                    e.DataAdapter.SelectCommand.Parameters["?SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
-                    e.DataAdapter.SelectCommand.Parameters["?Junk"].Value = e.Junks[i];
-                    e.DataAdapter.Fill(dtTemp);
+				for (int i = 0; i < Res.Length; i++)
+				{
+					if (Res[i] > -1)
+					{
+						drOK = dtPricesRes.NewRow();
+						drOK["OrderID"] = Res[i];
+						drOK["OriginalOrderID"] = e.CoreIDs[i];
+						dtPricesRes.Rows.Add(drOK);
+					}
+					else
+					{
+						dtTemp = AmpService.PostOrder.GetPricesDataTable();
+						e.DataAdapter.SelectCommand.Parameters["?SynonymCode"].Value = e.SynonymCodes[i];
+						e.DataAdapter.SelectCommand.Parameters["?SynonymFirmCrCode"].Value = e.SynonymFirmCrCodes[i];
+						e.DataAdapter.SelectCommand.Parameters["?Junk"].Value = e.Junks[i];
+						e.DataAdapter.Fill(dtTemp);
 
-                    if (dtTemp.Rows.Count > 0)
-                    {
-                        dtTemp.DefaultView.Sort = "Cost";
-                        drOK = dtPricesRes.NewRow();
-                        drOK.ItemArray = dtTemp.DefaultView[0].Row.ItemArray;
-                        drOK["OriginalOrderID"] = e.CoreIDs[i];
-                        dtPricesRes.Rows.Add(drOK);
-                    }
-                    else
-                    {
-                        drOK = dtPricesRes.NewRow();
-                        drOK["OrderID"] = -1;
-                        drOK["OriginalOrderID"] = e.CoreIDs[i];
-                        dtPricesRes.Rows.Add(drOK);
-                    }
-                }
-            }
+						if (dtTemp.Rows.Count > 0)
+						{
+							dtTemp.DefaultView.Sort = "Cost";
+							drOK = dtPricesRes.NewRow();
+							drOK.ItemArray = dtTemp.DefaultView[0].Row.ItemArray;
+							drOK["OriginalOrderID"] = e.CoreIDs[i];
+							dtPricesRes.Rows.Add(drOK);
+						}
+						else
+						{
+							drOK = dtPricesRes.NewRow();
+							drOK["OrderID"] = -1;
+							drOK["OriginalOrderID"] = e.CoreIDs[i];
+							dtPricesRes.Rows.Add(drOK);
+						}
+					}
+				}
+			}
 
 
-            //Формируем результирующий датасет
+        	//Формируем результирующий датасет
             dsRes = new DataSet();
             dsRes.Tables.Add(dtPricesRes);
 
@@ -687,12 +701,15 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
                 FiltedField[innerFieldName].Add(e.RangeValue[i]);
             }
 
+			DataSet data = new DataSet();
 
-        	e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
-        	e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
-        	e.DataAdapter.SelectCommand.ExecuteNonQuery();
+			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
+			{
+				e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+				e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
-            e.DataAdapter.SelectCommand.CommandText += @"
+				e.DataAdapter.SelectCommand.CommandText += @"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode,
         ifnull(c.CodeCr, '') CreaterCode,
@@ -710,7 +727,7 @@ SELECT  c.id OrderID,
         ap.pricecode PriceCode,
         ClientsData.ShortName SalerName,
         ap.PriceDate,
-        c.ProductId PrepCode,
+        p.CatalogId PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2,
         round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
@@ -736,27 +753,27 @@ WHERE c.firmcode                = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
     and clientsdata.firmcode	= ap.firmcode
 	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
 ";
-            if (e.NewEar)
-                e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
+				if (e.NewEar)
+					e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
 
-            foreach (string fieldName in FiltedField.Keys)
-                e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
+				foreach (string fieldName in FiltedField.Keys)
+					e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
 
-            if (!e.OnlyLeader)
-            {
-                //группируем так что бы в исходящем наборе были позиции с уникальным OrderID
-                e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
-                e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
-                e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
-            }
+				if (!e.OnlyLeader)
+				{
+					//группируем так что бы в исходящем наборе были позиции с уникальным OrderID
+					e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
+					e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
+					e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
+				}
 
-			e.DataAdapter.SelectCommand.Parameters.Clear();
-            e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
+				e.DataAdapter.SelectCommand.Parameters.Clear();
+				e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
-            DataSet data = new DataSet();
-            e.DataAdapter.Fill(data, "PriceList");
+				e.DataAdapter.Fill(data, "PriceList");
+			}
 
-            if (e.OnlyLeader)
+        	if (e.OnlyLeader)
             {
                 DataTable resultTable = data.Tables[0].Clone();
                 DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
@@ -954,7 +971,7 @@ WHERE c.firmcode                = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
 			if (userName.IndexOf("ANALIT\\") == 0)
 				userName = userName.Substring(7);
 
-			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(Literals.ConnectionString,
+			return Convert.ToUInt64(MySql.Data.MySqlClient.MySqlHelper.ExecuteScalar(Literals.ConnectionString,
 @"
 SELECT 
     osuseraccessright.clientcode 
