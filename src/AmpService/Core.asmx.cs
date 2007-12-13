@@ -622,9 +622,9 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
             Dictionary<string, string> validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer());
             validRequestFields.Add("OrderID", "c.id");
             validRequestFields.Add("SalerCode", "c.Code");
-            validRequestFields.Add("SalerName", "ClientsData.ShortName");
+            validRequestFields.Add("SalerName", "cd.ShortName");
             validRequestFields.Add("ItemID", "ampc.Code");
-            validRequestFields.Add("OriginalCR", "scr.Synonym");
+			validRequestFields.Add("OriginalCR", "sfc.Synonym");
             validRequestFields.Add("OriginalName", "s.Synonym");
             validRequestFields.Add("PriceCode", "ap.PriceCode");
             validRequestFields.Add("PrepCode", "p.CatalogId");
@@ -705,17 +705,19 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 
 			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
 			{
-				e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+				e.DataAdapter.SelectCommand.CommandText = "CALL GetOffers(?ClientCode, 0);";
 				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
 				e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
-				e.DataAdapter.SelectCommand.CommandText += @"
+				if (!e.OnlyLeader)
+				{
+					e.DataAdapter.SelectCommand.CommandText = @"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode,
         ifnull(c.CodeCr, '') CreaterCode,
         ifnull(ampc.code, '') ItemID,
         s.synonym OriginalName,
-        ifnull(scr.synonym, '') OriginalCr,
+        ifnull(sfc.synonym, '') OriginalCr,
         ifnull(c.Unit, '') Unit,
         ifnull(c.Volume, '') Volume,
         ifnull(c.Quantity, '') Quantity,
@@ -725,87 +727,77 @@ SELECT  c.id OrderID,
         length(c.Junk) > 0 Junk,
         ap.PublicUpCost As UpCost,
         ap.pricecode PriceCode,
-        ClientsData.ShortName SalerName,
+        cd.ShortName SalerName,
         ap.PriceDate,
         p.CatalogId PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2,
-        round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
-FROM    (farm.formrules fr,
-        farm.synonym s,
-        usersettings.clientsdata,
-        (farm.core0 c, ActivePrices ap, Catalogs.Products p)
-          LEFT JOIN farm.corecosts
-            ON corecosts.Core_Id     = c.id
-              AND corecosts.PC_CostCode = ap.CostCode)
-          LEFT JOIN farm.core0 ampc
-      			ON ampc.ProductId            = c.ProductId
- 			      	and ampc.codefirmcr       = c.codefirmcr
-      				and ampc.firmcode         = 1864
-          LEFT JOIN farm.synonymfirmcr scr
-            ON scr.PriceCode             = ifnull(fr.ParentSynonym, ap.pricecode)
-            and c.synonymfirmcrcode     = scr.synonymfirmcrcode
-WHERE c.firmcode                = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
-    AND fr.firmcode				= ap.pricecode
-	and c.ProductId				= p.Id
-    and c.synonymcode           = s.synonymcode
-    and s.PriceCode             = ifnull(fr.parentsynonym, ap.pricecode)
-    and clientsdata.firmcode	= ap.firmcode
-	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
+        offers.Cost as Cost
+FROM core as offers
+	JOIN farm.core0 as c on c.id = offers.id
+		JOIN activeprices as ap ON ap.PriceCode = offers.PriceCode
+			  JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
+	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
+	JOIN Catalogs.Products as p ON p.Id = c.ProductId
+	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
+	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.firmcode = 1864
 ";
-				if (e.NewEar)
-					e.DataAdapter.SelectCommand.CommandText += " and ampc.id is null ";
-
-				foreach (string fieldName in FiltedField.Keys)
-					e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
-
-				if (!e.OnlyLeader)
+				}
+				else
 				{
-					//группируем так что бы в исходящем наборе были позиции с уникальным OrderID
-					e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id ";
-					e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
-					e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
+					e.DataAdapter.SelectCommand.CommandText = @"
+SELECT  c.id OrderID,
+        ifnull(c.Code, '') SalerCode,
+        ifnull(c.CodeCr, '') CreaterCode,
+        ifnull(ampc.code, '') ItemID,
+        s.synonym OriginalName,
+        ifnull(sfc.synonym, '') OriginalCr,
+        ifnull(c.Unit, '') Unit,
+        ifnull(c.Volume, '') Volume,
+        ifnull(c.Quantity, '') Quantity,
+        ifnull(c.Note, '') Note,
+        ifnull(c.Period, '') Period,
+        ifnull(c.Doc, '') Doc,
+        length(c.Junk) > 0 Junk,
+        ap.PublicUpCost As UpCost,
+        ap.pricecode PriceCode,
+        cd.ShortName SalerName,
+        ap.PriceDate,
+        p.CatalogId PrepCode,
+        c.synonymcode OrderCode1,
+        c.synonymfirmcrcode OrderCode2,
+        offers.MinCost as Cost
+FROM UserSettings.MinCosts as offers
+	JOIN farm.core0 as c on c.id = offers.id
+		JOIN UserSettings.activeprices as ap ON ap.PriceCode = offers.PriceCode
+			  JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
+	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
+	JOIN Catalogs.Products as p ON p.Id = c.ProductId
+	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
+    LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.firmcode = 1864
+";
 				}
 
+				string predicatBlock = "";
+
+				if (e.NewEar)
+					predicatBlock += " ampc.id is null ";
+
+				foreach (string fieldName in FiltedField.Keys)
+				{
+					if (predicatBlock != "")
+						predicatBlock += " and ";
+					predicatBlock += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
+				}
+
+				if (predicatBlock != "")
+					e.DataAdapter.SelectCommand.CommandText += "WHERE " + predicatBlock;
+
+				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
 				e.DataAdapter.SelectCommand.Parameters.Clear();
-				e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
 				e.DataAdapter.Fill(data, "PriceList");
-			}
-
-        	if (e.OnlyLeader)
-            {
-                DataTable resultTable = data.Tables[0].Clone();
-                DataTable prepCodeTable = data.Tables[0].DefaultView.ToTable(true, "PrepCode");
-                foreach (DataRow row in prepCodeTable.Rows)
-                {
-                    DataRow[] orderedRows = data.Tables[0].Select(String.Format("PrepCode = {0}", row["PrepCode"]), "Cost ASC");
-                    resultTable.ImportRow(orderedRows[0]);
-                }
-
-                if (e.Offset > -1)
-                {
-                    DataTable tempTable = resultTable;
-                    resultTable = data.Tables[0].Clone();
-
-                    int count;
-                    if ((e.Count > tempTable.Rows.Count) || (e.Count < e.Offset))
-                        count = tempTable.Rows.Count;
-                    else
-                        count = e.Count;
-
-                    for (int i = e.Offset; i < count; i++)
-                        resultTable.ImportRow(tempTable.Rows[i]);
-                }
-
-                if ((e.SortField != null) && (e.SortField.Length > 0))
-                {
-                    resultTable.DefaultView.Sort = Utils.FormatOrderBlock(e.SortField, e.SortDirection).Substring(10);
-                    resultTable = resultTable.DefaultView.ToTable();
-                }
-                data.Tables.Remove(data.Tables[0]);
-                data.Tables.Add(resultTable);
-            }
+			}			
 
 			LogQuery(e.DataAdapter.SelectCommand, data, true, functionName);
 
