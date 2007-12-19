@@ -183,13 +183,17 @@ namespace AmpService
 
 									commandText.AppendLine(
 										@"
-SELECT	distinct c.id as PrepCode, 
+SELECT	p.id as PrepCode, 
 		cn.Name, 
-		cf.Form
+		cf.Form,
+		ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as Properties
 FROM Catalogs.Catalog c
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
+	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
+	LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
+	LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId
 	JOIN Farm.Core0 c0 on c0.ProductId = p.Id
 		JOIN activeprices ap on ap.PriceCode = c0.PriceCode
 	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.firmcode=1864
@@ -199,13 +203,17 @@ WHERE");
 								{
 									commandText.AppendLine(
 										@"
-SELECT distinct	c.id as PrepCode,  
+SELECT	p.id as PrepCode,  
 		cn.Name, 
-		cf.Form
+		cf.Form,
+		ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as Properties
 FROM Catalogs.Catalog c 
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
+	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
+	LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
+	LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId
 	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.firmcode=1864
 WHERE");
 								}
@@ -221,8 +229,10 @@ WHERE");
 									.AddCriteria(Utils.StringArrayToQuery(Name, "ampc.code"), searchByApmCode)
 									.AddCriteria(Utils.StringArrayToQuery(Name, "cn.Name"), !searchByApmCode)
 									.AddCriteria("ampc.id is null", NewEar)
+									.AddCriteria("p.Hidden = 0")
 									.AddCriteria("c.Hidden = 0");
 
+								commandText.AppendLine("GROUP BY p.Id");
 								commandText.AppendLine("ORDER BY cn.Name, cf.Form");
 								commandText.AppendLine(Utils.GetLimitString(SelStart, Limit));
 
@@ -627,7 +637,7 @@ WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.C
 			validRequestFields.Add("OriginalCR", "sfc.Synonym");
             validRequestFields.Add("OriginalName", "s.Synonym");
             validRequestFields.Add("PriceCode", "ap.PriceCode");
-            validRequestFields.Add("PrepCode", "p.CatalogId");
+            validRequestFields.Add("PrepCode", "p.Id");
 
             List<string> validSortFields = new List<string>();
             validSortFields.Add("OrderID");
@@ -729,7 +739,7 @@ SELECT  c.id OrderID,
         ap.pricecode PriceCode,
         cd.ShortName SalerName,
         ap.PriceDate,
-        p.CatalogId PrepCode,
+        p.Id PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2,
         offers.Cost as Cost
@@ -763,7 +773,7 @@ SELECT  c.id OrderID,
         ap.pricecode PriceCode,
         cd.ShortName SalerName,
         ap.PriceDate,
-        p.CatalogId PrepCode,
+        p.Id PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2,
         offers.MinCost as Cost
