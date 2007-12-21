@@ -12,7 +12,7 @@ using System.Web.Services;
 using Common.MySql;
 using ExecuteTemplate;
 using MySql.Data.MySqlClient;
-using MySqlHelper = Common.MySql.MySqlHelper;
+using MySqlHelper=Common.MySql.MySqlHelper;
 
 namespace AmpService
 {
@@ -196,7 +196,7 @@ FROM Catalogs.Catalog c
 	LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId
 	JOIN Farm.Core0 c0 on c0.ProductId = p.Id
 		JOIN activeprices ap on ap.PriceCode = c0.PriceCode
-	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.firmcode=1864
+	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.PriceCode = 1864
 WHERE");
 								}
 								else
@@ -214,7 +214,7 @@ FROM Catalogs.Catalog c
 	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
 	LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
 	LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId
-	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.firmcode=1864
+	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.PriceCode = 1864
 WHERE");
 								}
 
@@ -362,9 +362,9 @@ FROM    (farm.formrules fr,
             ON corecosts.Core_Id     = c.id
               AND corecosts.PC_CostCode = ap.CostCode),
 		UserSettings.ClientsData cd
-WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
-    AND fr.firmcode                         = ap.pricecode
-    AND clientsdata.firmcode                = ap.firmcode
+WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
+    AND fr.PriceCode                       = ap.pricecode
+    AND clientsdata.firmcode               = ap.firmcode
 	AND if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
 	AND cd.FirmCode							= ?ClientCode
 	AND c.ID in " +
@@ -495,8 +495,8 @@ FROM    (farm.formrules fr,
           LEFT JOIN farm.synonymfirmcr scr
             ON scr.PriceCode             = ifnull(fr.ParentSynonym, ap.pricecode)
             and c.synonymfirmcrcode     = scr.synonymfirmcrcode
-WHERE c.firmcode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
-    AND fr.firmcode                         = ap.pricecode
+WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
+    AND fr.PriceCode                        = ap.pricecode
     and c.synonymcode                       = s.synonymcode
     and s.PriceCode                         = ifnull(fr.parentsynonym, ap.pricecode)
     and clientsdata.firmcode                = ap.firmcode
@@ -750,7 +750,7 @@ FROM core as offers
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
-	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.firmcode = 1864
+	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 ";
 				}
 				else
@@ -784,7 +784,7 @@ FROM UserSettings.MinCosts as offers
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
-    LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.firmcode = 1864
+    LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 ";
 				}
 
@@ -803,6 +803,10 @@ FROM UserSettings.MinCosts as offers
 				if (predicatBlock != "")
 					e.DataAdapter.SelectCommand.CommandText += "WHERE " + predicatBlock;
 
+				//группировка нужна т.к. в асортиментном прайсе амп может быть несколько записей 
+				//соответствующие с одинаковым ProductId и CodeFirmCr но смысла в этом нет 
+				//ни какого они просто не нужны
+				e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id";
 				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
 				e.DataAdapter.SelectCommand.Parameters.Clear();
 
