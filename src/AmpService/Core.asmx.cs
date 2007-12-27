@@ -490,8 +490,8 @@ FROM    (farm.formrules fr,
               AND corecosts.PC_CostCode = ap.CostCode)
           LEFT JOIN farm.core0 ampc
       			ON ampc.ProductId            = c.ProductId
- 			      	and ampc.codefirmcr       = c.codefirmcr
-      				and ampc.firmcode         = 1864
+ 			      	and ampc.codefirmcr      = c.codefirmcr
+      				and ampc.PriceCode       = 1864
           LEFT JOIN farm.synonymfirmcr scr
             ON scr.PriceCode             = ifnull(fr.ParentSynonym, ap.pricecode)
             and c.synonymfirmcrcode     = scr.synonymfirmcrcode
