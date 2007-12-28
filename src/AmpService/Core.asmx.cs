@@ -637,7 +637,7 @@ WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.
 			validRequestFields.Add("OriginalCR", "sfc.Synonym");
             validRequestFields.Add("OriginalName", "s.Synonym");
             validRequestFields.Add("PriceCode", "ap.PriceCode");
-            validRequestFields.Add("PrepCode", "p.Id");
+			validRequestFields.Add("PrepCode", "c.ProductId");
 
             List<string> validSortFields = new List<string>();
             validSortFields.Add("OrderID");
@@ -713,48 +713,113 @@ WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.
 
 			DataSet data = new DataSet();
 
-			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
-			{
-				e.DataAdapter.SelectCommand.CommandText = "CALL GetOffers(?ClientCode, 0);";
-				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
-				e.DataAdapter.SelectCommand.ExecuteNonQuery();
+			string predicatBlock = "";
 
+			if (e.NewEar)
+				predicatBlock += " ampc.id is null ";
+
+			foreach (string fieldName in FiltedField.Keys)
+			{
+				if (predicatBlock != "")
+					predicatBlock += " and ";
+				predicatBlock += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
+			}
+
+			using (CleanUp.AfterGetOffers(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
+			{
 				if (!e.OnlyLeader)
 				{
+					if (predicatBlock != "")
+						predicatBlock = " and " + predicatBlock;
+
+					e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+					e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+					e.DataAdapter.SelectCommand.ExecuteNonQuery();
+
 					e.DataAdapter.SelectCommand.CommandText = @"
+drop temporary table if exists offers;
+
+create temporary table offers
 SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode,
-        ifnull(c.CodeCr, '') CreaterCode,
-        ifnull(ampc.code, '') ItemID,
-        s.synonym OriginalName,
-        ifnull(sfc.synonym, '') OriginalCr,
-        ifnull(c.Unit, '') Unit,
-        ifnull(c.Volume, '') Volume,
-        ifnull(c.Quantity, '') Quantity,
-        ifnull(c.Note, '') Note,
-        ifnull(c.Period, '') Period,
-        ifnull(c.Doc, '') Doc,
-        length(c.Junk) > 0 Junk,
-        ap.PublicUpCost As UpCost,
-        ap.pricecode PriceCode,
-        cd.ShortName SalerName,
-        ap.PriceDate,
-        p.Id PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2,
-        offers.Cost as Cost
-FROM core as offers
-	JOIN farm.core0 as c on c.id = offers.id
-		JOIN activeprices as ap ON ap.PriceCode = offers.PriceCode
-			  JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
+		ifnull(c.Code, '') SalerCode,
+		ifnull(c.CodeCr, '') CreaterCode,
+		ifnull(ampc.code, '') ItemID,
+		s.synonym OriginalName,
+		ifnull(sfc.synonym, '') OriginalCr,
+		ifnull(c.Unit, '') Unit,
+		ifnull(c.Volume, '') Volume,
+		ifnull(c.Quantity, '') Quantity,
+		ifnull(c.Note, '') Note,
+		ifnull(c.Period, '') Period,
+		ifnull(c.Doc, '') Doc,
+		length(c.Junk) > 0 Junk,
+		ap.PublicUpCost as UpCost,
+		ap.PriceCode as PriceCode,
+		cd.ShortName SalerName,
+		ap.PriceDate,
+        c.ProductId as PrepCode,
+		c.synonymcode OrderCode1,
+		c.synonymfirmcrcode OrderCode2,
+        if(if(round(c.BaseCost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(c.BaseCost*ap.UpCost,2))>c.MaxBoundCost,
+        c.MaxBoundCost, if(round(c.BaseCost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(c.BaseCost*ap.UpCost,2))) as Cost
+FROM    (farm.core0 c, ActivePrices ap)
+	JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
-";
+WHERE   c.PriceCode = ap.CostCode
+        AND c.BaseCost is not null
+        AND ap.CostType = 1
+        AND ap.pricecode != 2647";
+					e.DataAdapter.SelectCommand.CommandText += predicatBlock;
+					e.DataAdapter.SelectCommand.ExecuteNonQuery();
+
+					e.DataAdapter.SelectCommand.CommandText = @"
+INSERT offers
+SELECT  c.id OrderID,
+		ifnull(c.Code, '') SalerCode,
+		ifnull(c.CodeCr, '') CreaterCode,
+		ifnull(ampc.code, '') ItemID,
+		s.synonym OriginalName,
+		ifnull(sfc.synonym, '') OriginalCr,
+		ifnull(c.Unit, '') Unit,
+		ifnull(c.Volume, '') Volume,
+		ifnull(c.Quantity, '') Quantity,
+		ifnull(c.Note, '') Note,
+		ifnull(c.Period, '') Period,
+		ifnull(c.Doc, '') Doc,
+		length(c.Junk) > 0 Junk,
+		ap.PublicUpCost as UpCost,
+		ap.PriceCode as PriceCode,
+		cd.ShortName SalerName,
+		ap.PriceDate,
+        c.ProductId as PrepCode,
+		c.synonymcode OrderCode1,
+		c.synonymfirmcrcode OrderCode2,
+        if(if(round(corecosts.cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(corecosts.cost*ap.UpCost,2))>c.MaxBoundCost,
+        c.MaxBoundCost, if(round(corecosts.cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(corecosts.cost*ap.UpCost,2))) as cost
+FROM    (farm.core0 c, ActivePrices ap, farm.corecosts)
+	JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
+	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
+	JOIN Catalogs.Products as p ON p.Id = c.ProductId
+	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
+	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
+WHERE   c.PriceCode = ap.PriceCode
+        AND corecosts.Core_Id = c.id
+        and corecosts.PC_CostCode=ap.CostCode
+        AND ap.CostType=0
+        AND ap.pricecode!=2647";
+					e.DataAdapter.SelectCommand.CommandText += predicatBlock;
+					e.DataAdapter.SelectCommand.ExecuteNonQuery();
+					e.DataAdapter.SelectCommand.CommandText = @"select * from offers ";
 				}
 				else
 				{
+					e.DataAdapter.SelectCommand.CommandText = "CALL GetOffers(?ClientCode, 0);";
+					e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+					e.DataAdapter.SelectCommand.ExecuteNonQuery();
+
 					e.DataAdapter.SelectCommand.CommandText = @"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode,
@@ -786,27 +851,17 @@ FROM UserSettings.MinCosts as offers
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
     LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 ";
-				}
 
-				string predicatBlock = "";
-
-				if (e.NewEar)
-					predicatBlock += " ampc.id is null ";
-
-				foreach (string fieldName in FiltedField.Keys)
-				{
 					if (predicatBlock != "")
-						predicatBlock += " and ";
-					predicatBlock += Utils.StringArrayToQuery(FiltedField[fieldName], fieldName);
-				}
+						predicatBlock = " where " + predicatBlock;
 
-				if (predicatBlock != "")
-					e.DataAdapter.SelectCommand.CommandText += "WHERE " + predicatBlock;
+					e.DataAdapter.SelectCommand.CommandText += predicatBlock;
+				}
 
 				//группировка нужна т.к. в асортиментном прайсе амп может быть несколько записей 
 				//соответствующие с одинаковым ProductId и CodeFirmCr но смысла в этом нет 
 				//ни какого они просто не нужны
-				e.DataAdapter.SelectCommand.CommandText += " GROUP BY c.Id";
+				e.DataAdapter.SelectCommand.CommandText += " GROUP BY OrderID";
 				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
 				e.DataAdapter.SelectCommand.Parameters.Clear();
 
