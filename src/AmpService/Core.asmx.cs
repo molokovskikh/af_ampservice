@@ -866,9 +866,20 @@ FROM UserSettings.MinCosts as offers
 				e.DataAdapter.SelectCommand.Parameters.Clear();
 
 				e.DataAdapter.Fill(data, "PriceList");
-			}			
+			}
 
-			LogQuery(e.DataAdapter.SelectCommand, data, true, functionName);
+        	LogQuery(e.DataAdapter.SelectCommand, data, true, functionName,
+        	         new KeyValuePair<string, object>[]
+        	         	{
+        	         		new KeyValuePair<string, object>("NewEar", e.NewEar),
+							new KeyValuePair<string, object>("OnlyLeader", e.OnlyLeader),
+							new KeyValuePair<string, object>("RangeField", e.RangeField),
+							new KeyValuePair<string, object>("RangeValue", e.RangeValue),
+							new KeyValuePair<string, object>("SortField", e.SortField),
+							new KeyValuePair<string, object>("SortDirection", e.SortDirection),
+							new KeyValuePair<string, object>("SelStart", e.Offset),
+							new KeyValuePair<string, object>("Limit", e.Count),
+        	         	});
 
             return data;
         }

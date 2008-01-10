@@ -91,9 +91,12 @@ namespace AmpService.Tests
 		public void PostOrderTest()
 		{
 			AMPService ampService = new AMPService();
-			ampService.PostOrder(new long[] {683306932}, new int[] {1}, new string[] {"это тестовый заказ"},
-			                     new int[] {1807677},
-			                     new int[] {9836}, new bool[] {false});
+			ampService.PostOrder(new long[] { 838566976, 838566968, 838566969 },
+			                     new int[] {1, 1, 1},
+			                     new string[] {"это тестовый заказ"},
+								 new int[] { 1503908, 1256924, 1503905 },
+								 new int[] { 156745, 156745, 156745 },
+			                     new bool[] {false, false, false});
 		}
 
 		[Test]

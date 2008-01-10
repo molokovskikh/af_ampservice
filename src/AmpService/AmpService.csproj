@@ -74,7 +74,11 @@
       <SubType>Component</SubType>
       <DependentUpon>Core.asmx</DependentUpon>
     </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
     <Compile Include="Literals.cs" />
+    <Compile Include="LockMonitor.cs" />
     <Compile Include="PostOrder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
@@ -93,6 +97,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Global.asax" />
     <Content Include="Web.Release.config" />
   </ItemGroup>
   <ItemGroup>
