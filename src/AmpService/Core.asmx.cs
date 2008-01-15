@@ -163,7 +163,7 @@ namespace AmpService
 				using (MySqlConnection connection = new MySqlConnection(Literals.ConnectionString))
 				{
 					connection.Open();
-					using (MySqlTransaction transaction = connection.BeginTransaction(IsolationLevel.RepeatableRead))
+					using (MySqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
 					{
 						try
 						{
