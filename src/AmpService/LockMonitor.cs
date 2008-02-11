@@ -92,8 +92,8 @@ namespace AmpService
 					foreach (HttpRequest request in toNotify)
 						_monitoringRequests.Remove(request);
 				}
+				Thread.Sleep(1000);
 			}
-			Thread.Sleep(1000);
 		}
 
 	}
