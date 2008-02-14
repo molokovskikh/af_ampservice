@@ -48,7 +48,7 @@ namespace AmpService
 #else
 			MailAddress Address = new MailAddress("r.kvasov@analit.net");
 #endif
-            SmtpClient Client = new SmtpClient("box.analit.net");
+            SmtpClient Client = new SmtpClient("mail.adc.analit.net");
             try
             {
                 Message.From = Address;
