@@ -43,6 +43,7 @@
 			<fileset basedir=".\${ProjectName}\">
 				<include name="bin\*.dll"/>
 				<include name="*.asmx"/>
+				<include name="*.asax"/>
 			</fileset>
 		</copy>
 
@@ -68,5 +69,24 @@
 					path="${VssPath}" 
 					comment="Build script checkin"
 		/> 
+		
+		<if propertyexists="CopyToTest">  
+		
+			<delete>
+				<fileset basedir="\\acdcserv\AmpTest\">
+					<include name="**.*"/>
+					<exclude name="**.scc" />
+				</fileset>			
+			</delete>
+		
+			<copy todir="\\acdcserv\AmpTest\" >
+				<fileset basedir="${ReleasePath}">
+					<include name="**.*"/>
+					<exclude name="**.scc" />
+				</fileset>	
+			</copy>		
+		
+		</if>
+		
 	</target>	
 </project>
