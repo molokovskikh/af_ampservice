@@ -351,23 +351,14 @@ SELECT  cd.FirmCode as ClientCode,
         c.Code,
 		c.CodeCr,
 		0 Quantity,
-        length(c.Junk) > 0 Junk,
-		length(c.Await) > 0 Await,
-		c.BaseCost,
-		round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost
-FROM    (farm.formrules fr,
-        usersettings.clientsdata,
-        (farm.core0 c, ActivePrices ap)
-          LEFT JOIN farm.corecosts
-            ON corecosts.Core_Id     = c.id
-              AND corecosts.PC_CostCode = ap.CostCode),
-		UserSettings.ClientsData cd
-WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
-    AND fr.PriceCode                       = ap.pricecode
-    AND clientsdata.firmcode               = ap.firmcode
-	AND if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
-	AND cd.FirmCode							= ?ClientCode
-	AND c.ID in " +
+        c.Junk as Junk,
+		c.Await as Await,
+		if(if(round(cc.Cost*ap.UpCost,2)<MinBoundCost, MinBoundCost, round(cc.Cost*ap.UpCost,2))>MaxBoundCost,MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<MinBoundCost, MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost
+FROM (farm.core0 c, usersettings.clientsdata cd)
+  JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
+    JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
+WHERE 	cd.FirmCode	= ?ClientCode
+		AND c.ID in " +
 					CoreIDString;
 
 				e.DataAdapter.SelectCommand.Parameters.Clear();
@@ -455,10 +446,12 @@ WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.
 
 			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
 			{
-				e.DataAdapter.SelectCommand.CommandText =
-					@"
-CALL GetActivePrices(?ClientCode);
+				e.DataAdapter.SelectCommand.CommandText = "CALL GetActivePrices(?ClientCode);";
+				e.DataAdapter.SelectCommand.Parameters.Clear();
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+				e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
+				e.DataAdapter.SelectCommand.CommandText = @"
 SELECT  c.id OrderID,
 		c.id OriginalOrderID,
         ifnull(c.Code, '') SalerCode,
@@ -472,46 +465,37 @@ SELECT  c.id OrderID,
         ifnull(c.Note, '') Note,
         ifnull(c.Period, '') Period,
         ifnull(c.Doc, '') Doc,
-        length(c.Junk) > 0 Junk,
+        c.Junk as Junk,
         ap.PublicUpCost As UpCost,
-		round(if(if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost < c.minboundcost, c.minboundcost, if(ap.costtype=0, corecosts.cost, c.basecost) * ap.UpCost),2) as Cost,
+		if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost,c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost,
         ap.pricecode SalerID,
-        ClientsData.ShortName SalerName,
+        cd.ShortName SalerName,
         ap.PriceDate,
         c.ProductId PrepCode,
         c.synonymcode OrderCode1,
         c.synonymfirmcrcode OrderCode2
-FROM    (farm.formrules fr,
-        farm.synonym s,
-        usersettings.clientsdata,
-        (farm.core0 c, ActivePrices ap)
-          LEFT JOIN farm.corecosts
-            ON corecosts.Core_Id     = c.id
-              AND corecosts.PC_CostCode = ap.CostCode)
-          LEFT JOIN farm.core0 ampc
-      			ON ampc.ProductId            = c.ProductId
- 			      	and ampc.codefirmcr      = c.codefirmcr
-      				and ampc.PriceCode       = 1864
-          LEFT JOIN farm.synonymfirmcr scr
-            ON scr.PriceCode             = ifnull(fr.ParentSynonym, ap.pricecode)
-            and c.synonymfirmcrcode     = scr.synonymfirmcrcode
-WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.CostCode)
-    AND fr.PriceCode                        = ap.pricecode
-    and c.synonymcode                       = s.synonymcode
-    and s.PriceCode                         = ifnull(fr.parentsynonym, ap.pricecode)
-    and clientsdata.firmcode                = ap.firmcode
-	and if(ap.costtype = 0, corecosts.cost is not null, c.basecost is not null)
-    and c.SynonymCode = ?SynonymCode
-    and c.SynonymFirmCrCode = ?SynonymFirmCrCode
-    and (length(c.Junk) > 0 = ?Junk)";
+FROM farm.core0 c
+  JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
+    JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
+	JOIN usersettings.clientsdata cd on cd.FirmCode = ap.FirmCode
+	JOIN usersettings.pricescosts pc on pc.CostCode = ap.CostCode
+		JOIN usersettings.PriceItems pi on pi.Id = pc.PriceItemId
+			JOIN farm.formrules fr on fr.Id = pi.FormRuleId
+	JOIN farm.synonym s on s.PriceCode = ifnull(fr.parentsynonym, ap.pricecode)
+    LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
+	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(fr.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
+WHERE	c.SynonymCode = ?SynonymCode
+		and c.SynonymFirmCrCode = ?SynonymFirmCrCode
+		and c.Junk = ?Junk;
+";
 
 				e.DataAdapter.SelectCommand.Parameters.Clear();
-				e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
-				e.DataAdapter.SelectCommand.Parameters.Add("?SynonymCode", MySqlDbType.Int32);
-				e.DataAdapter.SelectCommand.Parameters.Add("?SynonymFirmCrCode", MySqlDbType.Int32);
-				e.DataAdapter.SelectCommand.Parameters.Add("?Junk", MySqlDbType.Bit);
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", e.ClientCode);
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?SynonymCode", MySqlDbType.Int32);
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?SynonymFirmCrCode", MySqlDbType.Int32);
+				e.DataAdapter.SelectCommand.Parameters.AddWithValue("?Junk", MySqlDbType.Bit);
 
-				for (int i = 0; i < Res.Length; i++)
+				for (var i = 0; i < Res.Length; i++)
 				{
 					if (Res[i] > -1)
 					{
@@ -608,7 +592,8 @@ WHERE c.PriceCode                          = if(ap.costtype=0, ap.PriceCode, ap.
                                         ";
 
 
-            e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
+			if (e.FirmNames != null && e.FirmNames.Length > 0)
+	            e.DataAdapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(e.FirmNames, "ClientsData.ShortName");
 
             e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 
@@ -760,56 +745,17 @@ SELECT  c.id OrderID,
         c.ProductId as PrepCode,
 		c.synonymcode OrderCode1,
 		c.synonymfirmcrcode OrderCode2,
-        if(if(round(c.BaseCost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(c.BaseCost*ap.UpCost,2))>c.MaxBoundCost,
-        c.MaxBoundCost, if(round(c.BaseCost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(c.BaseCost*ap.UpCost,2))) as Cost
-FROM    (farm.core0 c, ActivePrices ap)
-	JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
+        if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost, c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost
+FROM farm.core0 c
+	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
+		JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
+		JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
-WHERE   c.PriceCode = ap.CostCode
-        AND c.BaseCost is not null
-        AND ap.CostType = 1
-        AND ap.pricecode != 2647";
-					e.DataAdapter.SelectCommand.CommandText += predicatBlock;
-					e.DataAdapter.SelectCommand.ExecuteNonQuery();
-
-					e.DataAdapter.SelectCommand.CommandText = @"
-INSERT offers
-SELECT  c.id OrderID,
-		ifnull(c.Code, '') SalerCode,
-		ifnull(c.CodeCr, '') CreaterCode,
-		ifnull(ampc.code, '') ItemID,
-		s.synonym OriginalName,
-		ifnull(sfc.synonym, '') OriginalCr,
-		ifnull(c.Unit, '') Unit,
-		ifnull(c.Volume, '') Volume,
-		ifnull(c.Quantity, '') Quantity,
-		ifnull(c.Note, '') Note,
-		ifnull(c.Period, '') Period,
-		ifnull(c.Doc, '') Doc,
-		length(c.Junk) > 0 Junk,
-		ap.PublicUpCost as UpCost,
-		ap.PriceCode as PriceCode,
-		cd.ShortName SalerName,
-		ap.PriceDate,
-        c.ProductId as PrepCode,
-		c.synonymcode OrderCode1,
-		c.synonymfirmcrcode OrderCode2,
-        if(if(round(corecosts.cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(corecosts.cost*ap.UpCost,2))>c.MaxBoundCost,
-        c.MaxBoundCost, if(round(corecosts.cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(corecosts.cost*ap.UpCost,2))) as cost
-FROM    (farm.core0 c, ActivePrices ap, farm.corecosts)
-	JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
-	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
-	JOIN Catalogs.Products as p ON p.Id = c.ProductId
-	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
-	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
-WHERE   c.PriceCode = ap.PriceCode
-        AND corecosts.Core_Id = c.id
-        and corecosts.PC_CostCode=ap.CostCode
-        AND ap.CostType=0
-        AND ap.pricecode!=2647";
+WHERE ap.pricecode != 2647
+";
 					e.DataAdapter.SelectCommand.CommandText += predicatBlock;
 					e.DataAdapter.SelectCommand.ExecuteNonQuery();
 					e.DataAdapter.SelectCommand.CommandText = @"select * from offers ";
@@ -833,7 +779,7 @@ SELECT  c.id OrderID,
         ifnull(c.Note, '') Note,
         ifnull(c.Period, '') Period,
         ifnull(c.Doc, '') Doc,
-        length(c.Junk) > 0 Junk,
+        c.Junk as Junk,
         ap.PublicUpCost As UpCost,
         ap.pricecode PriceCode,
         cd.ShortName SalerName,
@@ -869,7 +815,7 @@ FROM UserSettings.MinCosts as offers
 			}
 
         	LogQuery(e.DataAdapter.SelectCommand, data, true, functionName,
-        	         new KeyValuePair<string, object>[]
+        	         new[]
         	         	{
         	         		new KeyValuePair<string, object>("NewEar", e.NewEar),
 							new KeyValuePair<string, object>("OnlyLeader", e.OnlyLeader),
@@ -950,35 +896,34 @@ FROM UserSettings.MinCosts as offers
         {
             GetOrdersArgs args = e as GetOrdersArgs;	
 
-            args.DataAdapter.SelectCommand.CommandText +=
-                    @"
-                                SELECT  
-                                        i.firmclientcode as ClientCode, 
-                                        i.firmclientcode2 as ClientCode2, 
-                                        i.firmclientcode3 as ClientCode3, 
-                                        oh.RowID as OrderID,
-                                        cast(oh.PriceDate as char) as PriceDate, 
-                                        cast(oh.WriteTime as char) as OrderDate, 
-                                        ifnull(oh.ClientAddition, '') as Comment,
-                                        ol.Code           as ItemID, 
-                                        ol.Cost, 
-                                        ol.Quantity, 
-                                        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', cd.phone), '') as Addition,
-                                        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
-                                FROM    UserSettings.PricesData pd 
-                                INNER JOIN Orders.OrdersHead oh 
-                                ON pd.PriceCode = oh.PriceCode 
-                                INNER JOIN Orders.OrdersList ol 
-                                ON oh.RowID = ol.OrderID 
-                                INNER JOIN UserSettings.Intersection i 
-                                ON i.ClientCode = oh.ClientCode 
-                                and i.RegionCode= oh.RegionCode 
-                                and i.PriceCode = oh.PriceCode 
-                                INNER JOIN UserSettings.ClientsData cd 
-                                ON cd.FirmCode  = oh.ClientCode 
-                                WHERE  pd.FirmCode = 62
+            args.DataAdapter.SelectCommand.CommandText += @"
+SELECT  i.firmclientcode as ClientCode, 
+        i.firmclientcode2 as ClientCode2, 
+        i.firmclientcode3 as ClientCode3, 
+        oh.RowID as OrderID,
+        cast(oh.PriceDate as char) as PriceDate, 
+        cast(oh.WriteTime as char) as OrderDate, 
+        ifnull(oh.ClientAddition, '') as Comment,
+        ol.Code as ItemID, 
+        ol.Cost, 
+        ol.Quantity, 
+        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
+		(select c.contactText
+        from contacts.contact_groups cg
+          join contacts.contacts c on cg.Id = c.ContactOwnerId
+        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
+              and cg.Type = 0
+              and c.Type = 1
+        limit 1)), '') as Addition,
+        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
+FROM UserSettings.PricesData pd 
+	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
+	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
+    JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
+WHERE pd.FirmCode = 62
 ";
-            if (args.OrderID != null)
+			if (args.OrderID != null && args.OrderID.Length > 0)
             {
                 if (args.OrderID[0] == "0")
                 {
@@ -992,7 +937,7 @@ FROM UserSettings.MinCosts as offers
                         args.DataAdapter.SelectCommand.CommandText += " and ol.OrderID > " + args.OrderID[0].Replace("!", "");
                 }
             }
-            if (args.PriceCode > 0)
+			if (args.PriceCode > 0)
                 args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode.ToString();
 
             DataSet data = new DataSet();

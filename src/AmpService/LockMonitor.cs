@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading;
 using System.Web;
-using Microsoft.Practices.EnterpriseLibrary.Logging;
+using log4net;
 using MySql.Data.MySqlClient;
 
 namespace AmpService
@@ -13,6 +13,7 @@ namespace AmpService
 		private readonly Thread _monitorThread;
 		private bool _stopped = false;
 		private readonly Dictionary<HttpRequest, DateTime> _monitoringRequests = new Dictionary<HttpRequest, DateTime>();
+		private readonly ILog _log = LogManager.GetLogger(typeof (LockMonitor));
 
 		public LockMonitor()
 		{
@@ -84,9 +85,9 @@ namespace AmpService
 						}
 
 
-						Logger.Write(String.Format(@"Следующие запросы ожидают более 10 секунд: 
+						_log.ErrorFormat(@"Следующие запросы ожидают более 10 секунд: 
 {0}{1}
-", requests, innodbStatus), "Error");
+", requests, innodbStatus);
 					}
 
 					foreach (HttpRequest request in toNotify)

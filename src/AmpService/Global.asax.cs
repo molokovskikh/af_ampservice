@@ -1,5 +1,8 @@
 using System;
+using System.Reflection;
 using System.Web;
+using log4net;
+using log4net.Config;
 
 namespace AmpService
 {
@@ -9,6 +12,8 @@ namespace AmpService
 
 		protected void Application_Start(object sender, EventArgs e)
 		{
+			XmlConfigurator.Configure();
+			GlobalContext.Properties["Version"] = Assembly.GetExecutingAssembly().GetName().Version;
 		}
 
 		protected void Application_EndRequest(object sender, EventArgs e)

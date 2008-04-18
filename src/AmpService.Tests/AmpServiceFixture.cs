@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using log4net.Config;
 using NUnit.Framework;
 
 namespace AmpService.Tests
@@ -9,25 +10,30 @@ namespace AmpService.Tests
 	[TestFixture]
 	public class AmpServiceFixture
 	{
+		static AmpServiceFixture()
+		{
+			XmlConfigurator.Configure();
+		}
+
 		[Test]
 		public void GetPricesTest()
 		{
 			
 			AMPService WebServ = new AMPService();
-			WebServ.GetPrices(false, false,
+			LogDataSet(WebServ.GetPrices(false, false,
 			                  new String[]
 			                  	{
 			                  		"prepCode", "PriceCode", "PriceCode", "PrepCode", "ItemID", "PrepCode", "PrepCode",
 			                  		"OriginalName", "ItemID", "PriceCode"
 			                  	},
-			                  new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, null, null, 100, 0);
+			                  new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, null, null, 100, 0));
 
 
-			WebServ.GetPrices(false, false, new String[] {"OriginalName"}, new String[] {"*а*"}, null, null, 100, 0);
+			LogDataSet(WebServ.GetPrices(false, false, new String[] {"OriginalName"}, new String[] {"*а*"}, null, null, 100, 0));
 
 
-			WebServ.GetPrices(false, false, new String[] {"OriginalName", "OriginalName"}, new String[] {"к*", "т*"}, null,
-			                  null, 100, 0);
+			LogDataSet(WebServ.GetPrices(false, false, new String[] {"OriginalName", "OriginalName"}, new String[] {"к*", "т*"}, null,
+			                  null, 100, 0));
 
 
 			WebServ.GetPrices(false, false, new String[] {"OriginalName", "OriginalName"}, new String[] {"к*", "т*"},
@@ -68,35 +74,35 @@ namespace AmpService.Tests
 		public void GetOrdersTest()
 		{
 			AMPService WebServ = new AMPService();
-			WebServ.GetOrders(null, 0);
-			WebServ.GetOrders(new string[0], 0);
-			WebServ.GetOrders(new String[] {"1"}, 2);
-			WebServ.GetOrders(new String[] {"1", "2", "3"}, 2);
-			WebServ.GetOrders(new String[] {"0"}, -1);
-			WebServ.GetOrders(new String[] {"!1"}, -1);
+			LogDataSet(WebServ.GetOrders(null, 0));
+			LogDataSet(WebServ.GetOrders(new string[0], 0));
+			LogDataSet(WebServ.GetOrders(new String[] {"1"}, 2));
+			LogDataSet(WebServ.GetOrders(new String[] {"1", "2", "3"}, 2));
+			LogDataSet(WebServ.GetOrders(new String[] {"0"}, -1));
+			LogDataSet(WebServ.GetOrders(new String[] {"!1"}, -1));
 		}
 
 		[Test]
 		public void GetPriceCodeByNameTest()
 		{
 			AMPService WebServ = new AMPService();
-			WebServ.GetPriceCodeByName(null);
-			WebServ.GetPriceCodeByName(new String[] {"Протек-15"});
-			WebServ.GetPriceCodeByName(new String[] {"Протек-15", "Материа Медика"});
-			WebServ.GetPriceCodeByName(new String[] {"Протек*"});
-			WebServ.GetPriceCodeByName(new String[] {"*к*", "Ма*риа Ме*ка"});
+			LogDataSet(WebServ.GetPriceCodeByName(null));
+			LogDataSet(WebServ.GetPriceCodeByName(new String[] {"Протек-15"}));
+			LogDataSet(WebServ.GetPriceCodeByName(new String[] {"Протек-15", "Материа Медика"}));
+			LogDataSet(WebServ.GetPriceCodeByName(new String[] {"Протек*"}));
+			LogDataSet(WebServ.GetPriceCodeByName(new String[] {"*к*", "Ма*риа Ме*ка"}));
 		}
 
 		[Test]
 		public void PostOrderTest()
 		{
 			AMPService ampService = new AMPService();
-			ampService.PostOrder(new long[] { 838566976, 838566968, 838566969 },
+			LogDataSet(ampService.PostOrder(new long[] { 838566976, 838566968, 838566969 },
 			                     new int[] {1, 1, 1},
 			                     new string[] {"это тестовый заказ"},
 								 new int[] { 1503908, 1256924, 1503905 },
 								 new int[] { 156745, 156745, 156745 },
-			                     new bool[] {false, false, false});
+			                     new bool[] {false, false, false}));
 		}
 
 		[Test]
