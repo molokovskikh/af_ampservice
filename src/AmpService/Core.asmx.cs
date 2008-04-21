@@ -476,14 +476,12 @@ SELECT  c.id OrderID,
         c.synonymfirmcrcode OrderCode2
 FROM farm.core0 c
   JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
+		JOIN usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
     JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
 	JOIN usersettings.clientsdata cd on cd.FirmCode = ap.FirmCode
-	JOIN usersettings.pricescosts pc on pc.CostCode = ap.CostCode
-		JOIN usersettings.PriceItems pi on pi.Id = pc.PriceItemId
-			JOIN farm.formrules fr on fr.Id = pi.FormRuleId
-	JOIN farm.synonym s on s.PriceCode = ifnull(fr.parentsynonym, ap.pricecode)
+	JOIN farm.synonym s on s.PriceCode = ifnull(pd.parentsynonym, ap.pricecode)
     LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
-	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(fr.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
+	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(pd.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
 WHERE	c.SynonymCode = ?SynonymCode
 		and c.SynonymFirmCrCode = ?SynonymFirmCrCode
 		and c.Junk = ?Junk;
