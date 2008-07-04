@@ -19,8 +19,7 @@ namespace AmpService
 	[WebService(Namespace = "AMPNameSpace")]
     public class AMPService : WebService
     {
-        MySqlTransaction MyTrans;
-        DateTime StartTime = DateTime.Now;
+		DateTime StartTime = DateTime.Now;
         private DataColumn dataColumn18;
         private DataColumn dataColumn19;
 
@@ -280,7 +279,7 @@ WHERE");
             return MyDS;
         }
 
-        [WebMethod()]
+        [WebMethod]
         public DataSet PostOrder(long[] OrderID, Int32[] Quantity, string[] Message, Int32[] OrderCode1, Int32[] OrderCode2,
                                  bool[] Junk)
         {
@@ -291,21 +290,13 @@ WHERE");
 
         private DataSet InnerPostOrder(PostOrderArgs e)
         {
-            string CoreIDString;
-            int Index;
-            DataSet dsRes;
-            DataTable dtPricesRes;
-
-            long[] Res = new long[e.CoreIDs.Length];
-            for (int i = 0; i < Res.Length; i++)
+        	var Res = new long[e.CoreIDs.Length];
+            for (var i = 0; i < Res.Length; i++)
             {
                 Res[i] = -1;
             }
-            DataSet dsPost;
-            DataTable dtSummaryOrder;
-            DataTable dtOrderHead;
 
-            //Если длины не равны, то возвращаем null
+        	//Если длины не равны, то возвращаем null
             if ((e.CoreIDs == null) || (e.Quantities == null) || (e.SynonymCodes == null) || (e.SynonymFirmCrCodes == null)
                 || (e.Junks == null)
                 || (e.CoreIDs.Length != e.Quantities.Length)
@@ -313,8 +304,8 @@ WHERE");
                 || (e.CoreIDs.Length != e.Junks.Length))
                 return null;
 
-            CoreIDString = "(";
-            foreach (long ID in e.CoreIDs)
+            var CoreIDString = "(";
+            foreach (var ID in e.CoreIDs)
             {
                 if ((CoreIDString.Length > 1) && (ID > 0))
                 {
@@ -327,7 +318,7 @@ WHERE");
             }
             CoreIDString += ")";
 
-            dsPost = new DataSet();
+            var dsPost = new DataSet();
 
 			using (CleanUp.AfterGetActivePrices(new MySqlHelper(e.DataAdapter.SelectCommand.Connection, e.DataAdapter.SelectCommand.Transaction)))
 			{
@@ -337,8 +328,7 @@ WHERE");
 				e.DataAdapter.SelectCommand.ExecuteNonQuery();
 
 
-				e.DataAdapter.SelectCommand.CommandText =
-					@"
+				e.DataAdapter.SelectCommand.CommandText = @"
 SELECT  cd.FirmCode as ClientCode,
 		cd.RegionCode,
 		ap.PriceCode,
@@ -365,7 +355,7 @@ WHERE 	cd.FirmCode	= ?ClientCode
 				e.DataAdapter.SelectCommand.Parameters.Add("?ClientCode", e.ClientCode);
 				e.DataAdapter.Fill(dsPost, "SummaryOrder");
 			}
-        	dtSummaryOrder = dsPost.Tables["SummaryOrder"];
+        	var dtSummaryOrder = dsPost.Tables["SummaryOrder"];
 
             DataRow[] drs;
             dtSummaryOrder.Columns.Add(new DataColumn("Message", typeof(string)));
@@ -380,13 +370,13 @@ WHERE 	cd.FirmCode	= ?ClientCode
                 }
             }
 
-            dtOrderHead = dtSummaryOrder.DefaultView.ToTable(true, "ClientCode", "RegionCode", "PriceCode", "PriceDate");
+            var dtOrderHead = dtSummaryOrder.DefaultView.ToTable(true, "ClientCode", "RegionCode", "PriceCode", "PriceDate");
             dtOrderHead.Columns.Add(new DataColumn("OrderID", typeof(long)));
 
             DataRow[] drOrderList;
             foreach (DataRow drOH in dtOrderHead.Rows)
             {
-                drOrderList = dtSummaryOrder.Select("PriceCode = " + drOH["PriceCode"].ToString());
+                drOrderList = dtSummaryOrder.Select("PriceCode = " + drOH["PriceCode"]);
                 if (drOrderList.Length > 0)
                 {
                     e.DataAdapter.SelectCommand.CommandText =
@@ -429,7 +419,7 @@ WHERE 	cd.FirmCode	= ?ClientCode
                         e.DataAdapter.SelectCommand.Parameters["?Cost"].Value = drOL["Cost"];
                         e.DataAdapter.SelectCommand.Parameters["?Quantity"].Value = drOL["Quantity"];
                         e.DataAdapter.SelectCommand.ExecuteNonQuery();
-                        Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
+                        var Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
                         if (Index > -1)
                             Res[Index] = Convert.ToInt64(drOH["OrderID"]);
                     }
@@ -437,7 +427,7 @@ WHERE 	cd.FirmCode	= ?ClientCode
             }
 
             //начинаем заполнять таблицу результатов
-			dtPricesRes = AmpService.PostOrder.GetPricesDataTable();
+			DataTable dtPricesRes = AmpService.PostOrder.GetPricesDataTable();
             dtPricesRes.TableName = "Prices";
 
             DataRow drOK;
@@ -531,7 +521,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 
 
         	//Формируем результирующий датасет
-            dsRes = new DataSet();
+            DataSet dsRes = new DataSet();
             dsRes.Tables.Add(dtPricesRes);
 
             /*
@@ -597,11 +587,11 @@ WHERE	c.SynonymCode = ?SynonymCode
 
             DataSet data = new DataSet();
             e.DataAdapter.Fill(data, "PriceList");
-			this.LogQuery(e.DataAdapter.SelectCommand, data, false, "GetPriceCodeByName");
+			LogQuery(e.DataAdapter.SelectCommand, data, false, "GetPriceCodeByName");
             return data;
         }
 
-        [WebMethod()]
+        [WebMethod]
         public DataSet GetPriceCodeByName(string[] firmName)
         {
             return MethodTemplate.ExecuteMethod<FirmNameArgs, DataSet>(
@@ -610,42 +600,46 @@ WHERE	c.SynonymCode = ?SynonymCode
 
         private DataSet InnerGetPrices(GetPricesArgs e)
         {
-            string functionName = "GetPrices";
+            const string functionName = "GetPrices";
             //словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
-            Dictionary<string, string> validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer());
-            validRequestFields.Add("OrderID", "c.id");
-            validRequestFields.Add("SalerCode", "c.Code");
-            validRequestFields.Add("SalerName", "cd.ShortName");
-            validRequestFields.Add("ItemID", "ampc.Code");
-			validRequestFields.Add("OriginalCR", "sfc.Synonym");
-            validRequestFields.Add("OriginalName", "s.Synonym");
-            validRequestFields.Add("PriceCode", "ap.PriceCode");
-			validRequestFields.Add("PrepCode", "c.ProductId");
+            var validRequestFields = new Dictionary<string, string>(new CaseInsensitiveStringComparer())
+                                     	{
+                                     		{"OrderID", "c.id"},
+                                     		{"SalerCode", "c.Code"},
+                                     		{"SalerName", "cd.ShortName"},
+                                     		{"ItemID", "ampc.Code"},
+                                     		{"OriginalCR", "sfc.Synonym"},
+                                     		{"OriginalName", "s.Synonym"},
+                                     		{"PriceCode", "ap.PriceCode"},
+                                     		{"PrepCode", "c.ProductId"}
+                                     	};
 
-            List<string> validSortFields = new List<string>();
-            validSortFields.Add("OrderID");
-            validSortFields.Add("SalerCode");
-            validSortFields.Add("CreaterCode");
-            validSortFields.Add("ItemID");
-            validSortFields.Add("OriginalName");
-            validSortFields.Add("OriginalCR");
-            validSortFields.Add("Unit");
-            validSortFields.Add("Volume");
-            validSortFields.Add("Quantity");
-            validSortFields.Add("Note");
-            validSortFields.Add("Period");
-            validSortFields.Add("Doc");
-            validSortFields.Add("Junk");
-            validSortFields.Add("Upcost");
-            validSortFields.Add("Cost");
-            validSortFields.Add("PriceCode");
-            validSortFields.Add("SalerName");
-            validSortFields.Add("PriceDate");
-            validSortFields.Add("PrepCode");
-            validSortFields.Add("OrderCode1");
-            validSortFields.Add("OrderCode2");
+        	var validSortFields = new List<string>
+                                  	{
+                                  		"OrderID",
+                                  		"SalerCode",
+                                  		"CreaterCode",
+                                  		"ItemID",
+                                  		"OriginalName",
+                                  		"OriginalCR",
+                                  		"Unit",
+                                  		"Volume",
+                                  		"Quantity",
+                                  		"Note",
+                                  		"Period",
+                                  		"Doc",
+                                  		"Junk",
+                                  		"Upcost",
+                                  		"Cost",
+                                  		"PriceCode",
+                                  		"SalerName",
+                                  		"PriceDate",
+                                  		"PrepCode",
+                                  		"OrderCode1",
+                                  		"OrderCode2"
+                                  	};
 
-            //проверка входящих параметров
+        	//проверка входящих параметров
             if ((e.RangeValue == null) || (e.RangeField == null)
                 || (e.RangeField.Length != e.RangeValue.Length))
 				throw new ArgumentException("Входящие параметры не валидны");
@@ -653,23 +647,20 @@ WHERE	c.SynonymCode = ?SynonymCode
             //то будет Exception на этапе трансляции
 
             //проверка имен полей для фильтрации
-            foreach (string fieldName in e.RangeField)
+            foreach (var fieldName in e.RangeField)
                 if (!validRequestFields.ContainsKey(fieldName))
                     throw new ArgumentException(String.Format("По полю {0} не может производиться фильтрация", fieldName), fieldName);
             //проверка имен полей для сортировки
             if (e.SortField != null)
             {
-                foreach (string fieldName in e.SortField)
-                    if (!validSortFields.Exists(delegate(string value)
-                                                    {
-                                                        return String.Compare(fieldName, value, true) == 0;
-                                                    }))
+                foreach (var fieldName in e.SortField)
+                    if (!validSortFields.Exists(value => String.Compare(fieldName, value, true) == 0))
                         throw new ArgumentException(String.Format("По поляю {0} не может производиться сортировка", fieldName), fieldName);
             }
             //проверка направлений сортировки
             if (e.SortDirection != null)
             {
-                foreach (string direction in e.SortDirection)
+                foreach (var direction in e.SortDirection)
                     if (!((String.Compare(direction, "Asc", true) == 0) || (String.Compare(direction, "Desc", true) == 0)))
                         throw new ArgumentException(
                                 String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"",
@@ -679,13 +670,13 @@ WHERE	c.SynonymCode = ?SynonymCode
             //словарь хранящий имена фильтруемых полей и значения фильтрации
             //           |            |
             //                имя поля      список значений для него
-            Dictionary<string, List<string>> FiltedField = new Dictionary<string, List<string>>();
+            var FiltedField = new Dictionary<string, List<string>>();
             //разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
             //транслируются во внутренние
-            for (int i = 0; i < e.RangeField.Length; i++)
+            for (var i = 0; i < e.RangeField.Length; i++)
             {
                 //преобразовываем клиентские названия полей во внутренние
-                string innerFieldName = validRequestFields[e.RangeField[i]];
+                var innerFieldName = validRequestFields[e.RangeField[i]];
                 //если в словаре не такого поля 
                 if (!FiltedField.ContainsKey(innerFieldName))
                     //то добавляем его и создаем массив для хранения его значений
@@ -694,14 +685,14 @@ WHERE	c.SynonymCode = ?SynonymCode
                 FiltedField[innerFieldName].Add(e.RangeValue[i]);
             }
 
-			DataSet data = new DataSet();
+			var data = new DataSet();
 
-			string predicatBlock = "";
+			var predicatBlock = "";
 
 			if (e.NewEar)
 				predicatBlock += " ampc.id is null ";
 
-			foreach (string fieldName in FiltedField.Keys)
+			foreach (var fieldName in FiltedField.Keys)
 			{
 				if (predicatBlock != "")
 					predicatBlock += " and ";
@@ -807,6 +798,7 @@ FROM UserSettings.MinCosts as offers
 				//ни какого они просто не нужны
 				e.DataAdapter.SelectCommand.CommandText += " GROUP BY OrderID";
 				e.DataAdapter.SelectCommand.CommandText += Utils.FormatOrderBlock(e.SortField, e.SortDirection);
+				e.DataAdapter.SelectCommand.CommandText += Utils.GetLimitString(e.Offset, e.Count);
 				e.DataAdapter.SelectCommand.Parameters.Clear();
 
 				e.DataAdapter.Fill(data, "PriceList");
@@ -860,7 +852,7 @@ FROM UserSettings.MinCosts as offers
         /// Примечание: следует помнить что первым значением является 0 а не 1.
         /// </param>
         /// <returns>DataSet содержащий позиции прайс листов.</returns>
-        [WebMethod()]
+        [WebMethod]
         public DataSet GetPrices(bool OnlyLeader, bool NewEar, string[] RangeField, string[] RangeValue, string[] SortField,
                                  string[] SortOrder, int Limit, int SelStart)
         {
@@ -883,17 +875,15 @@ FROM UserSettings.MinCosts as offers
         /// Прмечание: значение равное или меньше 0 игнорируются
         /// </param>
         /// <returns>Список заказов</returns>
-        [WebMethod()]
+        [WebMethod]
         public DataSet GetOrders(string[] OrderID, int PriceCode)
         {
             return MethodTemplate.ExecuteMethod<GetOrdersArgs, DataSet>(
 				new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null, GetClientCode);
         }
 
-        private DataSet InnerGetOrders(ExecuteArgs e)
+		private DataSet InnerGetOrders(GetOrdersArgs args)
         {
-            GetOrdersArgs args = e as GetOrdersArgs;	
-
             args.DataAdapter.SelectCommand.CommandText += @"
 SELECT  i.firmclientcode as ClientCode, 
         i.firmclientcode2 as ClientCode2, 
@@ -936,12 +926,12 @@ WHERE pd.FirmCode = 62
                 }
             }
 			if (args.PriceCode > 0)
-                args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode.ToString();
+                args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = " + args.PriceCode;
 
-            DataSet data = new DataSet();
+            var data = new DataSet();
             args.DataAdapter.Fill(data);
 
-			LogQuery(e.DataAdapter.SelectCommand, data, false, "GetOrders");
+			LogQuery(args.DataAdapter.SelectCommand, data, false, "GetOrders");
             return data;
         }
 
@@ -997,7 +987,7 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
     AND billingstatus = 1 
     AND OSUserName = ?UserName
 ",
-					new MySqlParameter[] { new MySqlParameter("?UserName", userName) }));
+					new[] { new MySqlParameter("?UserName", userName) }));
 		}
 
 
