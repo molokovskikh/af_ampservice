@@ -1,23 +1,36 @@
 using System;
 using System.Data;
 using log4net.Config;
+using MySql.Data.MySqlClient;
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace AmpService.Tests
 {
 	[TestFixture]
 	public class AmpServiceFixture
 	{
+		private AMPService _service;
+
 		static AmpServiceFixture()
 		{
 			XmlConfigurator.Configure();
 		}
 
+		[SetUp]
+		public void Setup()
+		{
+			_service = new AMPService
+			           	{
+			           		GetHost = () => "localhost", 
+							GetUserName = () => "kvasov"
+			           	};
+		}
+
 		[Test]
 		public void GetPricesTest()
 		{
-			var WebServ = new AMPService();
-			LogDataSet(WebServ.GetPrices(false, false,
+			LogDataSet(_service.GetPrices(false, false,
 			                             new[]
 			                             	{
 			                             		"prepCode", "PriceCode", "PriceCode", "PrepCode", "ItemID", "PrepCode", "PrepCode",
@@ -26,115 +39,179 @@ namespace AmpService.Tests
 			                             new[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, null, null, 100, 0));
 
 
-			LogDataSet(WebServ.GetPrices(false, false, new[] {"OriginalName"}, new[] {"*а*"}, null, null, 100, 0));
+			LogDataSet(_service.GetPrices(false, false, new[] {"OriginalName"}, new[] {"*а*"}, null, null, 100, 0));
 
 
-			LogDataSet(WebServ.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"}, null,
+			LogDataSet(_service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"}, null,
 			                             null, 100, 0));
 
 
-			WebServ.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"},
+			_service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"},
 			                  new[] {"OrderID"}, null, 100, 0);
 
 
-			WebServ.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"},
+			_service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"},
 			                  new[] {"OrderID"}, new[] {"DESC"}, 100, 0);
 
 
-			WebServ.GetPrices(false, false, new[] {"OriginalName", "originalName"}, new[] {"к*", "т*"},
+			_service.GetPrices(false, false, new[] {"OriginalName", "originalName"}, new[] {"к*", "т*"},
 			                  new[] {"orderID", "unit", "Volume"}, new[] {"DESC"}, 100, 0);
 
 
-			WebServ.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
+			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
 			                  new[] {"12999", "12998", "29652"}, null, null, -1, -1);
 
 
-			WebServ.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
+			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
 			                  new[] {"12999", "12998", "29652"}, null, null, 2, 1);
 
 
-			WebServ.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
+			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
 			                  new[] {"12999", "12998", "29652"}, new[] {"OrderID", "unit", "Volume"},
 			                  new[] {"DESC"}, -1, -1);
 
 
-			WebServ.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
+			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
 			                  new[] {"12999", "12998", "29652"}, new[] {"OrderID", "unit", "Volume"},
 			                  new[] {"ASC"}, -1, 1);
 
 
-			WebServ.GetPrices(false, false, new[] {"PrepCode"}, new[] {"5"}, new[] {"Cost"},
+			_service.GetPrices(false, false, new[] {"PrepCode"}, new[] {"5"}, new[] {"Cost"},
 			                  new[] {"ASC"}, 1000, 0);
 		}
 
 		[Test]
 		public void GetOrdersTest()
 		{
-			var WebServ = new AMPService();
-			LogDataSet(WebServ.GetOrders(null, 0));
-			LogDataSet(WebServ.GetOrders(new string[0], 0));
-			LogDataSet(WebServ.GetOrders(new[] {"1"}, 2));
-			LogDataSet(WebServ.GetOrders(new[] {"1", "2", "3"}, 2));
-			LogDataSet(WebServ.GetOrders(new[] {"0"}, -1));
-			LogDataSet(WebServ.GetOrders(new[] {"!1"}, -1));
+			LogDataSet(_service.GetOrders(null, 0));
+			LogDataSet(_service.GetOrders(new string[0], 0));
+			LogDataSet(_service.GetOrders(new[] {"1"}, 2));
+			LogDataSet(_service.GetOrders(new[] {"1", "2", "3"}, 2));
+			LogDataSet(_service.GetOrders(new[] {"0"}, -1));
+			LogDataSet(_service.GetOrders(new[] {"!1"}, -1));
 		}
 
 		[Test]
 		public void GetPriceCodeByNameTest()
 		{
-			var WebServ = new AMPService();
-			LogDataSet(WebServ.GetPriceCodeByName(null));
-			LogDataSet(WebServ.GetPriceCodeByName(new[] {"Протек-15"}));
-			LogDataSet(WebServ.GetPriceCodeByName(new[] {"Протек-15", "Материа Медика"}));
-			LogDataSet(WebServ.GetPriceCodeByName(new[] {"Протек*"}));
-			LogDataSet(WebServ.GetPriceCodeByName(new[] {"*к*", "Ма*риа Ме*ка"}));
+			LogDataSet(_service.GetPriceCodeByName(null));
+			LogDataSet(_service.GetPriceCodeByName(new[] {"Протек-15"}));
+			LogDataSet(_service.GetPriceCodeByName(new[] {"Протек-15", "Материа Медика"}));
+			LogDataSet(_service.GetPriceCodeByName(new[] {"Протек*"}));
+			LogDataSet(_service.GetPriceCodeByName(new[] {"*к*", "Ма*риа Ме*ка"}));
 		}
 
 		[Test]
 		public void PostOrderTest()
 		{
-			var ampService = new AMPService();
-			LogDataSet(ampService.PostOrder(new long[] {838566976, 838566968, 838566969},
-			                                new[] {1, 1, 1},
+			var data = _service.GetPrices(false, false,
+			                             new[] {"OriginalName"},
+			                             new[] {"*папа*"},
+			                             new string[] {},
+			                             new string[] {},
+			                             100,
+			                             0);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0), "предложений нет");
+			LogDataSet(_service.PostOrder(new[] { Convert.ToInt64(data.Tables[0].Rows[0]["OrderID"]) },
+			                                new[] {1},
 			                                new[] {"это тестовый заказ"},
-			                                new[] {1503908, 1256924, 1503905},
-			                                new[] {156745, 156745, 156745},
-			                                new[] {false, false, false}));
+											new[] { Convert.ToInt32(data.Tables[0].Rows[0]["OrderCode1"]) },
+											new[] { Convert.ToInt32(data.Tables[0].Rows[0]["OrderCode2"]) },
+			                                new[] {false}));
 		}
 
 		[Test]
 		public void GetNameFromCatalogTest()
 		{
-			var WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(null, null, false, false, null, 100, 0));
+			LogDataSet(_service.GetNameFromCatalog(null, null, false, false, null, 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(new[] {"*"}, new[] {"*"}, false, false, new uint[0], 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(new[] {"*"}, new[] {"*"}, false, false, new uint[0], 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] {5}, 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] {5}, 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, true, false, new uint[0], 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, true, false, new uint[0], 100, 0));
 
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(null, null, false, true, null, 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(null, null, false, true, null, 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, false, true, new uint[0], 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, false, true, new uint[0], 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] {5}, 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] {5}, 100, 0));
 
-			WebServ = new AMPService();
-			LogDataSet(WebServ.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, true, true, new uint[0], 100, 0));
+			_service = new AMPService();
+			LogDataSet(_service.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, true, true, new uint[0], 100, 0));
+		}
+
+		[Test]
+		public void Every_method_should_return_null_if_user_not_have_iol_permission()
+		{
+			_service.HavePermission = userName => false;
+
+			Assert.That(_service.GetOrders(new[] {"0"}, 0),
+			            Is.Null);
+
+			Assert.That(_service.GetNameFromCatalog(new[] {""},
+			                                        new string[] {},
+			                                        false,
+			                                        false,
+			                                        new uint[] {}, 100, 0),
+			            Is.Null);
+
+			Assert.That(_service.GetPriceCodeByName(new[] {"%протек%"}),
+			            Is.Null);
+
+			Assert.That(_service.GetPrices(false, false,
+			                               new[] {"OriginalName"},
+			                               new[] {"%папа%"},
+			                               new string[] {},
+			                               new string[] {}, 100, 0),
+			            Is.Null);
+
+			Assert.That(_service.PostOrder(new[] {54621354879},
+			                               new[] {1},
+			                               new[] {"123"},
+			                               new[] {46528},
+			                               new[] {544523},
+			                               new[] {false}), Is.Null);
+		}
+
+		[Test]
+		public void HavePermissionTest()
+		{
+			Execute(@"
+delete ap from AssignedPermissions ap, osuseraccessright oar, userpermissions up
+where ap.permissionid = up.id and oar.rowid = ap.userid and oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
+			Assert.That(_service.HavePermission("kvasov"), Is.False);
+
+			Execute(@"
+insert into AssignedPermissions(userid, permissionid)
+select oar.rowid, up.id
+from osuseraccessright oar, userpermissions up
+where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
+			Assert.That(_service.HavePermission("kvasov"), Is.True);
+		}
+
+		public void Execute(string commandText)
+		{
+			using (var connection = new MySqlConnection(Literals.ConnectionString))
+			{
+				connection.Open();
+				var command = connection.CreateCommand();
+				command.CommandText = commandText;
+				command.ExecuteNonQuery();
+			}
 		}
 
 		private static void LogDataSet(DataSet dataSet)
