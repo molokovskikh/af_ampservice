@@ -13,39 +13,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpService.Tests", "AmpServ
 		{1807FDE0-8023-47E3-992A-E20431791F97} = {1807FDE0-8023-47E3-992A-E20431791F97}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecuteTemplate", "..\..\ExecuteTemplate\src\ExecuteTemplate\ExecuteTemplate.csproj", "{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql", "Common.MySql\Common.MySql.csproj", "{8A680813-C83B-497A-85E6-E8F07B7D7650}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql", "..\..\Common.MySql\src\Common.MySql\Common.MySql.csproj", "{8A680813-C83B-497A-85E6-E8F07B7D7650}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql.Tests", "Common.MySql.Tests\Common.MySql.Tests.csproj", "{98EFE255-60D6-4C1B-95A6-49779D21E94E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.MySql.Tests", "..\..\Common.MySql\src\Common.MySql.Tests\Common.MySql.Tests.csproj", "{98EFE255-60D6-4C1B-95A6-49779D21E94E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools", "Common.Tools\Common.Tools.csproj", "{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools", "..\..\Common.Tools\src\Common.Tools\Common.Tools.csproj", "{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools.Tests", "Common.Tools.Tests\Common.Tools.Tests.csproj", "{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tools.Tests", "..\..\Common.Tools\src\Common.Tools.Test\Common.Tools.Tests.csproj", "{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecuteTemplate", "ExecuteTemplate\ExecuteTemplate.csproj", "{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}"
 EndProject
 Global
-	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 6
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = AmpService\\AmpService.csproj
-		SccLocalPath1 = .
-		SccProjectFilePathRelativizedFromConnection1 = AmpService\\
-		SccProjectUniqueName2 = AmpService.Tests\\AmpService.Tests.csproj
-		SccLocalPath2 = .
-		SccProjectFilePathRelativizedFromConnection2 = AmpService.Tests\\
-		SccProjectUniqueName3 = ..\\..\\ExecuteTemplate\\src\\ExecuteTemplate\\ExecuteTemplate.csproj
-		SccProjectTopLevelParentUniqueName3 = AMPService.sln
-		SccProjectName3 = \u0022$/Inforoom/NET2.0/ExecuteTemplate/src/ExecuteTemplate\u0022,\u0020VOGAAAAA
-		SccLocalPath3 = ..\\..\\ExecuteTemplate\\src\\ExecuteTemplate
-		SccProjectUniqueName4 = ..\\..\\Common.MySql\\src\\Common.MySql\\Common.MySql.csproj
-		SccProjectTopLevelParentUniqueName4 = AMPService.sln
-		SccProjectName4 = \u0022$/Inforoom/NET2.0/Common.MySql/src/Common.MySql\u0022,\u0020XFNAAAAA
-		SccLocalPath4 = ..\\..\\Common.MySql\\src\\Common.MySql
-		SccProjectUniqueName5 = ..\\..\\Common.MySql\\src\\Common.MySql.Tests\\Common.MySql.Tests.csproj
-		SccProjectTopLevelParentUniqueName5 = AMPService.sln
-		SccProjectName5 = \u0022$/Inforoom/NET2.0/Common.MySql/src/Common.MySql.Tests\u0022,\u0020FGNAAAAA
-		SccLocalPath5 = ..\\..\\Common.MySql\\src\\Common.MySql.Tests
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
 		Debug|Any CPU = Debug|Any CPU
@@ -75,16 +53,6 @@ Global
 		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{0E941CA7-6BAC-4E49-A9A0-450D2B6E4E89}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|.NET.ActiveCfg = Release|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8A680813-C83B-497A-85E6-E8F07B7D7650}.Debug|.NET.ActiveCfg = Debug|Any CPU
 		{8A680813-C83B-497A-85E6-E8F07B7D7650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8A680813-C83B-497A-85E6-E8F07B7D7650}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -125,15 +93,25 @@ Global
 		{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A2C4864F-8976-4C5B-A2BF-60AE31749BB7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|.NET.ActiveCfg = Release|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
 		{8A680813-C83B-497A-85E6-E8F07B7D7650} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
 		{98EFE255-60D6-4C1B-95A6-49779D21E94E} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
 		{72AFCFE8-C9E9-45FA-9698-BEE896A517A3} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
 		{A2C4864F-8976-4C5B-A2BF-60AE31749BB7} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
+		{046F74A6-68A8-4E5E-A9AB-7332B631CFB1} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
 	EndGlobalSection
 EndGlobal
