@@ -112,12 +112,16 @@ namespace AmpService.Tests
 			                             100,
 			                             0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0), "предложений нет");
-			LogDataSet(_service.PostOrder(new[] { Convert.ToInt64(data.Tables[0].Rows[0]["OrderID"]) },
+			var coreId = Convert.ToInt64(data.Tables[0].Rows[0]["OrderID"]);
+			var result = _service.PostOrder(new[] { coreId },
 			                                new[] {1},
 			                                new[] {"это тестовый заказ"},
 											new[] { Convert.ToInt32(data.Tables[0].Rows[0]["OrderCode1"]) },
 											new[] { Convert.ToInt32(data.Tables[0].Rows[0]["OrderCode2"]) },
-			                                new[] {false}));
+			                                new[] {false});
+			Assert.That(result.Tables[0].Rows.Count, Is.EqualTo(1), "ни вернули ни одной записи");
+			Assert.That(result.Tables[0].Rows[0]["OriginalOrderID"], Is.EqualTo(coreId), "заказали что то не то, идентификатор из core не совпал");
+
 		}
 
 		[Test]
