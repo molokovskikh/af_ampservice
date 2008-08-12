@@ -1,7 +1,13 @@
 using System;
+using System.Linq;
 using System.Data;
+using System.Reflection;
+using Castle.Windsor;
+using Common.Models;
+using Common.Models.Repositories;
 using log4net.Config;
 using MySql.Data.MySqlClient;
+using NHibernate.Mapping.Attributes;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -25,85 +31,28 @@ namespace AmpService.Tests
 			           		GetHost = () => "localhost", 
 							GetUserName = () => "kvasov"
 			           	};
-		}
 
-		[Test]
-		public void GetPricesTest()
-		{
-			LogDataSet(_service.GetPrices(false, false,
-			                             new[]
-			                             	{
-			                             		"prepCode", "PriceCode", "PriceCode", "PrepCode", "ItemID", "PrepCode", "PrepCode",
-			                             		"OriginalName", "ItemID", "PriceCode"
-			                             	},
-			                             new[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, null, null, 100, 0));
+			var container = new WindsorContainer();
+			container.AddComponent("Repository", typeof(IRepository<>), typeof(Repository<>));
+			container.AddComponent<IOfferRepository, OfferRepository>();
+			container.AddComponent("RepositoryInterceptor", typeof(RepositoryInterceptor));
+			var holder = new SessionFactoryHolder();
+			holder
+				.Configuration
+				.Configure()
+				.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
+			holder.BuildSessionFactory();
+			container.Kernel.AddComponentInstance<ISessionFactoryHolder>(holder);
 
-
-			LogDataSet(_service.GetPrices(false, false, new[] {"OriginalName"}, new[] {"*а*"}, null, null, 100, 0));
-
-
-			LogDataSet(_service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"}, null,
-			                             null, 100, 0));
-
-
-			_service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"},
-			                  new[] {"OrderID"}, null, 100, 0);
-
-
-			_service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"},
-			                  new[] {"OrderID"}, new[] {"DESC"}, 100, 0);
-
-
-			_service.GetPrices(false, false, new[] {"OriginalName", "originalName"}, new[] {"к*", "т*"},
-			                  new[] {"orderID", "unit", "Volume"}, new[] {"DESC"}, 100, 0);
-
-
-			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
-			                  new[] {"12999", "12998", "29652"}, null, null, -1, -1);
-
-
-			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
-			                  new[] {"12999", "12998", "29652"}, null, null, 2, 1);
-
-
-			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
-			                  new[] {"12999", "12998", "29652"}, new[] {"OrderID", "unit", "Volume"},
-			                  new[] {"DESC"}, -1, -1);
-
-
-			_service.GetPrices(true, false, new[] {"PrepCode", "PrepCode", "PrepCode"},
-			                  new[] {"12999", "12998", "29652"}, new[] {"OrderID", "unit", "Volume"},
-			                  new[] {"ASC"}, -1, 1);
-
-
-			_service.GetPrices(false, false, new[] {"PrepCode"}, new[] {"5"}, new[] {"Cost"},
-			                  new[] {"ASC"}, 1000, 0);
-		}
-
-		[Test]
-		public void GetOrdersTest()
-		{
-			LogDataSet(_service.GetOrders(null, 0));
-			LogDataSet(_service.GetOrders(new string[0], 0));
-			LogDataSet(_service.GetOrders(new[] {"1"}, 2));
-			LogDataSet(_service.GetOrders(new[] {"1", "2", "3"}, 2));
-			LogDataSet(_service.GetOrders(new[] {"0"}, -1));
-			LogDataSet(_service.GetOrders(new[] {"!1"}, -1));
-		}
-
-		[Test]
-		public void GetPriceCodeByNameTest()
-		{
-			LogDataSet(_service.GetPriceCodeByName(null));
-			LogDataSet(_service.GetPriceCodeByName(new[] {"Протек-15"}));
-			LogDataSet(_service.GetPriceCodeByName(new[] {"Протек-15", "Материа Медика"}));
-			LogDataSet(_service.GetPriceCodeByName(new[] {"Протек*"}));
-			LogDataSet(_service.GetPriceCodeByName(new[] {"*к*", "Ма*риа Ме*ка"}));
+			IoC.Initialize(container);
 		}
 
 		[Test]
 		public void PostOrderTest()
 		{
+			var orderRepository = IoC.Resolve<IRepository<Order>>();
+			var offerRepository = IoC.Resolve<IOfferRepository>();
+
 			var data = _service.GetPrices(false, false,
 			                             new[] {"OriginalName"},
 			                             new[] {"*папа*"},
@@ -112,50 +61,48 @@ namespace AmpService.Tests
 			                             100,
 			                             0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0), "предложений нет");
-			var coreId = Convert.ToInt64(data.Tables[0].Rows[0]["OrderID"]);
-			var result = _service.PostOrder(new[] { coreId },
+			var coreId = Convert.ToUInt64(data.Tables[0].Rows[0]["OrderID"]);
+
+			using (var connection = new MySqlConnection(Literals.ConnectionString))
+			{
+				connection.Open();
+				var command = new MySqlCommand(@"
+update farm.core0
+set RequestRatio = 5,
+	OrderCost = 10.5,
+	MinOrderCount = 10
+where id = ?CoreId
+", connection);
+				command.Parameters.AddWithValue("?CoreId", coreId);
+				command.ExecuteNonQuery();
+			}
+
+
+			var result = _service.PostOrder(new[] { (long)coreId },
 			                                new[] {1},
 			                                new[] {"это тестовый заказ"},
 											new[] { Convert.ToInt32(data.Tables[0].Rows[0]["OrderCode1"]) },
 											new[] { Convert.ToInt32(data.Tables[0].Rows[0]["OrderCode2"]) },
 			                                new[] {false});
-			Assert.That(result.Tables[0].Rows.Count, Is.EqualTo(1), "ни вернули ни одной записи");
-			Assert.That(result.Tables[0].Rows[0]["OriginalOrderID"], Is.EqualTo(coreId), "заказали что то не то, идентификатор из core не совпал");
 
-		}
+			using (var unitOfWork = new UnitOfWork())
+			using (var transaction = unitOfWork.CurrentSession.BeginTransaction(IsolationLevel.RepeatableRead))
+			{
+				Assert.That(result.Tables[0].Rows.Count, Is.EqualTo(1), "ни вернули ни одной записи");
+				Assert.That(result.Tables[0].Rows[0]["OriginalOrderID"], Is.EqualTo(coreId),
+				            "заказали что то не то, идентификатор из core не совпал");
+				var orderid = Convert.ToUInt32(result.Tables[0].Rows[0]["OrderId"]);
 
-		[Test]
-		public void GetNameFromCatalogTest()
-		{
-			LogDataSet(_service.GetNameFromCatalog(null, null, false, false, null, 100, 0));
+				var offer = offerRepository.GetById(new Client { FirmCode = 2575 }, coreId);
+				var order = orderRepository.Get(orderid);
 
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0));
+				var orderLine = (from orderItem in order.OrderItems where orderItem.CoreId == coreId select orderItem).Single();
 
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(new[] {"*"}, new[] {"*"}, false, false, new uint[0], 100, 0));
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] {5}, 100, 0));
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, true, false, new uint[0], 100, 0));
-
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(null, null, false, true, null, 100, 0));
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0));
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, false, true, new uint[0], 100, 0));
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] {5}, 100, 0));
-
-			_service = new AMPService();
-			LogDataSet(_service.GetNameFromCatalog(new[] {"5*"}, new[] {"*"}, true, true, new uint[0], 100, 0));
+				Assert.That(offer.Id, Is.EqualTo(orderLine.CoreId));
+				Assert.That(orderLine.RequestRatio, Is.EqualTo(offer.RequestRatio));
+				Assert.That(orderLine.MinOrderCount, Is.EqualTo(offer.MinOrderCount));
+				Assert.That(orderLine.OrderCost, Is.EqualTo(offer.OrderCost));
+			}
 		}
 
 		[Test]
@@ -215,26 +162,6 @@ where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
 				var command = connection.CreateCommand();
 				command.CommandText = commandText;
 				command.ExecuteNonQuery();
-			}
-		}
-
-		private static void LogDataSet(DataSet dataSet)
-		{
-			foreach (DataTable dataTable in dataSet.Tables)
-			{
-				Console.WriteLine("<table>");
-				foreach (DataRow dataRow in dataTable.Rows)
-				{
-					Console.WriteLine("\t<row>");
-					Console.Write("\t");
-					foreach (DataColumn column in dataTable.Columns)
-					{
-						Console.Write(dataRow[column] + " ");
-					}
-					Console.WriteLine();
-					Console.WriteLine("\t</row>");
-				}
-				Console.WriteLine("</table>");
 			}
 		}
 	}

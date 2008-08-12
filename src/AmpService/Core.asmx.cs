@@ -355,6 +355,9 @@ SELECT  cd.FirmCode as ClientCode,
 		0 Quantity,
         c.Junk as Junk,
 		c.Await as Await,
+		c.RequestRatio, 
+		c.MinOrderCount, 
+		c.OrderCost,
 		if(if(round(cc.Cost*ap.UpCost,2)<MinBoundCost, MinBoundCost, round(cc.Cost*ap.UpCost,2))>MaxBoundCost,MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<MinBoundCost, MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost
 FROM (farm.core0 c, usersettings.clientsdata cd)
   JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
@@ -406,7 +409,8 @@ WHERE 	cd.FirmCode	= ?ClientCode
 					e.DataAdapter.SelectCommand.Parameters.AddWithValue("?SubmitDate", submit ? null : new DateTime?(DateTime.Now));
 					drOH["OrderID"] = Convert.ToInt64(e.DataAdapter.SelectCommand.ExecuteScalar());
 					e.DataAdapter.SelectCommand.CommandText =
-						"insert into orders.orderslist (OrderID, ProductId, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost) values (?OrderID, ?ProductId, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost);";
+@"insert into orders.orderslist (OrderID, ProductId, CodeFirmCr, SynonymCode, SynonymFirmCrCode, Code, CodeCr, Quantity, Junk, Await, Cost, CoreId, RequestRatio, MinOrderCount, OrderCost)
+values (?OrderID, ?ProductId, ?CodeFirmCr, ?SynonymCode, ?SynonymFirmCrCode, ?Code, ?CodeCr, ?Quantity, ?Junk, ?Await, ?Cost, ?CoreId, ?RequestRatio, ?MinOrderCount, ?OrderCost);";
 					e.DataAdapter.SelectCommand.Parameters.Clear();
 					e.DataAdapter.SelectCommand.Parameters.Add("?OrderID", MySqlDbType.Int64);
 					e.DataAdapter.SelectCommand.Parameters.Add("?ProductId", MySqlDbType.Int64);
@@ -419,6 +423,10 @@ WHERE 	cd.FirmCode	= ?ClientCode
 					e.DataAdapter.SelectCommand.Parameters.Add("?Await", MySqlDbType.Byte);
 					e.DataAdapter.SelectCommand.Parameters.Add("?Cost", MySqlDbType.Decimal);
 					e.DataAdapter.SelectCommand.Parameters.Add("?Quantity", MySqlDbType.Int32);
+					e.DataAdapter.SelectCommand.Parameters.Add("?CoreId", MySqlDbType.Int64);
+					e.DataAdapter.SelectCommand.Parameters.Add("?RequestRatio", MySqlDbType.Int32);
+					e.DataAdapter.SelectCommand.Parameters.Add("?MinOrderCount", MySqlDbType.Int32);
+					e.DataAdapter.SelectCommand.Parameters.Add("?OrderCost", MySqlDbType.Decimal);
 					foreach (DataRow drOL in drOrderList)
 					{
 						e.DataAdapter.SelectCommand.Parameters["?OrderID"].Value = drOH["OrderID"];
@@ -432,6 +440,10 @@ WHERE 	cd.FirmCode	= ?ClientCode
 						e.DataAdapter.SelectCommand.Parameters["?Await"].Value = drOL["Await"];
 						e.DataAdapter.SelectCommand.Parameters["?Cost"].Value = drOL["Cost"];
 						e.DataAdapter.SelectCommand.Parameters["?Quantity"].Value = drOL["Quantity"];
+						e.DataAdapter.SelectCommand.Parameters["?CoreId"].Value = drOL["ID"];
+						e.DataAdapter.SelectCommand.Parameters["?RequestRatio"].Value = drOL["RequestRatio"];
+						e.DataAdapter.SelectCommand.Parameters["?MinOrderCount"].Value = drOL["MinOrderCount"];
+						e.DataAdapter.SelectCommand.Parameters["?OrderCost"].Value = drOL["OrderCost"];
 						e.DataAdapter.SelectCommand.ExecuteNonQuery();
 						int Index = Array.IndexOf(e.CoreIDs, Convert.ToInt64(drOL["ID"]));
 						if (Index > -1)
