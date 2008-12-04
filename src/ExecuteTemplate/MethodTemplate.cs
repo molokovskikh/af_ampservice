@@ -1,6 +1,7 @@
 using System;
 using System.Web;
 using System.Threading;
+using System.Web.Services.Protocols;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Configuration;
@@ -120,6 +121,12 @@ namespace ExecuteTemplate
 
 						if (transaction != null)
 							transaction.Rollback();
+
+						if (ex is SoapException)
+						{
+							log.Error(Utils.FormatException(ex, e, userName));
+							throw;
+						}
 
 						if (raiseException)
 							throw;

@@ -1,13 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
+using System.Web.Services.Protocols;
 using log4net.Config;
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 
 namespace AmpService.Tests
 {
+	public class AssertHelper
+	{
+		public static void ThrowException(Action action, Action<Exception> afterThrow)
+		{
+			try
+			{
+				action();
+				Assert.Fail("исключение не было выброшено");
+			}
+			catch (Exception e)
+			{
+				if (e is AssertionException)
+					throw;
+				afterThrow(e);
+			}
+		}
+	}
+
 	[TestFixture]
 	public class IntegrationTests
 	{
@@ -147,6 +164,20 @@ namespace AmpService.Tests
 
 			_service.GetPrices(false, false, new[] { "PrepCode" }, new[] { "5" }, new[] { "Cost" },
 							  new[] { "ASC" }, 1000, 0);
+		}
+
+		[Test]
+		public void Throw_exception_if_now_parameters_specified()
+		{
+			AssertHelper.ThrowException(() =>
+			                            _service.GetPrices(false,
+			                                               false,
+			                                               new string[0],
+			                                               new string[0],
+			                                               new string[0],
+			                                               new string[0], 0, 10),
+			                            e => Assert.That(e, Is.InstanceOfType(typeof (SoapException))));
+
 		}
 	}
 }

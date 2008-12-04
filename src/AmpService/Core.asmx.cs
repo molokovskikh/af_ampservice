@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Services;
+using System.Web.Services.Protocols;
+using System.Xml;
 using Common.MySql;
 using ExecuteTemplate;
 using MySql.Data.MySqlClient;
@@ -155,12 +157,14 @@ namespace AmpService
 		                                  int Limit,
 		                                  int SelStart)
 		{
+			if (!HavePermission(GetUserName()))
+				return null;
+
 			MyDS.Tables.Remove("Prices");
 			Restart:
 			try
 			{
-				if (!HavePermission(GetUserName()))
-					return null;
+				Service.UpdateLastAccessTime(GetUserName());
 
 				using (var connection = new MySqlConnection(Literals.ConnectionString))
 				{
@@ -189,7 +193,7 @@ namespace AmpService
 SELECT	p.id as PrepCode, 
 		cn.Name, 
 		cf.Form,
-		ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as Properties
+		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties
 FROM Catalogs.Catalog c
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
@@ -209,7 +213,7 @@ WHERE");
 SELECT	p.id as PrepCode,  
 		cn.Name, 
 		cf.Form,
-		ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as Properties
+		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties
 FROM Catalogs.Catalog c 
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
@@ -296,6 +300,8 @@ WHERE");
 		{
 			if (!HavePermission(GetUserName()))
 				return null;
+
+			Service.UpdateLastAccessTime(GetUserName());
 
 			var Res = new long[e.CoreIDs.Length];
 			for (int i = 0; i < Res.Length; i++)
@@ -575,6 +581,8 @@ WHERE	c.SynonymCode = ?SynonymCode
 			if (!HavePermission(GetUserName()))
 				return null;
 
+			Service.UpdateLastAccessTime(GetUserName());
+
 			e.DataAdapter.SelectCommand.CommandText = @"
                                 SELECT  PricesData.PriceCode as PriceCode, 
                                         PricesData.PriceName as PriceName,
@@ -633,6 +641,8 @@ WHERE	c.SynonymCode = ?SynonymCode
 		{
 			if (!HavePermission(GetUserName()))
 				return null;
+
+			Service.UpdateLastAccessTime(GetUserName());
 
 			const string functionName = "GetPrices";
 			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
@@ -718,6 +728,9 @@ WHERE	c.SynonymCode = ?SynonymCode
 				//добавляем значение для фильтрации
 				FiltedField[innerFieldName].Add(e.RangeValue[i]);
 			}
+
+			if (FiltedField.Count == 0)
+				throw new SoapException("Нет критериев для фильтрации", new XmlQualifiedName("0"));
 
 			var data = new DataSet();
 
@@ -925,6 +938,8 @@ FROM UserSettings.MinCosts as offers
 			if (!HavePermission(GetUserName()))
 				return null;
 
+			Service.UpdateLastAccessTime(GetUserName());
+
 			args.DataAdapter.SelectCommand.CommandText +=@"
 SELECT  i.firmclientcode as ClientCode, 
         i.firmclientcode2 as ClientCode2, 
@@ -1013,8 +1028,7 @@ WHERE pd.FirmCode = 62";
 
 		private static ulong GetClientCode(MySqlConnection connection, string userName)
 		{
-			if (userName.IndexOf("ANALIT\\") == 0)
-				userName = userName.Substring(7);
+			userName = NormalizeUsername(userName);
 
 			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(Literals.ConnectionString,@"
 SELECT osuseraccessright.clientcode 
@@ -1026,8 +1040,16 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
     AND OSUserName = ?UserName", new[] {new MySqlParameter("?UserName", userName)}));
 		}
 
+		public static string NormalizeUsername(string username)
+		{
+			if (username.IndexOf("ANALIT\\") == 0)
+				username = username.Substring(7);
 
-		public Func<string> GetUserName = () => HttpContext.Current.User.Identity.Name;
+			return username;
+		}
+
+
+		public Func<string> GetUserName = () => NormalizeUsername(HttpContext.Current.User.Identity.Name);
 
 		public Func<string> GetHost = () => HttpContext.Current.Request.UserHostAddress;
 
