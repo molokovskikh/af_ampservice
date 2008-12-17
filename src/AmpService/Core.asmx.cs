@@ -965,7 +965,7 @@ FROM UserSettings.PricesData pd
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
 	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
     JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
-WHERE pd.FirmCode = 62";
+WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)";
 			if (args.OrderID != null && args.OrderID.Length > 0)
 			{
 				if (args.OrderID[0] == "0")
