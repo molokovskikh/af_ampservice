@@ -2,6 +2,7 @@
 using System.Data;
 using System.Web.Services.Protocols;
 using log4net.Config;
+using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -38,6 +39,29 @@ namespace AmpService.Tests
 				GetHost = () => "localhost",
 				GetUserName = () => "kvasov"
 			};
+
+			Execute(@"
+delete ap from AssignedPermissions ap, osuseraccessright oar, userpermissions up
+where ap.permissionid = up.id and oar.rowid = ap.userid and oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
+			Assert.That(_service.HavePermission("kvasov"), Is.False);
+
+			Execute(@"
+insert into AssignedPermissions(userid, permissionid)
+select oar.rowid, up.id
+from osuseraccessright oar, userpermissions up
+where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
+			Assert.That(_service.HavePermission("kvasov"), Is.True);
+		}
+
+		public void Execute(string commandText)
+		{
+			using (var connection = new MySqlConnection(Literals.ConnectionString))
+			{
+				connection.Open();
+				var command = connection.CreateCommand();
+				command.CommandText = commandText;
+				command.ExecuteNonQuery();
+			}
 		}
 
 
