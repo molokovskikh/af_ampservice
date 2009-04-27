@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AmpService</RootNamespace>
-    <AssemblyName>AmpServiceProject</AssemblyName>
+    <AssemblyName>AmpService</AssemblyName>
     <SccProjectName>
     </SccProjectName>
     <SccLocalPath>

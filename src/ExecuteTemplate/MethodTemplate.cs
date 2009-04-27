@@ -1,12 +1,12 @@
 using System;
 using System.Web;
 using System.Threading;
-using System.Web.Services.Protocols;
+using Common.MySql;
 using MySql.Data.MySqlClient;
 using System.Data;
-using System.Configuration;
 using System.Xml.Serialization;
 using log4net;
+using MySqlHelper=MySql.Data.MySqlClient.MySqlHelper;
 
 namespace ExecuteTemplate
 {
@@ -40,8 +40,7 @@ namespace ExecuteTemplate
 		/// <param name="closeConnection">Требуется ли закрывать соединение после отработки метода?</param>
 		/// <param name="beforeSleep">Данный делегат вызывается перед тем, как метод сделает Sleep после ошибки MySql</param>
 		/// <returns></returns>
-		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue,
-			MySqlConnection connection, bool raiseException, GetClientCodeDelegate getClientCode, bool closeConnection, BeforeSleepDelegate<T> beforeSleep) where T : ExecuteArgs
+		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue, GetClientCodeDelegate getClientCode) where T : ExecuteArgs
 		{
 			var log = LogManager.GetLogger(typeof(MethodTemplate));
 
@@ -51,121 +50,71 @@ namespace ExecuteTemplate
 			R result = defaultValue;
 			var Quit = false;
 			var userName = String.Empty;
-			try
-			{
 				do
 				{
-					try
+					using (var connection = new ConnectionManager().GetConnection())
 					{
 						try
 						{
-							userName = HttpContext.Current.User.Identity.Name;
-						}
-						catch
-						{
-							userName = Environment.UserName;
-						}
-						if (userName.IndexOf("ANALIT\\") == 0)
-							userName = userName.Substring(7, userName.Length - 7);
-
-						if (connection == null)
-							connection = new MySqlConnection(Convert.ToString(ConfigurationManager.ConnectionStrings["DB"]));
-
-						if (connection.State == ConnectionState.Closed)
 							connection.Open();
+							transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
 
-						dataAdapter = new MySqlDataAdapter();
-						dataAdapter.SelectCommand = new MySqlCommand();
-						transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+							try
+							{
+								userName = HttpContext.Current.User.Identity.Name;
+							}
+							catch (Exception)
+							{
+								userName = Environment.UserName;
+							}
+							
 
-						dataAdapter.SelectCommand.Connection = connection;
-						dataAdapter.SelectCommand.Transaction = transaction;
+							if (userName.IndexOf("ANALIT\\") == 0)
+								userName = userName.Substring(7, userName.Length - 7);
 
-						e.DataAdapter = dataAdapter;
+							dataAdapter = new MySqlDataAdapter();
+							dataAdapter.SelectCommand = new MySqlCommand();
+							dataAdapter.SelectCommand.Connection = connection;
+							dataAdapter.SelectCommand.Transaction = transaction;
 
-						if (getClientCode != null)
-							e.ClientCode = getClientCode(connection, userName);
-						else
-							e.ClientCode = 0;
+							e.DataAdapter = dataAdapter;
 
-						result = d(e);
-
-						transaction.Commit();
-
-						Quit = true;
-					}
-					catch (MySqlException MySQLErr)
-					{
-						if (transaction != null)
-						{
-							transaction.Rollback();
-						}
-						if ((MySQLErr.Number == 1205) || (MySQLErr.Number == 1213) || (MySQLErr.Number == 1422))
-						{
-							if (beforeSleep != null)
-								beforeSleep(e, MySQLErr);
-							Thread.Sleep(10000);
-						}
-						else
-						{
-							Quit = true;
-							if (raiseException)
-								throw;
+							if (getClientCode != null)
+								e.ClientCode = getClientCode(connection, userName);
 							else
-								log.Error(Utils.FormatException(MySQLErr, e, userName));
+								e.ClientCode = 0;
+
+							result = d(e);
+
+							transaction.Commit();
+
+							Quit = true;
 						}
-					}
-					catch (Exception ex)
-					{
-						Quit = true;
-
-						if (transaction != null)
-							transaction.Rollback();
-
-						if (ex is SoapException)
+						catch (Exception ex)
 						{
-							log.Error(Utils.FormatException(ex, e, userName));
-							throw;
-						}
+							if (transaction != null)
+								transaction.Rollback();
 
-						if (raiseException)
-							throw;
-						else
-							log.Error(Utils.FormatException(ex, e, userName));
+							if (ExceptionHelper.IsDeadLockOrSimilarExceptionInChain(ex))
+							{
+								Thread.Sleep(10000);
+							}
+							else
+							{
+								Quit = true;
+								log.Error(Utils.FormatException(ex, e, userName));
+							}
+						}
 					}
 
 				} while (!Quit);
 
-			}
-			finally
-			{
-				if ((connection != null) && closeConnection)
-					connection.Close();
-			}
 			return result;
-		}
-
-		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue, 
-			MySqlConnection connection) where T : ExecuteArgs
-		{
-			return ExecuteMethod(e, d, defaultValue, connection, false, GetClientCode, true, null);
-		}
-
-		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue,
-			GetClientCodeDelegate getClientCode) where T : ExecuteArgs
-		{
-			return ExecuteMethod(e, d, defaultValue, null, false, getClientCode, true, null);
-		}
-
-		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue,
-			MySqlConnection connection, GetClientCodeDelegate getClientCode) where T : ExecuteArgs
-		{
-			return ExecuteMethod(e, d, defaultValue, connection, false, getClientCode, true, null);
 		}
 
 		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue) where T : ExecuteArgs
 		{
-			return ExecuteMethod(e, d, defaultValue, null, false, GetClientCode, true, null);
+			return ExecuteMethod(e, d, defaultValue, GetClientCode);
 		}
 
 		public static ulong GetClientCode(MySqlConnection connection, string userName)

@@ -190,7 +190,7 @@ where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
 							  new[] { "ASC" }, 1000, 0);
 		}
 
-		[Test]
+		[Test, Ignore("Вроде не нужно, но пусть належится")]
 		public void Throw_exception_if_now_parameters_specified()
 		{
 			AssertHelper.ThrowException(() =>

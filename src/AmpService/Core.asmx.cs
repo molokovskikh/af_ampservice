@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Reflection;
@@ -14,7 +13,6 @@ using System.Xml;
 using Common.MySql;
 using ExecuteTemplate;
 using MySql.Data.MySqlClient;
-using MySqlHelper=MySql.Data.MySqlClient.MySqlHelper;
 
 namespace AmpService
 {
@@ -22,76 +20,32 @@ namespace AmpService
 	public class AMPService : WebService
 	{
 		private readonly DateTime StartTime = DateTime.Now;
-		private DataColumn dataColumn18;
-		private DataColumn dataColumn19;
 
-		public AMPService()
+		private DataSet GetDataSet()
 		{
-			InitializeComponent();
-		}
-
-		private IContainer components;
-		public MySqlCommand MySelCmd;
-		public MySqlConnection MyCn;
-		private MySqlDataAdapter MyDA;
-		public DataSet MyDS;
-		public DataTable DataTable1;
-		public DataColumn DataColumn1;
-		public DataColumn DataColumn2;
-		public DataColumn DataColumn3;
-		public DataColumn DataColumn4;
-		public DataColumn DataColumn5;
-		public DataColumn DataColumn6;
-		public DataColumn DataColumn7;
-		public DataColumn DataColumn8;
-		public DataColumn DataColumn9;
-		public DataColumn DataColumn10;
-		public DataColumn DataColumn11;
-		public DataColumn DataColumn12;
-		public DataColumn DataColumn13;
-		public DataColumn DataColumn14;
-		public DataColumn DataColumn15;
-		public DataColumn DataColumn16;
-		public DataColumn DataColumn17;
-
-		private void InitializeComponent()
-		{
-			MySelCmd = new MySqlCommand();
-			MyCn = new MySqlConnection();
-			MyDA = new MySqlDataAdapter();
-			MyDS = new DataSet();
-			DataTable1 = new DataTable();
-			DataColumn1 = new DataColumn();
-			DataColumn2 = new DataColumn();
-			DataColumn3 = new DataColumn();
-			DataColumn4 = new DataColumn();
-			DataColumn5 = new DataColumn();
-			DataColumn6 = new DataColumn();
-			DataColumn7 = new DataColumn();
-			DataColumn8 = new DataColumn();
-			DataColumn9 = new DataColumn();
-			DataColumn10 = new DataColumn();
-			DataColumn11 = new DataColumn();
-			DataColumn12 = new DataColumn();
-			DataColumn13 = new DataColumn();
-			DataColumn14 = new DataColumn();
-			DataColumn15 = new DataColumn();
-			DataColumn16 = new DataColumn();
-			DataColumn17 = new DataColumn();
-			dataColumn18 = new DataColumn();
-			dataColumn19 = new DataColumn();
+			var MyDS = new DataSet();
+			var DataTable1 = new DataTable();
+			var DataColumn1 = new DataColumn();
+			var DataColumn2 = new DataColumn();
+			var DataColumn3 = new DataColumn();
+			var DataColumn4 = new DataColumn();
+			var DataColumn5 = new DataColumn();
+			var DataColumn6 = new DataColumn();
+			var DataColumn7 = new DataColumn();
+			var DataColumn8 = new DataColumn();
+			var DataColumn9 = new DataColumn();
+			var DataColumn10 = new DataColumn();
+			var DataColumn11 = new DataColumn();
+			var DataColumn12 = new DataColumn();
+			var DataColumn13 = new DataColumn();
+			var DataColumn14 = new DataColumn();
+			var DataColumn15 = new DataColumn();
+			var DataColumn16 = new DataColumn();
+			var DataColumn17 = new DataColumn();
+			var dataColumn18 = new DataColumn();
+			var dataColumn19 = new DataColumn();
 			MyDS.BeginInit();
 			DataTable1.BeginInit();
-			MySelCmd.CommandTimeout = 0;
-			MySelCmd.CommandType = CommandType.Text;
-			MySelCmd.Connection = MyCn;
-			MySelCmd.Transaction = null;
-			MySelCmd.UpdatedRowSource = UpdateRowSource.Both;
-			MyCn.ConnectionString = Literals.ConnectionString;
-			MyDA.DeleteCommand = null;
-			MyDA.InsertCommand = null;
-			MyDA.SelectCommand = MySelCmd;
-			MyDA.UpdateCommand = null;
 			MyDS.DataSetName = "AMPDataSet";
 			MyDS.Locale = new CultureInfo("ru-RU");
 			MyDS.Tables.AddRange(new[] {DataTable1});
@@ -134,18 +88,7 @@ namespace AmpService
 			dataColumn19.DataType = typeof (uint);
 			MyDS.EndInit();
 			DataTable1.EndInit();
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				if (!((components == null)))
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose(disposing);
+			return MyDS;
 		}
 
 		[WebMethod]
@@ -160,20 +103,20 @@ namespace AmpService
 			if (!HavePermission(GetUserName()))
 				return null;
 
-			MyDS.Tables.Remove("Prices");
+			var data = GetDataSet();
 			Restart:
 			try
 			{
 				Service.UpdateLastAccessTime(GetUserName());
 
-				using (var connection = new MySqlConnection(Literals.ConnectionString))
+				using (var connection = new ConnectionManager().GetConnection())
 				{
 					connection.Open();
 					using (var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
 					{
 						try
 						{
-							var clientCode = GetClientCode(MyCn);
+							var clientCode = GetClientCode(connection);
 
 							var commandText = new StringBuilder();
 
@@ -246,9 +189,9 @@ WHERE");
 								var adapter = new MySqlDataAdapter(commandText.ToString(), connection);
 								adapter.SelectCommand.Transaction = transaction;
 								adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
-								adapter.Fill(MyDS, "Catalog");
+								adapter.Fill(data, "Catalog");
 
-								LogQuery(adapter.SelectCommand, MyDS, false, MethodBase.GetCurrentMethod().Name,
+								LogQuery(adapter.SelectCommand, data, false, MethodBase.GetCurrentMethod().Name,
 								         new KeyValuePair<string, object>("Name", Name),
 								         new KeyValuePair<string, object>("Form", Form),
 								         new KeyValuePair<string, object>("NewEar", NewEar),
@@ -259,7 +202,7 @@ WHERE");
 							}
 
 							transaction.Commit();
-							return MyDS;
+							return data;
 						}
 						catch (Exception)
 						{
@@ -284,7 +227,7 @@ WHERE");
 			{
 				AmpService.PostOrder.MailErr(MethodBase.GetCurrentMethod().Name, ex.Message, ex.Source, GetUserName());
 			}
-			return MyDS;
+			return data;
 		}
 
 		[WebMethod]
@@ -293,7 +236,7 @@ WHERE");
 		{
 			return MethodTemplate.ExecuteMethod<PostOrderArgs, DataSet>(
 				new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk),
-				InnerPostOrder, null, MyCn, GetClientCode);
+				InnerPostOrder, null, GetClientCode);
 		}
 
 		private DataSet InnerPostOrder(PostOrderArgs e)
@@ -1032,14 +975,18 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 		{
 			userName = NormalizeUsername(userName);
 
-			return Convert.ToUInt64(MySqlHelper.ExecuteScalar(Literals.ConnectionString,@"
+			var command = connection.CreateCommand();
+			command.CommandText = @"
 SELECT osuseraccessright.clientcode 
 FROM clientsdata, 
     osuseraccessright 
 WHERE osuseraccessright.clientcode = clientsdata.firmcode 
     AND firmstatus = 1 
     AND billingstatus = 1 
-    AND OSUserName = ?UserName", new[] {new MySqlParameter("?UserName", userName)}));
+    AND OSUserName = ?UserName";
+			command.Parameters.AddWithValue("?UserName", userName);
+
+			return Convert.ToUInt64(command.ExecuteScalar());
 		}
 
 		public static string NormalizeUsername(string username)
@@ -1061,7 +1008,7 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 			  		if (userName.IndexOf("ANALIT\\") == 0)
 			  			userName = userName.Substring(7);
 
-			  		using (var connection = new MySqlConnection(Literals.ConnectionString))
+			  		using (var connection = new ConnectionManager().GetConnection())
 			  		{
 						connection.Open();
 			  			var command = new MySqlCommand(@"
