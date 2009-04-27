@@ -191,7 +191,7 @@ WHERE");
 								adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
 								adapter.Fill(data, "Catalog");
 
-								LogQuery(adapter.SelectCommand, data, false, MethodBase.GetCurrentMethod().Name,
+								LogQuery(data, false, MethodBase.GetCurrentMethod().Name,
 								         new KeyValuePair<string, object>("Name", Name),
 								         new KeyValuePair<string, object>("Form", Form),
 								         new KeyValuePair<string, object>("NewEar", NewEar),
@@ -236,7 +236,10 @@ WHERE");
 		{
 			return MethodTemplate.ExecuteMethod<PostOrderArgs, DataSet>(
 				new PostOrderArgs(OrderID, Quantity, Message, OrderCode1, OrderCode2, Junk),
-				InnerPostOrder, null, GetClientCode);
+				InnerPostOrder, 
+				null, 
+				GetClientCode,
+				false);
 		}
 
 		private DataSet InnerPostOrder(PostOrderArgs e)
@@ -515,7 +518,7 @@ WHERE	c.SynonymCode = ?SynonymCode
             PostOrder=-1 - ошибка формирования заказа.
 
              */
-			LogQuery(e.DataAdapter.SelectCommand, dsRes, false, "PostOrder");
+			LogQuery(dsRes, false, "PostOrder");
 			return dsRes;
 		}
 
@@ -569,7 +572,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 
 			var data = new DataSet();
 			e.DataAdapter.Fill(data, "PriceList");
-			LogQuery(e.DataAdapter.SelectCommand, data, false, "GetPriceCodeByName");
+			LogQuery(data, false, "GetPriceCodeByName");
 			return data;
 		}
 
@@ -706,7 +709,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 						@"
 drop temporary table if exists offers;
 
-create temporary table offers
+create temporary table offers engine memory
 SELECT  c.id OrderID,
 		ifnull(c.Code, '') SalerCode,
 		ifnull(c.CodeCr, '') CreaterCode,
@@ -798,7 +801,7 @@ FROM UserSettings.MinCosts as offers
 				e.DataAdapter.Fill(data, "PriceList");
 			}
 
-			LogQuery(e.DataAdapter.SelectCommand, data, true, functionName,
+			LogQuery(data, true, functionName,
 			         new[]
 			         	{
 			         		new KeyValuePair<string, object>("NewEar", e.NewEar),
@@ -931,7 +934,7 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 			var data = new DataSet();
 			args.DataAdapter.Fill(data);
 
-			LogQuery(args.DataAdapter.SelectCommand, data, false, "GetOrders");
+			LogQuery(data, false, "GetOrders");
 			return data;
 		}
 
@@ -1008,7 +1011,7 @@ WHERE osuseraccessright.clientcode = clientsdata.firmcode
 			  		if (userName.IndexOf("ANALIT\\") == 0)
 			  			userName = userName.Substring(7);
 
-			  		using (var connection = new ConnectionManager().GetConnection())
+			  		using (var connection = new MySqlConnection(Literals.ConnectionString))
 			  		{
 						connection.Open();
 			  			var command = new MySqlCommand(@"
@@ -1022,38 +1025,44 @@ where up.Shortcut = 'IOL' and ouar.osusername = ?UserName", connection);
 			  		}
 			  	};
 
-		private void LogQuery(MySqlCommand command, DataSet data, bool calculateUnique,
-		                      string functionName, params KeyValuePair<string, object>[] arguments)
+		private void LogQuery(DataSet data, 
+							  bool calculateUnique,
+		                      string functionName, 
+							  params KeyValuePair<string, object>[] arguments)
 		{
-			var rowCount = 0;
-			foreach (DataTable table in data.Tables)
-				rowCount += table.Rows.Count;
-
-			var oldQuery = command.CommandText;
-			if (calculateUnique)
+			using (var connection = new MySqlConnection(Literals.ConnectionString))
 			{
-				command.CommandText =
-					@" 
+				connection.Open();
+
+				var command = connection.CreateCommand();
+				var rowCount = 0;
+				foreach (DataTable table in data.Tables)
+					rowCount += table.Rows.Count;
+
+				if (calculateUnique)
+				{
+					command.CommandText =
+						@" 
 insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, UniqueCount, Arguments)
 values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime,  ?UniqueCount, ?Arguments);
 ";
-				command.Parameters.Add("?UniqueCount", CalculateUniqueFullCodeCount(data.Tables[0]));
-			}
-			else
-				command.CommandText =
-					@" 
+					command.Parameters.Add("?UniqueCount", CalculateUniqueFullCodeCount(data.Tables[0]));
+				}
+				else
+					command.CommandText =
+						@" 
 insert into logs.AMPLogs(LogTime, Host, User, Function, RowCount, ProcessingTime, Arguments) 
 values (now(), ?Host, ?UserName, ?FunctionName, ?RowCount, ?ProcessTime, ?Arguments);
 ";
-			command.Parameters.Add("?Host", GetHost());
-			command.Parameters.Add("?UserName", GetUserName());
-			command.Parameters.Add("?functionName", functionName);
-			command.Parameters.Add("?RowCount", rowCount);
-			command.Parameters.Add("?ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
-			command.Parameters.Add("?Arguments", SerializeArguments(arguments));
+				command.Parameters.Add("?Host", GetHost());
+				command.Parameters.Add("?UserName", GetUserName());
+				command.Parameters.Add("?functionName", functionName);
+				command.Parameters.Add("?RowCount", rowCount);
+				command.Parameters.Add("?ProcessTime", DateTime.Now.Subtract(StartTime).TotalMilliseconds);
+				command.Parameters.Add("?Arguments", SerializeArguments(arguments));
 
-			command.ExecuteNonQuery();
-			command.CommandText = oldQuery;
+				command.ExecuteNonQuery();
+			}
 		}
 
 		private string SerializeArguments(KeyValuePair<string, object>[] arguments)

@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Web;
 using System.Threading;
 using Common.MySql;
@@ -40,7 +41,7 @@ namespace ExecuteTemplate
 		/// <param name="closeConnection">Требуется ли закрывать соединение после отработки метода?</param>
 		/// <param name="beforeSleep">Данный делегат вызывается перед тем, как метод сделает Sleep после ошибки MySql</param>
 		/// <returns></returns>
-		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue, GetClientCodeDelegate getClientCode) where T : ExecuteArgs
+		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue, GetClientCodeDelegate getClientCode, bool canUseSlave) where T : ExecuteArgs
 		{
 			var log = LogManager.GetLogger(typeof(MethodTemplate));
 
@@ -52,7 +53,7 @@ namespace ExecuteTemplate
 			var userName = String.Empty;
 				do
 				{
-					using (var connection = new ConnectionManager().GetConnection())
+					using (var connection = GetConnection(canUseSlave))
 					{
 						try
 						{
@@ -106,15 +107,26 @@ namespace ExecuteTemplate
 							}
 						}
 					}
-
 				} while (!Quit);
 
 			return result;
 		}
 
+		private static MySqlConnection GetConnection(bool canUseSlave)
+		{
+			if (canUseSlave)
+				return new ConnectionManager().GetConnection();
+			return new MySqlConnection(ConfigurationManager.ConnectionStrings["Main"].ConnectionString);
+		}
+
 		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue) where T : ExecuteArgs
 		{
-			return ExecuteMethod(e, d, defaultValue, GetClientCode);
+			return ExecuteMethod(e, d, defaultValue, GetClientCode, true);
+		}
+
+		public static R ExecuteMethod<T, R>(T e, MethodDelegate<T, R> d, R defaultValue, GetClientCodeDelegate getClientCode) where T : ExecuteArgs
+		{
+			return ExecuteMethod(e, d, defaultValue, getClientCode, true);
 		}
 
 		public static ulong GetClientCode(MySqlConnection connection, string userName)
