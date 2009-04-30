@@ -1,0 +1,10 @@
+import file from WebServiceSupport.bake
+
+Global(
+	project : "AmpService",
+	deployTo : "\\\\acdcserv\\IOS\\AmpServ"
+)
+
+Task @default, [@buildWebService]
+
+Task @deploy, [@buildWebService, @deployWebService]
