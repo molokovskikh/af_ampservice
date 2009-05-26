@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Web.Services.Protocols;
+using Common.Tools;
 using log4net.Config;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
@@ -125,6 +126,38 @@ where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
 			LogDataSet(_service.GetOrders(new[] { "1", "2", "3" }, 2));
 			LogDataSet(_service.GetOrders(new[] { "0" }, -1));
 			LogDataSet(_service.GetOrders(new[] { "!1" }, -1));
+		}
+
+		[Test]
+		public void Get_orders_older_than()
+		{
+			Execute(@"
+delete from orders.ordershead
+where writetime > curdate() and clientcode = 2575");
+			var offers = _service.GetPrices(false,
+			                                false,
+			                                new[] {"OriginalName"},
+			                                new[] {"*папа*"}, null, null, 100, 0);
+			var offer = offers.Tables[0].Rows[0];
+			var orderIds = _service.PostOrder(new[] {Convert.ToInt64(offer["OrderID"])},
+			                               new[] {1},
+			                               new[] {"Тестовое сообщение"},
+			                               new[] {Convert.ToInt32(offer["OrderCode1"])},
+			                               new[] {Convert.ToInt32(offer["OrderCode2"])},
+			                               new[] {false});
+			var orderId = Convert.ToInt64(orderIds.Tables[0].Rows[0]["OrderID"]);
+			Execute(@"
+update orders.ordershead
+set Submited = 1,
+	SubmitDate = now()
+where RowId = {0}".Format(orderId));
+
+			var orders = _service.GetOrders(DateTime.Today, 0);
+			Assert.That(orders, Is.Not.Null);
+			Assert.That(orders.Tables.Count, Is.GreaterThan(0));
+			Assert.That(orders.Tables[0].Rows.Count, Is.EqualTo(1));
+			var order = orders.Tables[0].Rows[0];
+			Assert.That(Convert.ToInt64(order["OrderID"]), Is.EqualTo(orderId));
 		}
 
 		[Test]

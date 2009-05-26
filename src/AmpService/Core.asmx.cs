@@ -879,6 +879,65 @@ FROM UserSettings.MinCosts as offers
 				new GetOrdersArgs(OrderID, PriceCode), InnerGetOrders, null, GetClientCode);
 		}
 
+		[WebMethod]
+		public DataSet GetOrders(DateTime olderThan, int priceCode)
+		{
+			return MethodTemplate.ExecuteMethod(
+				new ExecuteArgs(),
+				args =>
+					{
+						if (!HavePermission(GetUserName()))
+							return null;
+
+						Service.UpdateLastAccessTime(GetUserName());
+
+						args.DataAdapter.SelectCommand.CommandText += @"
+SELECT  i.firmclientcode as ClientCode, 
+        i.firmclientcode2 as ClientCode2, 
+        i.firmclientcode3 as ClientCode3, 
+        oh.RowID as OrderID,
+        cast(oh.PriceDate as char) as PriceDate, 
+        cast(oh.SubmitDate as char) as OrderDate, 
+        ifnull(oh.ClientAddition, '') as Comment,
+        ol.Code as ItemID, 
+        ol.Cost, 
+        ol.Quantity, 
+        cast(if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
+		(select c.contactText
+        from contacts.contact_groups cg
+          join contacts.contacts c on cg.Id = c.ContactOwnerId
+        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
+              and cg.Type = 0
+              and c.Type = 1
+        limit 1)), '') as CHAR) as Addition,
+        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
+FROM UserSettings.PricesData pd 
+	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
+	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
+    JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
+WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
+	  and oh.Deleted = 0
+	  and oh.Submited = 1
+	  and oh.SubmitDate > ?OlderThan";
+						args.DataAdapter.SelectCommand.Parameters.AddWithValue("?OlderThan", olderThan);
+						if (priceCode > 0)
+						{
+							args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = ?PriceCode";
+							args.DataAdapter.SelectCommand.Parameters.AddWithValue("?PriceCode", priceCode);
+						}
+
+						var data = new DataSet();
+						args.DataAdapter.Fill(data);
+
+						LogQuery(data, false, "GetOrders",
+						         new KeyValuePair<string, object>("priceCode", priceCode),
+								 new KeyValuePair<string, object>("olderThan", olderThan));
+						return data;
+					},
+					null);
+		}
+
 		private DataSet InnerGetOrders(GetOrdersArgs args)
 		{
 			if (!HavePermission(GetUserName()))
@@ -886,13 +945,13 @@ FROM UserSettings.MinCosts as offers
 
 			Service.UpdateLastAccessTime(GetUserName());
 
-			args.DataAdapter.SelectCommand.CommandText +=@"
+			args.DataAdapter.SelectCommand.CommandText += @"
 SELECT  i.firmclientcode as ClientCode, 
         i.firmclientcode2 as ClientCode2, 
         i.firmclientcode3 as ClientCode3, 
         oh.RowID as OrderID,
         cast(oh.PriceDate as char) as PriceDate, 
-        cast(oh.WriteTime as char) as OrderDate, 
+        cast(oh.SubmitDate as char) as OrderDate, 
         ifnull(oh.ClientAddition, '') as Comment,
         ol.Code as ItemID, 
         ol.Cost, 
