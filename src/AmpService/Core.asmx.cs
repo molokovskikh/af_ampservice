@@ -880,7 +880,7 @@ FROM UserSettings.MinCosts as offers
 		}
 
 		[WebMethod]
-		public DataSet GetOrders(DateTime olderThan, int priceCode)
+		public DataSet GetOrdersByDate(DateTime olderThan, int priceCode)
 		{
 			return MethodTemplate.ExecuteMethod(
 				new ExecuteArgs(),
