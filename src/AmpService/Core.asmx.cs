@@ -902,24 +902,28 @@ SELECT  i.firmclientcode as ClientCode,
         ol.Code as ItemID, 
         ol.Cost, 
         ol.Quantity, 
-        cast(if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
+        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
 		(select c.contactText
         from contacts.contact_groups cg
           join contacts.contacts c on cg.Id = c.ContactOwnerId
         where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
               and cg.Type = 0
               and c.Type = 1
-        limit 1)), '') as CHAR) as Addition,
+        limit 1)), '') as Addition,
         if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
 FROM UserSettings.PricesData pd 
 	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
 	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
     JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
+		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
 WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 	  and oh.Deleted = 0
 	  and oh.Submited = 1
-	  and oh.SubmitDate > ?OlderThan";
+	  and oh.SubmitDate >= ?OlderThan
+	  and rcs.ServiceClient = 0
+	  and rcs.InvisibleOnFirm != 2
+";
 						args.DataAdapter.SelectCommand.Parameters.AddWithValue("?OlderThan", olderThan);
 						if (priceCode > 0)
 						{
@@ -970,9 +974,12 @@ FROM UserSettings.PricesData pd
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
 	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
     JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
+	JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
 WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 	  and oh.Deleted = 0
-	  and oh.Submited = 1";
+	  and oh.Submited = 1
+	  and rcs.ServiceClient = 0
+	  and rcs.InvisibleOnFirm != 2";
 			if (args.OrderID != null && args.OrderID.Length > 0)
 			{
 				if (args.OrderID[0] == "0")

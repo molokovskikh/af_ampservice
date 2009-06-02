@@ -131,13 +131,19 @@ where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
 		[Test]
 		public void Get_orders_older_than()
 		{
+			var begin = DateTime.Now;
 			Execute(@"
 delete from orders.ordershead
-where writetime > curdate() and clientcode = 2575");
+where writetime > curdate() and clientcode = 2575;
+
+update usersettings.RetClientsSet
+set ServiceClient = 0,
+	InvisibleOnFirm = 0
+where ClientCode = 2575");
 			var offers = _service.GetPrices(false,
 			                                false,
-			                                new[] {"OriginalName"},
-			                                new[] {"*папа*"}, null, null, 100, 0);
+			                                new[] {"OriginalName", "PriceCode"},
+			                                new[] {"*папа*", "94"}, null, null, 100, 0);
 			var offer = offers.Tables[0].Rows[0];
 			var orderIds = _service.PostOrder(new[] {Convert.ToInt64(offer["OrderID"])},
 			                               new[] {1},
@@ -152,12 +158,71 @@ set Submited = 1,
 	SubmitDate = now()
 where RowId = {0}".Format(orderId));
 
-			var orders = _service.GetOrders(DateTime.Today, 0);
+			var orders = _service.GetOrdersByDate(begin, 0);
 			Assert.That(orders, Is.Not.Null);
 			Assert.That(orders.Tables.Count, Is.GreaterThan(0));
 			Assert.That(orders.Tables[0].Rows.Count, Is.EqualTo(1));
 			var order = orders.Tables[0].Rows[0];
 			Assert.That(Convert.ToInt64(order["OrderID"]), Is.EqualTo(orderId));
+		}
+
+		[Test]
+		public void Do_not_show_orders_from_service_clients()
+		{
+			var begin = DateTime.Now;
+			Execute(@"
+delete from orders.ordershead
+where writetime > curdate() and clientcode = 2575;
+
+update usersettings.RetClientsSet 
+set ServiceClient = 1,
+	InvisibleOnFirm = 0
+where ClientCode = 2575");
+
+			BuildOrder();
+
+			var orders = _service.GetOrdersByDate(begin, 0);
+			Assert.That(orders.Tables[0].Rows.Count, Is.EqualTo(0));
+		}
+
+		private uint BuildOrder()
+		{
+			var offers = _service.GetPrices(false,
+											false,
+											new[] { "OriginalName", "PriceCode" },
+											new[] { "*папа*", "94" }, null, null, 100, 0);
+			var offer = offers.Tables[0].Rows[0];
+			var orderIds = _service.PostOrder(new[] { Convert.ToInt64(offer["OrderID"]) },
+										   new[] { 1 },
+										   new[] { "Тестовое сообщение" },
+										   new[] { Convert.ToInt32(offer["OrderCode1"]) },
+										   new[] { Convert.ToInt32(offer["OrderCode2"]) },
+										   new[] { false });
+			var orderId = Convert.ToUInt32(orderIds.Tables[0].Rows[0]["OrderID"]);
+			Execute(@"
+update orders.ordershead
+set Submited = 1,
+	SubmitDate = now()
+where RowId = {0}".Format(orderId));
+			return orderId;
+		}
+
+		[Test]
+		public void Do_not_show_orders_from_hidden_clients()
+		{
+			Execute(@"
+delete from orders.ordershead
+where writetime > curdate() and clientcode = 2575;
+
+update usersettings.RetClientsSet
+set ServiceClient = 0,
+	InvisibleOnFirm = 2
+where ClientCode = 2575");
+
+			BuildOrder();
+
+			var orders = _service.GetOrdersByDate(DateTime.Now, 0);
+			Assert.That(orders.Tables[0].Rows.Count, Is.EqualTo(0));
 		}
 
 		[Test]
