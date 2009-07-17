@@ -930,7 +930,7 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 							args.DataAdapter.SelectCommand.CommandText += " and oh.PriceCode = ?PriceCode";
 							args.DataAdapter.SelectCommand.Parameters.AddWithValue("?PriceCode", priceCode);
 						}
-
+						args.DataAdapter.SelectCommand.CommandText += " order by SubmitDate;";
 						var data = new DataSet();
 						args.DataAdapter.Fill(data);
 
