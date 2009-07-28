@@ -138,7 +138,6 @@ FROM clientsdata,
     osuseraccessright 
 WHERE osuseraccessright.clientcode = clientsdata.firmcode 
     AND firmstatus = 1 
-	AND allowGetData = 1
     AND billingstatus = 1 
     AND OSUserName = ?UserName", new[] { new MySqlParameter("?UserName", userName) }));
 		}
