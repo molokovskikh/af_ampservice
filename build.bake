@@ -1,4 +1,5 @@
 import file from WebServiceSupport.bake
+import file from lib.bake
 
 Global(
 	project : "AmpService",

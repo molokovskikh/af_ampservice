@@ -1,35 +1,71 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Text;
 
 namespace AmpService
 {
+	public static class DataRowExtentions
+	{
+		public static void CopyTo(this DataRow source, DataRow dest)
+		{
+			var destTable = dest.Table;
+			var sourceTable = source.Table;
+			if (destTable.Columns.Count < sourceTable.Columns.Count)
+			{
+				foreach (DataColumn column in sourceTable.Columns)
+				{
+					if (!destTable.Columns.Contains(column.ColumnName))
+						destTable.Columns.Add(column.ColumnName, column.DataType);
+				}
+			}
+
+			foreach (DataColumn column in sourceTable.Columns)
+				dest[column.ColumnName] = source[column];
+		}
+	}
+
+	public class WhereBlockBuilder
+	{
+		private readonly StringBuilder _whereBlock;
+		private bool _isAdd;
+
+		protected WhereBlockBuilder(StringBuilder commandText)
+		{
+			_whereBlock = commandText;
+		}
+
+		public static WhereBlockBuilder ForCommandTest(StringBuilder commandText)
+		{
+			return new WhereBlockBuilder(commandText);
+		}
+
+		public WhereBlockBuilder AddCriteria(string criteriaString)
+		{
+			if (criteriaString == null
+				|| criteriaString.Trim() == "")
+				return this;
+			if (_isAdd)
+				_whereBlock.Append(" and ");
+			_whereBlock.AppendLine(criteriaString);
+			_isAdd = true;
+			return this;
+		}
+
+		public WhereBlockBuilder AddCriteria(string criteriaString, bool addOrNot)
+		{
+			if (addOrNot)
+				AddCriteria(criteriaString);
+			return this;
+		}
+	}
+
 	/// <summary>
 	/// Класс содержит вспомогательные функции для генерации SQL запросов
 	/// </summary>
 	public class Utils
 	{
-		/// <summary>
-		/// Форматирует массив идентификаторов прайс листа для применения в запросе.
-		/// Пример: массив {1, 2} приводится к виду " and PricesData.PriceCode in (1, 2) "
-		/// </summary>
-		/// <param name="priceID">массив идентификаторов</param>
-		/// <returns>отформатированная строка</returns>
-		public static string FormatPriceIDForQuery(params uint[] priceID)
-		{
-			string result = String.Empty;
-			if (priceID != null && !(priceID.Length == 1 && priceID[0] == 0))
-			{
-				string ids = String.Empty;
-				foreach (uint id in priceID)
-					ids += Convert.ToString(id) + " , ";
-
-				ids = ids.Remove(ids.Length - 3);
-				result = String.Format(" and PricesData.PriceCode in ({0}) ", ids);
-			}
-			return result;
-		}
-
 		/// <summary>
 		/// Преобразовывает массив строк для использования в запросе.
 		/// Также происходит замена символа "*" на "%".
@@ -41,14 +77,14 @@ namespace AmpService
 		/// <returns>Отформатированная строка</returns>
 		public static string StringArrayToQuery<T>(IEnumerable<T> array, string fieldName)
 		{
-			StringBuilder builder = new StringBuilder();
-			int index = 0;
-			if (array != null && Count(array) > 0)
+			var builder = new StringBuilder();
+			var index = 0;
+			if (array != null && array.Count() > 0)
 			{
 				builder.Append(" (");
-				foreach (T item in array)
+				foreach (var item in array)
 				{
-					string value = item.ToString();
+					var value = item.ToString();
 					if (value.IndexOf("*") > -1)
 						builder.Append(fieldName + " like '" + value.Replace("*", "%") + "'");
 					else
@@ -61,8 +97,8 @@ namespace AmpService
 			}
 			if (index > 0)
 				return builder.ToString();
-			else
-				return "";
+
+			return "";
 		}
 		/// <summary>
 		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.
@@ -77,13 +113,13 @@ namespace AmpService
 		/// <returns></returns>
 		public static string FormatOrderBlock(IList<string> orderFields, IList<string> orderDirection)
 		{
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 			if ((orderFields != null) && (orderFields.Count > 0))
 			{
 				builder.Append(" ORDER BY ");
-				for (int i = 0; i < orderFields.Count; i++)
+				for (var i = 0; i < orderFields.Count; i++)
 				{
-					string direction = String.Empty;
+					var direction = String.Empty;
 					if ((orderDirection != null) && (i < orderDirection.Count))
 						direction = orderDirection[i];
 					builder.Append(orderFields[i] + " " + direction + ", ");
@@ -99,9 +135,9 @@ namespace AmpService
 		/// <param name="offset">Начиная с какого элемента</param>
 		/// <param name="count">Количество элементов</param>
 		/// <returns></returns>
-		public static string GetLimitString(int offset, int count)
+		public static string GetLimitString(uint offset, uint count)
 		{
-			string result = String.Empty;
+			var result = String.Empty;
 			if (offset >= 0)
 			{
 				result = " limit " + offset;
@@ -110,15 +146,6 @@ namespace AmpService
 			}
 
 			return result + ";";
-		}
-
-		private static int Count<T>(IEnumerable<T> enumerable)
-		{
-			int i = 0;
-			foreach (T item in enumerable)
-
-				i++;
-			return i;
 		}
 	}
 }
