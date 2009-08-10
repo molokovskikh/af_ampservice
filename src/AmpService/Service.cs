@@ -261,6 +261,7 @@ SELECT  c.id OrderID,
         ifnull(c.Period, '') Period,
         ifnull(c.Doc, '') Doc,
         c.Junk as Junk,
+
         ap.PublicUpCost As UpCost,
 		if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost,c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost,
         ap.pricecode SalerID,
