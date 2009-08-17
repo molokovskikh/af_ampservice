@@ -228,6 +228,9 @@ WHERE   DisabledByClient                                            = 0
 			foreach(var toOrder in toOrders)
 			{
 				var offer = offers.FirstOrDefault(o => o.Id == toOrder.OrderId);
+				if (offer == null)
+					continue;
+
 				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.PriceCode);
 				if (order == null)
 				{
