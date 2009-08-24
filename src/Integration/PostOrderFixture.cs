@@ -18,7 +18,7 @@ namespace Integration
 		}
 
 		[Test]
-		public void PostOrderTest()
+		public void Post_order()
 		{
 			var orderRepository = IoC.Resolve<IRepository<Order>>();
 			var offerRepository = IoC.Resolve<IOfferRepository>();
@@ -67,7 +67,7 @@ where id = :CoreId
 		}
 
 		[Test]
-		public void Order_should_be_canceled_if_request_ration_is_not_valid()
+		public void Do_not_chek_order_rules()
 		{
 			var data = service.GetPrices(false, false,
 			                             new[] {"OriginalName"},
@@ -82,12 +82,10 @@ where id = :CoreId
 update farm.core0
 set RequestRatio = 13
 where id = :CoreId").SetParameter("CoreId", coreId).ExecuteUpdate());
-			Assert.Throws(typeof(Exception),
-				() => service.PostOrder(new[] {coreId}, new[] {30u}, new [] {""},
-				                        new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode1"])},
-				                        new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode2"])},
-				                        new[] {false}), 
-				"Не удалось сформировать заказ, позиция {0} требует кратности 13 а пытались заказать 30", coreId);
+			service.PostOrder(new[] {coreId}, new[] {30u}, new[] {""},
+			                  new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode1"])},
+			                  new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode2"])},
+			                  new[] {false});
 		}
 	}
 }

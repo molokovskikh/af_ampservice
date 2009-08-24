@@ -234,7 +234,7 @@ WHERE   DisabledByClient                                            = 0
 				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.PriceCode);
 				if (order == null)
 				{
-					order = new Order(true, offer.PriceList, client, rules);
+					order = new Order(offer.PriceList, client, rules);
 					order.ClientAddition = toOrder.Message;
 					orders.Add(order);
 				}
@@ -252,34 +252,36 @@ WHERE   DisabledByClient                                            = 0
 
 			var selectOffer = @"
 SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode,
-        ifnull(c.CodeCr, '') CreaterCode,
-        ifnull(ampc.code, '') ItemID,
-        s.synonym OriginalName,
-        ifnull(scr.synonym, '') OriginalCr,
-        ifnull(c.Unit, '') Unit,
-        ifnull(c.Volume, '') Volume,
-        ifnull(c.Quantity, '') Quantity,
-        ifnull(c.Note, '') Note,
-        ifnull(c.Period, '') Period,
-        ifnull(c.Doc, '') Doc,
-        c.Junk as Junk,
-
-        ap.PublicUpCost As UpCost,
+		ifnull(c.Code, '') SalerCode,
+		ifnull(c.CodeCr, '') CreaterCode,
+		ifnull(ampc.code, '') ItemID,
+		s.synonym OriginalName,
+		ifnull(scr.synonym, '') OriginalCr,
+		ifnull(c.Unit, '') Unit,
+		ifnull(c.Volume, '') Volume,
+		ifnull(c.Quantity, '') Quantity,
+		ifnull(c.Note, '') Note,
+		ifnull(c.Period, '') Period,
+		ifnull(c.Doc, '') Doc,
+		c.Junk as Junk,
+		c.RequestRatio,
+		c.OrderCost as MinOrderSum,
+		c.MinOrderCount,
+		ap.PublicUpCost As UpCost,
 		if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost,c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost,
-        ap.pricecode SalerID,
-        cd.ShortName SalerName,
-        ap.PriceDate,
-        c.ProductId PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2
+		ap.pricecode SalerID,
+		cd.ShortName SalerName,
+		ap.PriceDate,
+		c.ProductId PrepCode,
+		c.synonymcode OrderCode1,
+		c.synonymfirmcrcode OrderCode2
 FROM farm.core0 c
-  JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
+	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
 		JOIN usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
-    JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
+	JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
 	JOIN usersettings.clientsdata cd on cd.FirmCode = ap.FirmCode
 	JOIN farm.synonym s on s.PriceCode = ifnull(pd.parentsynonym, ap.pricecode)
-    LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
+	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(pd.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
 WHERE	c.SynonymCode = ?SynonymCode
 		and c.SynonymFirmCrCode = ?SynonymFirmCrCode
@@ -455,14 +457,14 @@ SELECT  c.id OrderID,
 		c.RequestRatio,
 		c.OrderCost as MinOrderSum,
 		c.MinOrderCount,
-		ap.PublicUpCost as UpCost,
-		ap.PriceCode as PriceCode,
+		ap.PublicUpCost UpCost,
+		ap.PriceCode PriceCode,
 		cd.ShortName SalerName,
 		ap.PriceDate,
-        c.ProductId as PrepCode,
+		c.ProductId as PrepCode,
 		c.synonymcode OrderCode1,
 		c.synonymfirmcrcode OrderCode2,
-        if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost, c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost
+		if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost, c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) as Cost
 FROM farm.core0 c
 	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
 		JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
@@ -492,17 +494,20 @@ SELECT  c.id OrderID,
         ifnull(c.Volume, '') Volume,
         ifnull(c.Quantity, '') Quantity,
         ifnull(c.Note, '') Note,
-        ifnull(c.Period, '') Period,
-        ifnull(c.Doc, '') Doc,
-        c.Junk as Junk,
-        ap.PublicUpCost As UpCost,
-        ap.pricecode PriceCode,
-        cd.ShortName SalerName,
-        ap.PriceDate,
-        p.Id PrepCode,
-        c.synonymcode OrderCode1,
-        c.synonymfirmcrcode OrderCode2,
-        offers.MinCost as Cost
+		ifnull(c.Period, '') Period,
+		ifnull(c.Doc, '') Doc,
+		c.Junk as Junk,
+		c.RequestRatio,
+		c.OrderCost as MinOrderSum,
+		c.MinOrderCount,
+		ap.PublicUpCost UpCost,
+		ap.pricecode PriceCode,
+		cd.ShortName SalerName,
+		ap.PriceDate,
+		p.Id PrepCode,
+		c.synonymcode OrderCode1,
+		c.synonymfirmcrcode OrderCode2,
+		offers.MinCost as Cost
 FROM UserSettings.MinCosts as offers
 	JOIN farm.core0 as c on c.id = offers.id
 		JOIN UserSettings.activeprices as ap ON ap.PriceCode = offers.PriceCode
@@ -578,6 +583,52 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 				adapter.SelectCommand.Parameters.AddWithValue("?PriceCode", priceCode);
 			}
 			adapter.SelectCommand.CommandText += " order by WriteTime;";
+			var data = new DataSet();
+
+			With.Slave(c => {
+				adapter.SelectCommand.Connection = c;
+				adapter.Fill(data);
+			});
+
+			return data;
+		}
+
+		public virtual DataSet GetOrder(uint orderId)
+		{
+			var adapter = new MySqlDataAdapter();
+			adapter.SelectCommand = new MySqlCommand(@"
+SELECT  i.firmclientcode as ClientCode, 
+        i.firmclientcode2 as ClientCode2, 
+        i.firmclientcode3 as ClientCode3, 
+        oh.RowID as OrderID,
+        cast(oh.PriceDate as char) as PriceDate, 
+        cast(oh.WriteTime as char) as OrderDate, 
+        ifnull(oh.ClientAddition, '') as Comment,
+        ol.Code as ItemID, 
+        ol.Cost, 
+        ol.Quantity, 
+        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
+		(select c.contactText
+        from contacts.contact_groups cg
+          join contacts.contacts c on cg.Id = c.ContactOwnerId
+        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
+              and cg.Type = 0
+              and c.Type = 1
+        limit 1)), '') as Addition,
+        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
+FROM UserSettings.PricesData pd 
+	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
+	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
+    JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
+		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
+WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
+	  and oh.Deleted = 0
+	  and oh.Submited = 1
+	  and oh.RowId = ?OrderId
+	  and rcs.ServiceClient = 0
+	  and rcs.InvisibleOnFirm != 2");
+			adapter.SelectCommand.Parameters.AddWithValue("?orderId", orderId);
 			var data = new DataSet();
 
 			With.Slave(c => {

@@ -71,6 +71,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GetOrderFixture.cs" />
     <Compile Include="SecurityFixture.cs" />
     <Compile Include="GetPricesFixture.cs" />
     <Compile Include="HttpFixture.cs" />

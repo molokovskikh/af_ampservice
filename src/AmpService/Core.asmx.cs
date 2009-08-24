@@ -94,5 +94,11 @@ namespace AmpService
 		{
 			return service.GetOrdersByDate(olderThan, priceCode);
 		}
+
+		[WebMethod]
+		public DataSet GetOrder(uint orderId)
+		{
+			return service.GetOrder(orderId);
+		}
 	}
 }

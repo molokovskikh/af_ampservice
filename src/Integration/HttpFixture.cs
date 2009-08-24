@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Configuration;
 using System.Data;
-using System.IO;
-using System.Net;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
 
@@ -20,29 +18,6 @@ namespace Integration
 				command.CommandText = commandText;
 				command.ExecuteNonQuery();
 			}
-		}
-
-		[Test]
-		public void Try_to_invoke_method_with_post()
-		{
-			//var webRequest = WebRequest.Create("http://localhost:54617/AmpService.svc/Test?s=test");
-			//webRequest.Method = "GET";
-
-/*			using(var responce = webRequest.GetResponse())
-			using(var responceStream = new StreamReader(responce.GetResponseStream()))
-				Console.WriteLine(responceStream.ReadToEnd());
-*/
-
-			var webRequest = WebRequest.Create("http://localhost:54617/AmpService.svc/Test");
-			webRequest.Method = "POST";
-			webRequest.ContentType = "text/plain";
-			var requestBody = "s=test";
-			using(var reqest = new StreamWriter(webRequest.GetRequestStream()))
-				reqest.WriteLine(requestBody);
-
-			using(var responce = webRequest.GetResponse())
-			using(var responceStream = new StreamReader(responce.GetResponseStream()))
-				Console.WriteLine(responceStream.ReadToEnd());
 		}
 
 		[Test]
