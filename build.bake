@@ -5,11 +5,9 @@ import file from lib.bake
 
 Global(
 	project : "AmpService",
-	deployTo : "\\\\acdcserv\\IOS\\AmpServ"
+	deployTo : "\\\\acdcserv\\ios\\AmpTest\\"
+	#deployTo : "\\\\acdcserv\\IOS\\AmpServ\\"
 )
-
-if Configuration.IsDefined("env"):
-	Globals.deployTo = "\\\\acdcserv\\ios\\AmpTest\\" if Configuration.env == @test
 
 Task @default, [@buildWebService]
 
