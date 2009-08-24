@@ -16,15 +16,15 @@ namespace AmpService
 		}
 
 		[WebMethod]
-		public DataSet GetNameFromCatalog(string[] name,
-		                                  string[] form,
-		                                  bool newEar,
-		                                  bool offerOnly,
-		                                  uint[] priceID,
-		                                  uint limit,
-		                                  uint selStart)
+		public DataSet GetNameFromCatalog(string[] Name,
+		                                  string[] Form,
+		                                  bool NewEar,
+		                                  bool OfferOnly,
+		                                  uint[] PriceID,
+		                                  uint Limit,
+		                                  uint SelStart)
 		{
-			return service.GetNameFromCatalog(name, form, newEar, offerOnly, priceID, limit, selStart);
+			return service.GetNameFromCatalog(Name, Form, NewEar, OfferOnly, PriceID, Limit, SelStart);
 		}
 
 		[WebMethod]
@@ -79,14 +79,14 @@ namespace AmpService
 		}
 
 		[WebMethod]
-		public DataSet PostOrder(ulong[] orderId, 
-								 uint[] quantity, 
-								 string[] message, 
-								 uint[] orderCode1, 
-								 uint[] orderCode2,
-		                         bool[] junk)
+		public DataSet PostOrder(ulong[] PrderId, 
+								 uint[] Quantity, 
+								 string[] Message, 
+								 uint[] OrderCode1, 
+								 uint[] OrderCode2,
+		                         bool[] Junk)
 		{
-			return service.PostOrder(orderId, quantity, message, orderCode1, orderCode2, junk);
+			return service.PostOrder(PrderId, Quantity, Message, OrderCode1, OrderCode2, Junk);
 		}
 
 		[WebMethod]

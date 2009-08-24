@@ -73,8 +73,8 @@ namespace AmpService
 				Component.For<ILogRepository>().ImplementedBy<LogRepository>()
 				);
 
-			ServiceContext.GetUserName = () => HttpContext.Current.User.Identity.Name;
-			ServiceContext.GetUserName = () => HttpContext.Current.Request.UserHostAddress;
+			ServiceContext.GetUserName = () => ServiceContext.NormalizeUsername(HttpContext.Current.User.Identity.Name);
+			ServiceContext.GetHost = () => HttpContext.Current.Request.UserHostAddress;
 		}
 
 		protected void Application_End(object sender, EventArgs e)
