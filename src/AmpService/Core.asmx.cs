@@ -37,45 +37,45 @@ namespace AmpService
 		/// Выбирает список список позиций прайс листов, основываясь на полях 
 		/// фильтрации из RangeField и их значениях из RangeValue.
 		/// </summary>
-		/// <param name="onlyLeader">Выбирать только позиции имеющие минимальную цену для заданного поставщика</param>
-		/// <param name="newEar"></param>
-		/// <param name="rangeField">Список полей для которых осуществляется фильтрация. 
+		/// <param name="OnlyLeader">Выбирать только позиции имеющие минимальную цену для заданного поставщика</param>
+		/// <param name="NewEar"></param>
+		/// <param name="RangeField">Список полей для которых осуществляется фильтрация. 
 		/// Допустимые значения: PrepCode Int, PriceCode Int, ItemID String, OriginalName String или null
 		/// </param>
-		/// <param name="rangeValue">Список значений ко которым происходит фильтрация.
+		/// <param name="RangeValue">Список значений ко которым происходит фильтрация.
 		/// Допустимые значения: Int, String - строки могут содержать метасимвол "%".
 		/// Примечание: количество значений должно совпадать с количеством полей.
 		/// </param>
-		/// <param name="sortField">Поля по которым может осуществляться сортировка. 
+		/// <param name="SortField">Поля по которым может осуществляться сортировка. 
 		/// Допустимые значения: null, OrderID, SalerCode, CreaterCode, ItemID, OriginalName, 
 		/// OriginalCr, Unit, Volume, Quantity, Note, Period, Doc, Junk, UpCost, Cost, PriceCode, 
 		/// SalerName, PriceDate, PrepCode, OrderCode1, OrderCode2.
 		/// </param>
-		/// <param name="sortOrder">Порядок сортировки для полей из SortField.
+		/// <param name="SortOrder">Порядок сортировки для полей из SortField.
 		/// Допустимые значения: "ASC" - прямой порядок сортировки , "DESC" - обратный порядок сортовки.
 		/// Примечание: Количество значений может совпадать или быть меньще количества полей для сортировки.
 		/// Если количество значений меньше то для оставщихся полей бедут применен прямой порядок сортировки (ASC). 
 		/// Пример: SortField = {"OrderID", "Junk" ,"Cost"}, SortOrder = {"DESC"} - в этом случае выборка будет 
 		/// отсортированна так же как и в случае если бы  SortOrder = {"DESC", "ASC", "ASC"}
 		/// </param>
-		/// <param name="limit">Количество записей в выборке. 
+		/// <param name="Limit">Количество записей в выборке. 
 		/// Примечание: если Limit меньше SelStart то тогда выбираются все записи начиная с SelStart.
 		/// </param>
-		/// <param name="selStart">Значение с которого начинается выбор. 
+		/// <param name="SelStart">Значение с которого начинается выбор. 
 		/// Примечание: следует помнить что первым значением является 0 а не 1.
 		/// </param>
 		/// <returns>DataSet содержащий позиции прайс листов.</returns>
 		[WebMethod]
-		public DataSet GetPrices(bool onlyLeader,
-								 bool newEar,
-								 string[] rangeField,
-								 string[] rangeValue,
-								 string[] sortField,
-								 string[] sortOrder,
-								 uint limit,
-								 uint selStart)
+		public DataSet GetPrices(bool OnlyLeader,
+								 bool NewEar,
+								 string[] RangeField,
+								 string[] RangeValue,
+								 string[] SortField,
+								 string[] SortOrder,
+								 uint Limit,
+								 uint SelStart)
 		{
-			return service.GetPrices(onlyLeader, newEar, rangeField, rangeValue, sortField, sortOrder, limit, selStart);
+			return service.GetPrices(OnlyLeader, NewEar, RangeField, RangeValue, SortField, SortOrder, Limit, SelStart);
 		}
 
 		[WebMethod]
