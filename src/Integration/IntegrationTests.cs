@@ -42,6 +42,13 @@ namespace Integration
 			LogDataSet(service.GetPriceCodeByName(new[] { "*к*", "Ма*риа Ме*ка" }));
 		}
 
+		[Test]
+		public void Get_price_code_by_name_should_contains_min_req_info()
+		{
+			var data = service.GetPriceCodeByName(null);
+			Assert.That(data.Tables[0].Columns.Contains("MinReq"), "MinReq отсутствует");
+		}
+
 		private static void LogDataSet(DataSet dataSet)
 		{
 			foreach (DataTable dataTable in dataSet.Tables)

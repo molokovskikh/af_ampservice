@@ -123,51 +123,34 @@ WHERE");
 
 		public virtual DataSet GetPriceCodeByName(string[] firmNames)
 		{
+			
 			var clientCode = ServiceContext.Client.FirmCode;
 			var adapter = new MySqlDataAdapter();
 			adapter.SelectCommand = new MySqlCommand(@"
-SELECT  PricesData.PriceCode as PriceCode, 
-        PricesData.PriceName as PriceName,
-        PriceInfo,
-        ClientsData.FirmCode,
-        ClientsData.ShortName as FirmName, 
-        RegionalData.ContactInfo,
-        RegionalData.OperativeInfo
-FROM    (intersection, clientsdata, pricesdata, pricesregionaldata, retclientsset, clientsdata as AClientsData, RegionalData) 
-WHERE   DisabledByClient                                            = 0 
-        and Disabledbyfirm                                          = 0 
-        and DisabledByAgency                                        = 0 
-        and intersection.clientcode                                 = ?ClientCode 
-        and retclientsset.clientcode                                = intersection.clientcode 
-        and pricesdata.pricecode                                    = intersection.pricecode 
-        and clientsdata.firmcode                                    = pricesdata.firmcode 
-        and clientsdata.firmstatus                                  = 1 
-        and clientsdata.billingstatus                               = 1 
-        and clientsdata.firmtype                                    = 0 
-        and clientsdata.firmsegment                                 = AClientsData.firmsegment 
-        and pricesregionaldata.regioncode                           = intersection.regioncode 
-        and pricesregionaldata.pricecode                            = pricesdata.pricecode 
-        and AClientsData.firmcode                                   = intersection.clientcode 
-        and (clientsdata.maskregion & intersection.regioncode)      > 0 
-        and (AClientsData.maskregion & intersection.regioncode)     > 0 
-        and (retclientsset.workregionmask & intersection.regioncode)> 0 
-        and pricesdata.agencyenabled                                = 1 
-        and pricesdata.enabled                                      = 1 
-        and invisibleonclient                                       = 0 
-        and pricesdata.pricetype                                   <> 1 
-        and pricesregionaldata.enabled                              = 1
-        and RegionalData.FirmCode = ClientsData.FirmCode
-        and RegionalData.RegionCode = Intersection.RegionCode");
+select p.PriceCode,
+		p.PriceName,
+		pd.PriceInfo,
+		cd.FirmCode,
+		cd.ShortName as FirmName,
+		rd.ContactInfo,
+		rd.OperativeInfo,
+		ifnull(p.MinReq, 0) as MinReq
+from usersettings.prices p
+	join usersettings.clientsdata cd on p.FirmCode = cd.FirmCode
+	join usersettings.pricesdata pd on pd.PriceCode = p.PriceCode
+	join usersettings.RegionalData rd on p.FirmCode = rd.FirmCode and p.RegionCode = rd.RegionCode;
+");
 
 			if (firmNames != null && firmNames.Length > 0)
-				adapter.SelectCommand.CommandText += " and " + Utils.StringArrayToQuery(firmNames, "ClientsData.ShortName");
-
-			adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
+				adapter.SelectCommand.CommandText += " where " + Utils.StringArrayToQuery(firmNames, "ClientsData.ShortName");
 
 			var data = new DataSet();
 			With.Slave(c => {
-				adapter.SelectCommand.Connection = c;
-				adapter.Fill(data, "PriceList");
+				using(StorageProcedures.GetPrices(c, clientCode))
+				{
+					adapter.SelectCommand.Connection = c;
+					adapter.Fill(data, "PriceList");
+				}
 			});
 			return data;
 		}
