@@ -138,11 +138,11 @@ select p.PriceCode,
 from usersettings.prices p
 	join usersettings.clientsdata cd on p.FirmCode = cd.FirmCode
 	join usersettings.pricesdata pd on pd.PriceCode = p.PriceCode
-	join usersettings.RegionalData rd on p.FirmCode = rd.FirmCode and p.RegionCode = rd.RegionCode;
+	join usersettings.RegionalData rd on p.FirmCode = rd.FirmCode and p.RegionCode = rd.RegionCode
 ");
 
 			if (firmNames != null && firmNames.Length > 0)
-				adapter.SelectCommand.CommandText += " where " + Utils.StringArrayToQuery(firmNames, "ClientsData.ShortName");
+				adapter.SelectCommand.CommandText += " where " + Utils.StringArrayToQuery(firmNames, "cd.ShortName");
 
 			var data = new DataSet();
 			With.Slave(c => {
