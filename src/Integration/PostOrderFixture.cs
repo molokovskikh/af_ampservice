@@ -67,6 +67,26 @@ where id = :CoreId
 		}
 
 		[Test]
+		public void Post_order_with_single_message()
+		{
+			var data = service.GetPrices(false, false,
+			                             new[] {"OriginalName"},
+			                             new[] {"*папа*"},
+			                             null,
+			                             null,
+			                             100,
+			                             0);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0), "предложений нет");
+			var coreId1 = Convert.ToUInt64(data.Tables[0].Rows[0]["OrderID"]);
+			var coreId2 = Convert.ToUInt64(data.Tables[0].Rows[1]["OrderID"]);
+			service.PostOrder(new[] {coreId1, coreId2}, new[] {30u, 10u}, new[] {""},
+			                  new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode1"]), Convert.ToUInt32(data.Tables[0].Rows[1]["OrderCode1"])},
+			                  new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode2"]), Convert.ToUInt32(data.Tables[0].Rows[1]["OrderCode2"])},
+			                  new[] {false, false});
+
+		}
+
+		[Test]
 		public void Do_not_chek_order_rules()
 		{
 			var data = service.GetPrices(false, false,

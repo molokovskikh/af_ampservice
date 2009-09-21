@@ -172,14 +172,22 @@ from usersettings.prices p
 													 uint[] orderCodes2,
 													 bool[] junks)
 			{
-				return orderIds.Select((orderId, i) => new ToOrder
-				{
-					OrderId = orderIds[i],
-					Quantity = quanties[i],
-					Message = messages[i],
-					OrderCode1 = orderCodes1[i],
-					OrderCode2 = orderCodes2[i],
-					Junk = junks[i],
+				return orderIds.Select((orderId, i) => {
+
+					var message = "";
+					if (messages.Length > i)
+						message = messages[i];
+					
+					var toOrder = new ToOrder
+					{
+						OrderId = orderIds[i],
+						Quantity = quanties[i],
+						Message = message,
+						OrderCode1 = orderCodes1[i],
+						OrderCode2 = orderCodes2[i],
+						Junk = junks[i],
+					};
+					return toOrder;
 				}).ToList();
 			}
 		}
