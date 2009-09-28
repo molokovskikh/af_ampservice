@@ -87,6 +87,28 @@ where id = :CoreId
 		}
 
 		[Test]
+		public void If_offer_does_not_exists_return_new_one()
+		{
+			var data = service.GetPrices(false, false,
+			                             new[] {"OriginalName"},
+			                             new[] {"*папа*"},
+			                             null,
+			                             null,
+			                             100,
+			                             0);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0), "предложений нет");
+			var orderCode1 = 5u;
+			var orderCode2 = 6u;
+			var result = service.PostOrder(new[] {1ul}, new[] {30u}, new[] {""},
+			                  new[] {orderCode1},
+			                  new[] {orderCode2},
+			                  new[] {false});
+			Assert.That(result.Tables[0].Rows[0]["OrderID"], Is.EqualTo(-1));
+			Assert.That(result.Tables[0].Rows[0]["OriginalOrderID"], Is.EqualTo(1));
+			
+		}
+
+		[Test]
 		public void Do_not_chek_order_rules()
 		{
 			var data = service.GetPrices(false, false,
