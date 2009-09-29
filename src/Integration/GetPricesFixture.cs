@@ -1,4 +1,10 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Data;
+using System.Linq;
+using Common.Models;
+using Common.Service.Models;
+using NHibernate.Linq;
+using NUnit.Framework;
 
 namespace Integration
 {
@@ -54,6 +60,19 @@ namespace Integration
 
 			service.GetPrices(false, false, new[] { "PrepCode" }, new[] { "5" }, new[] { "Cost" }, new[] { "ASC" }, 1000, 0);
 			Assert.That(data, Is.Not.Null);
+		}
+
+		[Test]
+		public void Calculate_row_count()
+		{
+			var begin = DateTime.Now;
+			var data = service.GetPrices(false, false, new[] {"OriginalName"}, new[] {"*папа*"}, new[] {"OriginalName"}, new[] {"asc"}, 1000, 0);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
+			var productCount = data.Tables[0].Rows.Cast<DataRow>().GroupBy(r => r["PrepCode"]).Count();
+			With.Session(s => {
+				var entity = s.Linq<ServiceLogEntity>().Where(e => e.MethodName == "GetPrices" && e.LogTime >= begin).First();
+				Assert.That(entity.RowCount, Is.EqualTo(productCount));
+			});
 		}
 	}
 }

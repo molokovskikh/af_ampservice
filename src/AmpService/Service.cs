@@ -311,6 +311,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 			return result; 
 		}
 
+		[OfferRowCalculator("PrepCode")]
 		public virtual DataSet GetPrices(bool onlyLeader, 
 										 bool newEar,
 										 string[] rangeField,
