@@ -75,6 +75,7 @@ namespace AmpService
 
 			ServiceContext.GetUserName = () => ServiceContext.NormalizeUsername(HttpContext.Current.User.Identity.Name);
 			ServiceContext.GetHost = () => HttpContext.Current.Request.UserHostAddress;
+			IoC.Resolve<LockMonitor>().Start();
 		}
 
 		protected void Application_End(object sender, EventArgs e)
