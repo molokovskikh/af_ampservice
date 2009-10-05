@@ -238,7 +238,7 @@ from usersettings.prices p
 
 			var result = new DataSet();
 			var table = result.Tables.Add("Prices");
-			table.Columns.Add("OrderID", typeof (int));
+			table.Columns.Add("OrderID", typeof (ulong));
 			table.Columns.Add("OriginalOrderID", typeof (ulong));
 
 			var selectOffer = @"
