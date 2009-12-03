@@ -2,9 +2,12 @@
 using System.Data;
 using System.Linq;
 using Common.Models;
+using Common.Service;
 using Common.Service.Models;
+using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support;
 
 namespace Integration
 {
@@ -32,12 +35,11 @@ namespace Integration
 		public void GetPricesTest()
 		{
 			var data = service.GetPrices(false, false,
-			                             new[]
-			                             {
-			                             	"prepCode", "PriceCode", "PriceCode", "PrepCode", "ItemID", "PrepCode", "PrepCode",
-			                             	"OriginalName", "ItemID", "PriceCode"
-			                             },
-			                             new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }, null, null, 100, 0);
+				new[] {
+					"prepCode", "PriceCode", "PriceCode", "PrepCode", "ItemID", "PrepCode", "PrepCode",
+					"OriginalName", "ItemID", "PriceCode"
+				},
+				new[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, null, null, 100, 0);
 			Assert.That(data, Is.Not.Null);
 
 			data = service.GetPrices(false, false, new[] { "OriginalName" }, new[] { "*а*" }, null, null, 100, 0);
@@ -65,6 +67,11 @@ namespace Integration
 		[Test]
 		public void Calculate_row_count()
 		{
+			With.Session(s => s.Linq<ServiceLogEntity>()
+				.Where(e => e.UserName == "kvasov" && e.MethodName == "GetPrices")
+				.ToList()
+				.Each(s.Delete));
+
 			var begin = DateTime.Now;
 			var data = service.GetPrices(false, false, new[] {"OriginalName"}, new[] {"*папа*"}, new[] {"OriginalName"}, new[] {"asc"}, 1000, 0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
@@ -73,6 +80,17 @@ namespace Integration
 				var entity = s.Linq<ServiceLogEntity>().Where(e => e.MethodName == "GetPrices" && e.LogTime >= begin).First();
 				Assert.That(entity.RowCount, Is.EqualTo(productCount));
 			});
+		}
+
+		[Test]
+		public void Get_prices_by_future_clients()
+		{
+			var client = TestClient.CreateSimple();
+			var user = client.Users.First();
+			ServiceContext.GetUserName = () => user.Login;
+
+			var  data = service.GetPriceCodeByName(null);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 		}
 	}
 }

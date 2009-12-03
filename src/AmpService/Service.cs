@@ -39,7 +39,6 @@ namespace AmpService
 												  uint selStart)
 		{
 			var data = new DataSet();
-			var clientCode = ServiceContext.Client.FirmCode;
 			var commandText = new StringBuilder();
 
 			int i;
@@ -103,17 +102,15 @@ WHERE");
 			With.Slave(c => {
 				if (offerOnly)
 				{
-					using(StorageProcedures.GetActivePrices(c, clientCode))
+					using(InvokeGetActivePrices(c))
 					{
 						var adapter = new MySqlDataAdapter(commandText.ToString(), c);
-						adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
 						adapter.Fill(data, "Catalog");
 					}
 				}
 				else
 				{
 					var adapter = new MySqlDataAdapter(commandText.ToString(), c);
-					adapter.SelectCommand.Parameters.AddWithValue("?ClientCode", clientCode);
 					adapter.Fill(data, "Catalog");
 				}
 			});
@@ -123,8 +120,6 @@ WHERE");
 
 		public virtual DataSet GetPriceCodeByName(string[] firmNames)
 		{
-			
-			var clientCode = ServiceContext.Client.FirmCode;
 			var adapter = new MySqlDataAdapter();
 			adapter.SelectCommand = new MySqlCommand(@"
 select p.PriceCode,
@@ -146,7 +141,7 @@ from usersettings.prices p
 
 			var data = new DataSet();
 			With.Slave(c => {
-				using(StorageProcedures.GetPrices(c, clientCode))
+				using(InvokeGetPrices(c))
 				{
 					adapter.SelectCommand.Connection = c;
 					adapter.Fill(data, "PriceList");
@@ -213,7 +208,12 @@ from usersettings.prices p
 			var client = ServiceContext.Client;
 			var rules = _rulesRepository.Get(client.FirmCode);
 
-			var offers = _offerRepository.GetByIds(client, orderIds);
+			IList<Offer> offers;
+			if (ServiceContext.IsFuture())
+				offers = _offerRepository.GetByIds(ServiceContext.User, orderIds);
+			else
+				offers = _offerRepository.GetByIds(client, orderIds);
+
 			var orders = new List<Order>();
 			var toOrders = ToOrder.FromRequest(orderIds, quanties, messages, orderCodes1, orderCodes2, junks);
 			foreach(var toOrder in toOrders)
@@ -225,7 +225,10 @@ from usersettings.prices p
 				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.PriceCode);
 				if (order == null)
 				{
-					order = new Order(offer.PriceList, client, rules);
+					if (ServiceContext.IsFuture())
+						order = new Order(offer.PriceList, ServiceContext.User, rules);
+					else
+						order = new Order(offer.PriceList, client, rules);
 					order.ClientAddition = toOrder.Message;
 					orders.Add(order);
 				}
@@ -258,7 +261,7 @@ SELECT  c.id OrderID,
 		ifnull(c.RequestRatio, 0) RequestRatio,
 		ifnull(c.OrderCost, 0) MinOrderSum,
 		ifnull(c.MinOrderCount, 0) MinOrderCount,
-		ap.PublicUpCost UpCost,
+		0 UpCost,
 		if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost,c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) Cost,
 		ap.pricecode SalerID,
 		cd.ShortName SalerName,
@@ -279,7 +282,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 		and c.Junk = ?Junk;";
 
 			With.Slave(c => {
-				using(StorageProcedures.GetActivePrices(c, client.FirmCode))
+				using(InvokeGetActivePrices(c))
 				{
 					foreach (var toOrder in toOrders)
 					{
@@ -322,42 +325,40 @@ WHERE	c.SynonymCode = ?SynonymCode
 										 uint selStart)
 		{
 			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
-			var validRequestFields = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase)
-			                         	{
-			                         		{"OrderID", "c.id"},
-			                         		{"SalerCode", "c.Code"},
-			                         		{"SalerName", "cd.ShortName"},
-			                         		{"ItemID", "ampc.Code"},
-			                         		{"OriginalCR", "sfc.Synonym"},
-			                         		{"OriginalName", "s.Synonym"},
-			                         		{"PriceCode", "ap.PriceCode"},
-			                         		{"PrepCode", "c.ProductId"}
-			                         	};
+			var validRequestFields = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
+				{"OrderID", "c.id"},
+				{"SalerCode", "c.Code"},
+				{"SalerName", "cd.ShortName"},
+				{"ItemID", "ampc.Code"},
+				{"OriginalCR", "sfc.Synonym"},
+				{"OriginalName", "s.Synonym"},
+				{"PriceCode", "ap.PriceCode"},
+				{"PrepCode", "c.ProductId"}
+			};
 
-			var validSortFields = new List<string>
-			                      	{
-			                      		"OrderID",
-			                      		"SalerCode",
-			                      		"CreaterCode",
-			                      		"ItemID",
-			                      		"OriginalName",
-			                      		"OriginalCR",
-			                      		"Unit",
-			                      		"Volume",
-			                      		"Quantity",
-			                      		"Note",
-			                      		"Period",
-			                      		"Doc",
-			                      		"Junk",
-			                      		"Upcost",
-			                      		"Cost",
-			                      		"PriceCode",
-			                      		"SalerName",
-			                      		"PriceDate",
-			                      		"PrepCode",
-			                      		"OrderCode1",
-			                      		"OrderCode2"
-			                      	};
+			var validSortFields = new List<string> {
+				"OrderID",
+				"SalerCode",
+				"CreaterCode",
+				"ItemID",
+				"OriginalName",
+				"OriginalCR",
+				"Unit",
+				"Volume",
+				"Quantity",
+				"Note",
+				"Period",
+				"Doc",
+				"Junk",
+				"Upcost",
+				"Cost",
+				"PriceCode",
+				"SalerName",
+				"PriceDate",
+				"PrepCode",
+				"OrderCode1",
+				"OrderCode2"
+			};
 
 			//проверка входящих параметров
 			if (rangeValue == null || rangeField == null
@@ -389,7 +390,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 
 			//словарь хранящий имена фильтруемых полей и значения фильтрации
 			//           |            |
-			//                имя поля      список значений для него
+			//      имя поля      список значений для него
 			var filtedField = new Dictionary<string, List<string>>();
 			//разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
 			//транслируются во внутренние
@@ -422,12 +423,11 @@ WHERE	c.SynonymCode = ?SynonymCode
 				predicatBlock += Utils.StringArrayToQuery(filtedField[fieldName], fieldName);
 			}
 
-			var clientCode = ServiceContext.Client.FirmCode;
 			Func<MySqlConnection, DisposibleAction>  prerequirements;
 			string command;
 			if (!onlyLeader)
 			{
-				prerequirements = c => StorageProcedures.GetActivePrices(c, clientCode);
+				prerequirements = c => InvokeGetActivePrices(c);
 
 				command = @"
 drop temporary table if exists offers;
@@ -449,7 +449,7 @@ SELECT  c.id OrderID,
 		ifnull(c.RequestRatio, 0) RequestRatio,
 		ifnull(c.OrderCost, 0) MinOrderSum,
 		ifnull(c.MinOrderCount, 0) MinOrderCount,
-		ap.PublicUpCost UpCost,
+		0 UpCost,
 		ap.PriceCode PriceCode,
 		cd.ShortName SalerName,
 		ap.PriceDate,
@@ -474,7 +474,8 @@ WHERE ap.pricecode != 2647
 			}
 			else
 			{
-				prerequirements = c => StorageProcedures.GetOffers(c, clientCode);
+				prerequirements = c => InvokeGetOffers(c);
+
 				command = @"
 SELECT  c.id OrderID,
         ifnull(c.Code, '') SalerCode,
@@ -492,7 +493,7 @@ SELECT  c.id OrderID,
 		ifnull(c.RequestRatio, 0) RequestRatio,
 		ifnull(c.OrderCost, 0) MinOrderSum,
 		ifnull(c.MinOrderCount, 0) MinOrderCount,
-		ap.PublicUpCost UpCost,
+		0 UpCost,
 		ap.pricecode PriceCode,
 		cd.ShortName SalerName,
 		ap.PriceDate,
@@ -533,62 +534,58 @@ FROM UserSettings.MinCosts as offers
 			return data;
 		}
 
+		private DisposibleAction InvokeGetOffers(MySqlConnection connection)
+		{
+			if (ServiceContext.IsFuture())
+				return StorageProcedures.FutureGetOffers(connection, ServiceContext.User.Id);
+
+			return StorageProcedures.GetOffers(connection, ServiceContext.Client.FirmCode);
+		}
+
+		private DisposibleAction InvokeGetActivePrices(MySqlConnection c)
+		{
+			if (ServiceContext.IsFuture())
+				return StorageProcedures.FutureGetActivePrices(c, ServiceContext.User.Id);
+			return StorageProcedures.GetActivePrices(c, ServiceContext.Client.FirmCode);
+		}
+
+		private DisposibleAction InvokeGetPrices(MySqlConnection c)
+		{
+			if (ServiceContext.IsFuture())
+				return StorageProcedures.FutureGetPrices(c, ServiceContext.User.Id);
+			return StorageProcedures.GetPrices(c, ServiceContext.Client.FirmCode);
+		}
+
+
 		public virtual DataSet GetOrdersByDate(DateTime olderThan, int priceCode)
 		{
-			var adapter = new MySqlDataAdapter();
-			adapter.SelectCommand = new MySqlCommand(@"
-SELECT  i.firmclientcode as ClientCode, 
-        i.firmclientcode2 as ClientCode2, 
-        i.firmclientcode3 as ClientCode3, 
-        oh.RowID as OrderID,
-        cast(oh.PriceDate as char) as PriceDate, 
-        cast(oh.WriteTime as char) as OrderDate, 
-        ifnull(oh.ClientAddition, '') as Comment,
-        ol.Code as ItemID, 
-        ol.Cost, 
-        ol.Quantity, 
-        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
-		(select c.contactText
-        from contacts.contact_groups cg
-          join contacts.contacts c on cg.Id = c.ContactOwnerId
-        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
-              and cg.Type = 0
-              and c.Type = 1
-        limit 1)), '') as Addition,
-        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
-FROM UserSettings.PricesData pd 
-	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
-	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
-	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
-    JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
-		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
-WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
-	  and oh.Deleted = 0
-	  and oh.Submited = 1
-	  and oh.WriteTime >= ?OlderThan
-	  and rcs.ServiceClient = 0
-	  and rcs.InvisibleOnFirm != 2");
-			adapter.SelectCommand.Parameters.AddWithValue("?OlderThan", olderThan);
-			if (priceCode > 0)
-			{
-				adapter.SelectCommand.CommandText += " and oh.PriceCode = ?PriceCode";
-				adapter.SelectCommand.Parameters.AddWithValue("?PriceCode", priceCode);
-			}
-			adapter.SelectCommand.CommandText += " order by WriteTime;";
-			var data = new DataSet();
-
-			With.Slave(c => {
-				adapter.SelectCommand.Connection = c;
-				adapter.Fill(data);
+			return GetOrders(adapter => {
+				var filter = "and oh.WriteTime >= ?OlderThan";
+				adapter.SelectCommand.Parameters.AddWithValue("?OlderThan", olderThan);
+				if (priceCode > 0)
+				{
+					filter += " and oh.PriceCode = ?PriceCode";
+					adapter.SelectCommand.Parameters.AddWithValue("?PriceCode", priceCode);
+				}
+				return filter;
 			});
-
-			return data;
 		}
 
 		public virtual DataSet GetOrder(uint orderId)
 		{
+			return GetOrders(adapter => {
+				adapter.SelectCommand.Parameters.AddWithValue("?OrderId", orderId);
+				return " and oh.RowId = ?OrderId";
+			});
+		}
+
+		private DataSet GetOrders(Func<MySqlDataAdapter, string> action)
+		{
 			var adapter = new MySqlDataAdapter();
-			adapter.SelectCommand = new MySqlCommand(@"
+			adapter.SelectCommand = new MySqlCommand("");
+			var filter = action(adapter);
+
+			adapter.SelectCommand.CommandText = String.Format(@"
 SELECT  i.firmclientcode as ClientCode, 
         i.firmclientcode2 as ClientCode2, 
         i.firmclientcode3 as ClientCode3, 
@@ -615,12 +612,50 @@ FROM UserSettings.PricesData pd
     JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
 WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
-	  and oh.Deleted = 0
-	  and oh.Submited = 1
-	  and oh.RowId = ?OrderId
-	  and rcs.ServiceClient = 0
-	  and rcs.InvisibleOnFirm != 2");
-			adapter.SelectCommand.Parameters.AddWithValue("?orderId", orderId);
+	and oh.Deleted = 0
+	and oh.Submited = 1
+	and rcs.ServiceClient = 0
+	and rcs.InvisibleOnFirm != 2
+	{0}
+
+union
+
+SELECT  i.SupplierClientId as ClientCode,
+        ai.SupplierDeliveryId as ClientCode2,
+        i.SupplierPaymentId as ClientCode3,
+        oh.RowID as OrderID,
+        cast(oh.PriceDate as char) as PriceDate,
+        cast(oh.WriteTime as char) as OrderDate,
+        ifnull(oh.ClientAddition, '') as Comment,
+        ol.Code as ItemID,
+        ol.Cost,
+        ol.Quantity,
+        if(length(i.SupplierClientId)< 1, concat(cd.Name, '; ', a.Address, '; ',
+		(select c.contactText
+        from contacts.contact_groups cg
+          join contacts.contacts c on cg.Id = c.ContactOwnerId
+        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
+              and cg.Type = 0
+              and c.Type = 1
+        limit 1)), '') as Addition,
+        if(length(i.SupplierPaymentId) < 1, cd.Name, '') as ClientName
+FROM UserSettings.PricesData pd 
+	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
+	JOIN Future.Intersection i ON i.ClientId = oh.ClientCode and i.RegionId = oh.RegionCode and i.PriceId = oh.PriceCode
+    JOIN Future.Clients cd ON cd.Id = oh.ClientCode
+	join Future.Addresses a on a.Id = oh.AddressId
+		join Future.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
+		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
+WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
+	and oh.Deleted = 0
+	and oh.Submited = 1
+	and rcs.ServiceClient = 0
+	and rcs.InvisibleOnFirm != 2
+	{0}
+order by OrderDate
+", filter);
+
 			var data = new DataSet();
 
 			With.Slave(c => {
@@ -629,6 +664,7 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 			});
 
 			return data;
+
 		}
 	}
 }

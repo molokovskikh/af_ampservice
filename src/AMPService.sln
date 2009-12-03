@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unit", "Unit\Unit.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Integration", "Integration\Integration.csproj", "{2037CC3F-00CA-40D9-8F52-C945648C40B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Support", "Test.Support\Test.Support\Test.Support.csproj", "{A215E837-1208-49E3-AF93-A9612223122C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -147,6 +149,16 @@ Global
 		{2037CC3F-00CA-40D9-8F52-C945648C40B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2037CC3F-00CA-40D9-8F52-C945648C40B9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2037CC3F-00CA-40D9-8F52-C945648C40B9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Release|.NET.ActiveCfg = Release|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A215E837-1208-49E3-AF93-A9612223122C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -162,5 +174,6 @@ Global
 		{CD94B599-2068-48C8-ABFB-D60E86C33613} = {4819EC42-24B7-409C-AD69-33AB3E883BBC}
 		{FACEFF67-13A0-4424-921A-A51A85260078} = {31EC5253-AF84-4373-AD6D-4098FFDAF4E4}
 		{2037CC3F-00CA-40D9-8F52-C945648C40B9} = {31EC5253-AF84-4373-AD6D-4098FFDAF4E4}
+		{A215E837-1208-49E3-AF93-A9612223122C} = {31EC5253-AF84-4373-AD6D-4098FFDAF4E4}
 	EndGlobalSection
 EndGlobal

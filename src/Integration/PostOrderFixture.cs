@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using Castle.ActiveRecord;
 using Common.Models;
 using Common.Models.Repositories;
+using Common.Service;
 using NUnit.Framework;
+using Test.Support;
 
 namespace Integration
 {
@@ -124,10 +129,79 @@ where id = :CoreId
 update farm.core0
 set RequestRatio = 13
 where id = :CoreId").SetParameter("CoreId", coreId).ExecuteUpdate());
-			service.PostOrder(new[] {coreId}, new[] {30u}, new[] {""},
-			                  new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode1"])},
-			                  new[] {Convert.ToUInt32(data.Tables[0].Rows[0]["OrderCode2"])},
-			                  new[] {false});
+			PostOrder(data.Tables[0].Rows[0]);
+		}
+
+		[Test]
+		public void Post_order_by_future_clients()
+		{
+			var client = TestClient.CreateSimple();
+			var user = client.Users.First();
+			ServiceContext.GetUserName = () => user.Login;
+
+			var data = GetPrices();
+			
+			var row = data.Tables[0].Rows[0];
+			PostOrder(row);
+
+			using (new SessionScope())
+			{
+				var orders = TestOrder.Queryable.Where(o => o.Client.Id == client.Id).ToList();
+				Assert.That(orders.Count, Is.EqualTo(1));
+				var order = orders.First();
+				Assert.That(order.Address.Id, Is.EqualTo(client.Addresses.First().Id));
+				Assert.That(order.User.Id, Is.EqualTo(user.Id));
+			}
+		}
+
+		[Test]
+		public void Sugest_order_for_new_client()
+		{
+			var client = TestClient.CreateSimple();
+			var user = client.Users.First();
+			ServiceContext.GetUserName = () => user.Login;
+
+			var data = GetPrices();
+
+			var row = data.Tables[0].Rows[0];
+			var coreId = Convert.ToUInt64(row[0]);
+
+			var result = service.PostOrder(new[] {1UL},
+				new[] {30u},
+				new[] {""},
+				new[] {Convert.ToUInt32(row["OrderCode1"])},
+				new[] {Convert.ToUInt32(row["OrderCode2"])},
+				new[] {false});
+
+			Assert.That(result.Tables[0].Rows.Count, Is.EqualTo(1));
+			Assert.That(Convert.ToInt32(result.Tables[0].Rows[0]["OrderID"]), Is.EqualTo(coreId));
+			Assert.That(result.Tables[0].Columns.Contains("SalerCode"), Is.True);
+		}
+
+		private void PostOrder(DataRow row)
+		{
+			var result = service.PostOrder(new[] {Convert.ToUInt64(row["OrderId"])}, new[] {30u}, new[] {""},
+				new[] {Convert.ToUInt32(row["OrderCode1"])},
+				new[] {Convert.ToUInt32(row["OrderCode2"])},
+				new[] {false});
+
+			Assert.That(result.Tables[0].Rows.Count, Is.EqualTo(1));
+			Assert.That(Convert.ToInt32(result.Tables[0].Rows[0]["OrderID"]), Is.Not.EqualTo(-1), "ничего не заказли");
+		}
+
+		private DataSet GetPrices()
+		{
+			var data=  service.GetPrices(
+				false,
+				false,
+				new[] {"OriginalName"},
+				new[] {"*папа*"},
+				null,
+				null,
+				100,
+				0);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0), "предложений нет");
+			return data;
 		}
 	}
 }

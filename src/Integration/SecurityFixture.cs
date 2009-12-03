@@ -1,4 +1,5 @@
 using Common.Models;
+using Common.Service;
 using NUnit.Framework;
 
 namespace Integration
@@ -12,6 +13,7 @@ namespace Integration
 		public void Setup()
 		{
 			service = new AmpService.AmpService();
+			ServiceContext.GetUserName = () => "kvasov";
 		}
 
 		[Test]
@@ -20,29 +22,31 @@ namespace Integration
 			Execute(@"
 delete ap from AssignedPermissions ap, osuseraccessright oar, userpermissions up
 where ap.permissionid = up.id and oar.rowid = ap.userid and oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
+
 			Assert.That(service.GetNameFromCatalog(new[] {""},
-			                                       new string[] {},
-			                                       false,
-			                                       false,
-			                                       new uint[] {}, 100, 0),
-			            Is.Null);
+				new string[] {},
+				false,
+				false,
+				new uint[] {}, 100, 0),
+				Is.Null);
 
 			Assert.That(service.GetPriceCodeByName(new[] {"%протек%"}),
-			            Is.Null);
+				Is.Null);
 
 			Assert.That(service.GetPrices(false, false,
-			                              new[] {"OriginalName"},
-			                              new[] {"%папа%"},
-			                              new string[] {},
-			                              new string[] {}, 100, 0),
-			            Is.Null);
+				new[] {"OriginalName"},
+				new[] {"%папа%"},
+				new string[] {},
+				new string[] {}, 100, 0),
+				Is.Null);
 
 			Assert.That(service.PostOrder(new[] {54621354879ul},
-			                              new[] {1u},
-			                              new[] {"123"},
-			                              new[] {46528u},
-			                              new[] {544523u},
-			                              new[] {false}), Is.Null);
+				new[] {1u},
+				new[] {"123"},
+				new[] {46528u},
+				new[] {544523u},
+				new[] {false}), 
+				Is.Null);
 		}
 
 		public void Execute(string command)

@@ -1,7 +1,10 @@
 ﻿using AmpService;
+using Castle.ActiveRecord;
+using Castle.ActiveRecord.Framework.Config;
 using Common.Models;
 using Common.Service;
 using NUnit.Framework;
+using Test.Support;
 
 namespace Integration
 {
@@ -21,6 +24,9 @@ from osuseraccessright oar, userpermissions up
 where oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
 			ServiceContext.GetHost = () => "localhost";
 			ServiceContext.GetUserName = () => "kvasov";
+			ActiveRecordStarter.Initialize(
+				new[] { typeof(TestClient).Assembly },
+				ActiveRecordSectionHandler.Instance);
 		}
 
 		public void Execute(string command)
