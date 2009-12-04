@@ -5,7 +5,6 @@ import file from lib.bake
 
 Global(
 	project : "AmpService",
-	#deployTo : "\\\\acdcserv\\ios\\AmpTest\\"
 	deployTo : "\\\\acdcserv\\IOS\\AmpServ\\"
 )
 
