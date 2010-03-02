@@ -274,7 +274,7 @@ FROM farm.core0 c
 		JOIN usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
 	JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
 	JOIN usersettings.clientsdata cd on cd.FirmCode = ap.FirmCode
-	JOIN farm.synonym s on s.PriceCode = ifnull(pd.parentsynonym, ap.pricecode)
+	JOIN farm.synonym s on s.PriceCode = ifnull(pd.parentsynonym, ap.pricecode) and s.SynonymCode = c.SynonymCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(pd.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
 WHERE	c.SynonymCode = ?SynonymCode
