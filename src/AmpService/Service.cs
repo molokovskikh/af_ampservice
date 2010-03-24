@@ -50,8 +50,11 @@ namespace AmpService
 SELECT	p.id as PrepCode, 
 		cn.Name, 
 		cf.Form,
-		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties
+		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
+		c.VitallyImportant,
+		m.Mnn
 FROM Catalogs.Catalog c
+	left join Catalogs.Mnn m on c.MnnId = m.Id
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
@@ -69,8 +72,11 @@ WHERE");
 SELECT	p.id as PrepCode,  
 		cn.Name, 
 		cf.Form,
-		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties
-FROM Catalogs.Catalog c 
+		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
+		c.VitallyImportant,
+		m.Mnn
+FROM Catalogs.Catalog c
+	left join Catalogs.Mnn m on c.MnnId = m.Id
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
