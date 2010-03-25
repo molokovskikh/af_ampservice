@@ -52,7 +52,7 @@ SELECT	p.id as PrepCode,
 		cf.Form,
 		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
 		c.VitallyImportant,
-		m.Mnn
+		ifnull(m.Mnn, '') as Mnn
 FROM Catalogs.Catalog c
 	left join Catalogs.Mnn m on c.MnnId = m.Id
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
@@ -74,7 +74,7 @@ SELECT	p.id as PrepCode,
 		cf.Form,
 		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
 		c.VitallyImportant,
-		m.Mnn
+		ifnull(m.Mnn, '') as Mnn
 FROM Catalogs.Catalog c
 	left join Catalogs.Mnn m on c.MnnId = m.Id
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
