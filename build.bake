@@ -5,8 +5,7 @@ import file from Deploy.bake
 
 Global(
 	project : "AmpService",
-	#deployTo : "\\\\acdcserv.adc.analit.net\\Инфорум\\WebApps\\AmpService\\",
-	deployTo : "\\\\acdcserv\\IOS\\AmpServ\\",
+	deployTo : """\\adc.analit.net\Инфорум\WebApps\AmpService\""",
 	humanReadableName : "Служба для Амп"
 )
 
