@@ -54,8 +54,8 @@ SELECT	p.id as PrepCode,
 		c.VitallyImportant,
 		ifnull(m.Mnn, '') as Mnn
 FROM Catalogs.Catalog c
-	left join Catalogs.Mnn m on c.MnnId = m.Id
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
+		left join Catalogs.Mnn m on cn.MnnId = m.Id
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
 	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
@@ -76,8 +76,8 @@ SELECT	p.id as PrepCode,
 		c.VitallyImportant,
 		ifnull(m.Mnn, '') as Mnn
 FROM Catalogs.Catalog c
-	left join Catalogs.Mnn m on c.MnnId = m.Id
 	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
+		left join Catalogs.Mnn m on cn.MnnId = m.Id
 	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
 	JOIN Catalogs.Products p on p.CatalogId = c.Id
 	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
