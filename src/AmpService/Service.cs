@@ -622,13 +622,14 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 	and oh.Submited = 1
 	and rcs.ServiceClient = 0
 	and rcs.InvisibleOnFirm != 2
+	and oh.UserId is null
 	{0}
 
 union
 
-SELECT  i.SupplierClientId as ClientCode,
-        ai.SupplierDeliveryId as ClientCode2,
-        i.SupplierPaymentId as ClientCode3,
+SELECT  ifnull(i.SupplierClientId, '') as ClientCode,
+        ifnull(ai.SupplierDeliveryId, '') as ClientCode2,
+        ifnull(i.SupplierPaymentId, '') as ClientCode3,
         oh.RowID as OrderID,
         cast(oh.PriceDate as char) as PriceDate,
         cast(oh.WriteTime as char) as OrderDate,
@@ -636,7 +637,7 @@ SELECT  i.SupplierClientId as ClientCode,
         ol.Code as ItemID,
         ol.Cost,
         ol.Quantity,
-        if(length(i.SupplierClientId)< 1, concat(cd.Name, '; ', a.Address, '; ',
+        if(length(ifnull(i.SupplierClientId, ''))< 1, concat(cd.Name, '; ', a.Address, '; ',
 		(select c.contactText
         from contacts.contact_groups cg
           join contacts.contacts c on cg.Id = c.ContactOwnerId
@@ -644,7 +645,7 @@ SELECT  i.SupplierClientId as ClientCode,
               and cg.Type = 0
               and c.Type = 1
         limit 1)), '') as Addition,
-        if(length(i.SupplierPaymentId) < 1, cd.Name, '') as ClientName
+        if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName
 FROM UserSettings.PricesData pd 
 	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
