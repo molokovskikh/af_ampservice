@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Web.Services.Protocols;
 using System.Xml;
 using Common.Models;
@@ -31,94 +30,66 @@ namespace AmpService
 		}
 
 		public virtual DataSet GetNameFromCatalog(string[] name,
-												  string[] form,
-												  bool newEar,
-												  bool offerOnly,
-												  uint[] priceId,
-												  uint limit,
-												  uint selStart)
+			string[] form,
+			bool newEar,
+			bool offerOnly,
+			uint[] priceId,
+			uint limit,
+			uint selStart)
 		{
 			var data = new DataSet();
-			var commandText = new StringBuilder();
 
 			int i;
 			var searchByApmCode = name != null && name.Length > 0 && int.TryParse(name[0], out i);
 
+			var query = new Query().Select(@"
+p.id as PrepCode, 
+cn.Name, 
+cf.Form,
+cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
+c.VitallyImportant,
+ifnull(m.Mnn, '') as Mnn")
+				.From(@"
+Catalogs.Catalog c
+JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
+	left join Catalogs.Mnn m on cn.MnnId = m.Id
+JOIN Catalogs.CatalogForms cf on cf.id = c.formid
+JOIN Catalogs.Products p on p.CatalogId = c.Id
+LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
+LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
+LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
+				.Where("p.Hidden = 0", "c.Hidden = 0")
+				.Where(Utils.StringArrayToQuery(form, "cf.Form"))
+				.GroupBy("p.Id")
+				.OrderBy("cn.Name, cf.Form")
+				.Limit(Utils.GetLimitString(selStart, limit).ToLower().Replace("limit ", ""));
+
 			if (offerOnly)
 			{
-				commandText.AppendLine(@"
-SELECT	p.id as PrepCode, 
-		cn.Name, 
-		cf.Form,
-		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
-		c.VitallyImportant,
-		ifnull(m.Mnn, '') as Mnn
-FROM Catalogs.Catalog c
-	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
-		left join Catalogs.Mnn m on cn.MnnId = m.Id
-	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
-	JOIN Catalogs.Products p on p.CatalogId = c.Id
-	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
-	LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
-	LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId
-	JOIN Farm.Core0 c0 on c0.ProductId = p.Id
-		JOIN activeprices ap on ap.PriceCode = c0.PriceCode
-	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.PriceCode = 1864
-WHERE");
-			}
-			else
-			{
-				commandText.AppendLine(@"
-SELECT	p.id as PrepCode,  
-		cn.Name, 
-		cf.Form,
-		cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
-		c.VitallyImportant,
-		ifnull(m.Mnn, '') as Mnn
-FROM Catalogs.Catalog c
-	JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
-		left join Catalogs.Mnn m on cn.MnnId = m.Id
-	JOIN Catalogs.CatalogForms cf on cf.id = c.formid
-	JOIN Catalogs.Products p on p.CatalogId = c.Id
-	LEFT JOIN Catalogs.ProductProperties pp on pp.ProductId = p.Id
-	LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
-	LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId
-	LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.PriceCode = 1864
-WHERE");
+				query.Join("JOIN Farm.Core0 c0 on c0.ProductId = p.Id", "JOIN activeprices ap on ap.PriceCode = c0.PriceCode");
+
+				if (newEar || searchByApmCode)
+					query.Join("LEFT JOIN farm.core0 ampc on ampc.ProductId = p.Id and ampc.codefirmcr = c0.codefirmcr and ampc.PriceCode = 1864");
+
+				if (newEar)
+					query.Where("ampc.id is null");
+
+				if (searchByApmCode)
+					query.Where(Utils.StringArrayToQuery(name, "ampc.code"));
 			}
 
-			WhereBlockBuilder
-				.ForCommandTest(commandText)
-				.AddCriteria(Utils.StringArrayToQuery(priceId, "ap.pricecode"),
-				             offerOnly
-				             && priceId != null
-				             && !(priceId.Length == 1
-				                  && priceId[0] == 0))
-				.AddCriteria(Utils.StringArrayToQuery(form, "cf.Form"))
-				.AddCriteria(Utils.StringArrayToQuery(name, "ampc.code"), searchByApmCode)
-				.AddCriteria(Utils.StringArrayToQuery(name, "cn.Name"), !searchByApmCode)
-				.AddCriteria("ampc.id is null", newEar)
-				.AddCriteria("p.Hidden = 0")
-				.AddCriteria("c.Hidden = 0");
+			if (!searchByApmCode)
+				query.Where(Utils.StringArrayToQuery(name, "cn.Name"));
 
-			commandText.AppendLine("GROUP BY p.Id");
-			commandText.AppendLine("ORDER BY cn.Name, cf.Form");
-			commandText.AppendLine(Utils.GetLimitString(selStart, limit));
+			if (offerOnly && priceId != null && !(priceId.Length == 1 && priceId[0] == 0))
+				query.Where(Utils.StringArrayToQuery(priceId, "ap.pricecode"));
 
 			With.Slave(c => {
 				if (offerOnly)
-				{
 					using(InvokeGetActivePrices(c))
-					{
-						var adapter = new MySqlDataAdapter(commandText.ToString(), c);
-						adapter.Fill(data, "Catalog");
-					}
-				}
+						query.Table(data, "Catalog", c);
 				else
-				{
-					var adapter = new MySqlDataAdapter(commandText.ToString(), c);
-					adapter.Fill(data, "Catalog");
-				}
+					query.Table(data, "Catalog", c);
 			});
 
 			return data;
@@ -214,11 +185,7 @@ from usersettings.prices p
 			var client = ServiceContext.Client;
 			var rules = _rulesRepository.Get(client.FirmCode);
 
-			IList<Offer> offers;
-			if (ServiceContext.IsFuture())
-				offers = _offerRepository.GetByIds(ServiceContext.User, orderIds);
-			else
-				offers = _offerRepository.GetByIds(client, orderIds);
+			var offers = _offerRepository.GetByIds(ServiceContext.Orderable, orderIds);
 
 			var orders = new List<Order>();
 			var toOrders = ToOrder.FromRequest(orderIds, quanties, messages, orderCodes1, orderCodes2, junks);
@@ -228,7 +195,7 @@ from usersettings.prices p
 				if (offer == null)
 					continue;
 
-				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.PriceCode);
+				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.Id.Price.PriceCode);
 				if (order == null)
 				{
 					if (ServiceContext.IsFuture())
@@ -610,10 +577,12 @@ SELECT  i.firmclientcode as ClientCode,
               and cg.Type = 0
               and c.Type = 1
         limit 1)), '') as Addition,
-        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName
-FROM UserSettings.PricesData pd 
-	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
-	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
+        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName,
+		ifnull(i.FirmCostCorr + i.PublicCostCorr + pd.UpCost + prd.UpCost, 0) PriceMarkup
+FROM UserSettings.PricesData pd
+	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
+	join Usersettings.pricesregionaldata prd on prd.PriceCode = pd.PriceCode and prd.RegionCode = oh.RegionCode
 	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
     JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
@@ -645,10 +614,12 @@ SELECT  ifnull(i.SupplierClientId, '') as ClientCode,
               and cg.Type = 0
               and c.Type = 1
         limit 1)), '') as Addition,
-        if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName
+        if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName,
+		ifnull(i.PriceMarkup + pd.UpCost + prd.UpCost, 0) PriceMarkup
 FROM UserSettings.PricesData pd 
-	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode 
-	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID 
+	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
+	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
+	join Usersettings.pricesregionaldata prd on prd.PriceCode = pd.PriceCode and prd.RegionCode = oh.RegionCode
 	JOIN Future.Intersection i ON i.ClientId = oh.ClientCode and i.RegionId = oh.RegionCode and i.PriceId = oh.PriceCode
     JOIN Future.Clients cd ON cd.Id = oh.ClientCode
 	join Future.Addresses a on a.Id = oh.AddressId

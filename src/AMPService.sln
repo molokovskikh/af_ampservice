@@ -1,7 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{4819EC42-24B7-409C-AD69-33AB3E883BBC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{31EC5253-AF84-4373-AD6D-4098FFDAF4E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmpService", "AmpService\AmpService.csproj", "{1807FDE0-8023-47E3-992A-E20431791F97}"
 EndProject
@@ -20,8 +22,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Service", "Common.Service\Common.Service\Common.Service.csproj", "{42D52206-A0F4-4624-B3DA-D554DC6A5C09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Service.Tests", "Common.Service\Common.Service.Tests\Common.Service.Tests.csproj", "{CD94B599-2068-48C8-ABFB-D60E86C33613}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{31EC5253-AF84-4373-AD6D-4098FFDAF4E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unit", "Unit\Unit.csproj", "{FACEFF67-13A0-4424-921A-A51A85260078}"
 EndProject

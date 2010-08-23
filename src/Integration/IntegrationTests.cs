@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using Common.Service;
+using log4net.Config;
 using NUnit.Framework;
 using Test.Support;
 
@@ -55,10 +56,6 @@ namespace Integration
 		[Test]
 		public void Get_name_from_catalog_for_future_client()
 		{
-			var client = TestClient.CreateSimple();
-			var user = client.Users.First();
-			ServiceContext.GetUserName = () => user.Login;
-
 			var data = service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			Assert.That(data.Tables[0].Columns.Contains("VitallyImportant"), Is.True, "нет VitallyImportant");

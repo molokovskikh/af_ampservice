@@ -17,12 +17,12 @@ namespace AmpService
 
 		[WebMethod]
 		public DataSet GetNameFromCatalog(string[] name,
-		                                  string[] form,
-		                                  bool newEar,
-		                                  bool offerOnly,
-		                                  uint[] priceID,
-		                                  uint limit,
-		                                  uint selStart)
+			string[] form,
+			bool newEar,
+			bool offerOnly,
+			uint[] priceID,
+			uint limit,
+			uint selStart)
 		{
 			return service.GetNameFromCatalog(name, form, newEar, offerOnly, priceID, limit, selStart);
 		}
@@ -67,24 +67,24 @@ namespace AmpService
 		/// <returns>DataSet содержащий позиции прайс листов.</returns>
 		[WebMethod]
 		public DataSet GetPrices(bool onlyLeader,
-								 bool newEar,
-								 string[] rangeField,
-								 string[] rangeValue,
-								 string[] sortField,
-								 string[] sortOrder,
-								 uint limit,
-								 uint selStart)
+			bool newEar,
+			string[] rangeField,
+			string[] rangeValue,
+			string[] sortField,
+			string[] sortOrder,
+			uint limit,
+			uint selStart)
 		{
 			return service.GetPrices(onlyLeader, newEar, rangeField, rangeValue, sortField, sortOrder, limit, selStart);
 		}
 
 		[WebMethod]
-		public DataSet PostOrder(ulong[] orderId, 
-								 uint[] quantity, 
-								 string[] message, 
-								 uint[] orderCode1, 
-								 uint[] orderCode2,
-		                         bool[] junk)
+		public DataSet PostOrder(ulong[] orderId,
+			uint[] quantity,
+			string[] message,
+			uint[] orderCode1,
+			uint[] orderCode2,
+			bool[] junk)
 		{
 			return service.PostOrder(orderId, quantity, message, orderCode1, orderCode2, junk);
 		}

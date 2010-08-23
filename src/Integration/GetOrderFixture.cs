@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Castle.ActiveRecord;
 using Common.Models;
 using Common.Service;
 using NUnit.Framework;
@@ -14,30 +15,7 @@ namespace Integration
 		public void Get_orders_older_than()
 		{
 			var begin = DateTime.Now;
-			Execute(@"
-delete from orders.ordershead
-where writetime > curdate() and clientcode = 2575;
-
-update usersettings.RetClientsSet
-set ServiceClient = 0,
-	InvisibleOnFirm = 0
-where ClientCode = 2575");
-			var offers = service.GetPrices(false,
-			                               false,
-			                               new[] {"OriginalName", "PriceCode"},
-			                               new[] {"*папа*", "94"}, null, null, 100, 0);
-			var offer = offers.Tables[0].Rows[0];
-			var orderIds = service.PostOrder(new[] {Convert.ToUInt64(offer["OrderID"])},
-			                                 new[] {1u},
-			                                 new[] {"Тестовое сообщение"},
-			                                 new[] {Convert.ToUInt32(offer["OrderCode1"])},
-			                                 new[] {Convert.ToUInt32(offer["OrderCode2"])},
-			                                 new[] {false});
-			var orderId = Convert.ToInt64(orderIds.Tables[0].Rows[0]["OrderID"]);
-			Execute(String.Format(@"
-update orders.ordershead
-set Submited = 1
-where RowId = {0}", orderId));
+			var orderId = BuildOrder();
 
 			var orders = service.GetOrdersByDate(begin, 0);
 			Assert.That(orders, Is.Not.Null);
@@ -51,15 +29,11 @@ where RowId = {0}", orderId));
 		public void Do_not_show_orders_from_service_clients()
 		{
 			var begin = DateTime.Now;
-			Execute(@"
-delete from orders.ordershead
-where writetime > curdate() and clientcode = 2575;
-
-update usersettings.RetClientsSet 
-set ServiceClient = 1,
-	InvisibleOnFirm = 0
-where ClientCode = 2575");
-
+			using (new TransactionScope())
+			{
+				client.Settings.ServiceClient = true;
+				client.Settings.Save();
+			}
 			BuildOrder();
 
 			var orders = service.GetOrdersByDate(begin, 0);
@@ -69,32 +43,21 @@ where ClientCode = 2575");
 		[Test]
 		public void Do_not_show_orders_from_hidden_clients()
 		{
-			Execute(@"
-delete from orders.ordershead
-where writetime > curdate() and clientcode = 2575;
-
-update usersettings.RetClientsSet
-set ServiceClient = 0,
-	InvisibleOnFirm = 2
-where ClientCode = 2575");
-
+			var begin = DateTime.Now;
+			using (new TransactionScope())
+			{
+				client.Settings.InvisibleOnFirm = 2;
+				client.Settings.Save();
+			}
 			BuildOrder();
 
-			var orders = service.GetOrdersByDate(DateTime.Now, 0);
+			var orders = service.GetOrdersByDate(begin, 0);
 			Assert.That(orders.Tables[0].Rows.Count, Is.EqualTo(0));
 		}
 
 		[Test]
 		public void Get_order_should_return_order_by_id()
 		{
-			Execute(@"
-delete from orders.ordershead
-where writetime > curdate() and clientcode = 2575;
-
-update usersettings.RetClientsSet
-set ServiceClient = 0,
-	InvisibleOnFirm = 0
-where ClientCode = 2575");
 			var orderId = BuildOrder();
 			var data = service.GetOrder(orderId);
 			Assert.That(data.Tables[0].Rows.Count, Is.EqualTo(1));
@@ -103,33 +66,6 @@ where ClientCode = 2575");
 
 		private uint BuildOrder()
 		{
-			var offers = service.GetPrices(false,
-			                               false,
-			                               new[] { "OriginalName", "PriceCode" },
-			                               new[] { "*папа*", "94" }, null, null, 100, 0);
-			var offer = offers.Tables[0].Rows[0];
-			var orderIds = service.PostOrder(new[] { Convert.ToUInt64(offer["OrderID"]) },
-			                                 new[] { 1u },
-			                                 new[] { "Тестовое сообщение" },
-			                                 new[] { Convert.ToUInt32(offer["OrderCode1"]) },
-			                                 new[] { Convert.ToUInt32(offer["OrderCode2"]) },
-			                                 new[] { false });
-			var orderId = Convert.ToUInt32(orderIds.Tables[0].Rows[0]["OrderID"]);
-			Execute(String.Format(@"
-update orders.ordershead
-set Submited = 1
-where RowId = {0}", orderId));
-			return orderId;
-		}
-
-		[Test]
-		public void Get_order_from_future_clients()
-		{
-			var client = TestClient.CreateSimple();
-			var user = client.Users.First();
-			ServiceContext.GetUserName = () => user.Login;
-
-			var begin = DateTime.Now;
 			var offers = service.GetPrices(false,
 				false,
 				new[] {"OriginalName", "PriceCode"},
@@ -142,6 +78,18 @@ where RowId = {0}", orderId));
 				new[] {Convert.ToUInt32(offer["OrderCode2"])},
 				new[] {false});
 			var orderId = Convert.ToUInt32(orderIds.Tables[0].Rows[0]["OrderID"]);
+			Execute(String.Format(@"
+update orders.ordershead
+set Submited = 1
+where RowId = {0}", orderId));
+			return orderId;
+		}
+
+		[Test]
+		public void Get_order_from_future_clients()
+		{
+			var begin = DateTime.Now;
+			var orderId = BuildOrder();
 
 			var orders = service.GetOrdersByDate(begin, 0);
 			Assert.That(orders, Is.Not.Null);
@@ -159,10 +107,14 @@ where RowId = {0}", orderId));
 	public class IntegrationFixture
 	{
 		protected AmpService.AmpService service;
+		protected TestClient client;
 
 		[SetUp]
 		public void Setup()
 		{
+			client = TestClient.CreateSimple();
+			var user = client.Users.First();
+			ServiceContext.GetUserName = () => user.Login;
 			service = new AmpService.AmpService();
 		}
 
