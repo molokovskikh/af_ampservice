@@ -559,17 +559,18 @@ FROM UserSettings.MinCosts as offers
 			var filter = action(adapter);
 
 			adapter.SelectCommand.CommandText = String.Format(@"
-SELECT  i.firmclientcode as ClientCode, 
+SELECT  ol.RowId OrderLineId,
+		i.firmclientcode as ClientCode, 
         i.firmclientcode2 as ClientCode2, 
         i.firmclientcode3 as ClientCode3, 
-        oh.RowID as OrderID,
+        oh.RowID as OrderId,
         cast(oh.PriceDate as char) as PriceDate, 
         cast(oh.WriteTime as char) as OrderDate, 
         ifnull(oh.ClientAddition, '') as Comment,
-        ol.Code as ItemID, 
-        ol.Cost, 
-        ol.Quantity, 
-        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ', 
+        ol.Code as ItemID,
+        ol.Cost,
+        ol.Quantity,
+        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ',
 		(select c.contactText
         from contacts.contact_groups cg
           join contacts.contacts c on cg.Id = c.ContactOwnerId
@@ -596,7 +597,8 @@ WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 
 union
 
-SELECT  ifnull(i.SupplierClientId, '') as ClientCode,
+SELECT  ol.RowId OrderLineId,
+		ifnull(i.SupplierClientId, '') as ClientCode,
         ifnull(ai.SupplierDeliveryId, '') as ClientCode2,
         ifnull(i.SupplierPaymentId, '') as ClientCode3,
         oh.RowID as OrderID,
