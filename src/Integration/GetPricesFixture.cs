@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using Common.Models;
+using Common.Models.Repositories;
 using Common.Service;
 using Common.Service.Models;
 using Common.Tools;
@@ -85,7 +86,7 @@ namespace Integration
 		[Test]
 		public void Get_prices_by_future_clients()
 		{
-			var client = TestClient.CreateSimple();
+			var client = TestClient.Create();
 			var user = client.Users.First();
 			ServiceContext.GetUserName = () => user.Login;
 

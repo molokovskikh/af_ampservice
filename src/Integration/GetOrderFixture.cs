@@ -112,7 +112,7 @@ where RowId = {0}", orderId));
 		[SetUp]
 		public void Setup()
 		{
-			client = TestClient.CreateSimple();
+			client = TestClient.Create();
 			var user = client.Users.First();
 			ServiceContext.GetUserName = () => user.Login;
 			service = new AmpService.AmpService();

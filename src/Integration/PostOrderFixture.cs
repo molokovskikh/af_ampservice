@@ -135,7 +135,7 @@ where id = :CoreId").SetParameter("CoreId", coreId).ExecuteUpdate());
 		[Test]
 		public void Post_order_by_future_clients()
 		{
-			var client = TestClient.CreateSimple();
+			var client = TestClient.Create();
 			var user = client.Users.First();
 			ServiceContext.GetUserName = () => user.Login;
 
@@ -157,7 +157,7 @@ where id = :CoreId").SetParameter("CoreId", coreId).ExecuteUpdate());
 		[Test]
 		public void Sugest_order_for_new_client()
 		{
-			var client = TestClient.CreateSimple();
+			var client = TestClient.Create();
 			var user = client.Users.First();
 			ServiceContext.GetUserName = () => user.Login;
 

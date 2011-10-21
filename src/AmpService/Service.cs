@@ -191,17 +191,14 @@ from usersettings.prices p
 			var toOrders = ToOrder.FromRequest(orderIds, quanties, messages, orderCodes1, orderCodes2, junks);
 			foreach(var toOrder in toOrders)
 			{
-				var offer = offers.FirstOrDefault(o => o.Id == toOrder.OrderId);
+				var offer = offers.FirstOrDefault(o => o.Id.CoreId == toOrder.OrderId);
 				if (offer == null)
 					continue;
 
 				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.Id.Price.PriceCode);
 				if (order == null)
 				{
-					if (ServiceContext.IsFuture())
-						order = new Order(offer.PriceList, ServiceContext.User, rules);
-					else
-						order = new Order(offer.PriceList, client, rules);
+					order = new Order(offer.PriceList, ServiceContext.User, rules);
 					order.ClientAddition = toOrder.Message;
 					orders.Add(order);
 				}
@@ -509,26 +506,19 @@ FROM UserSettings.MinCosts as offers
 
 		private DisposibleAction InvokeGetOffers(MySqlConnection connection)
 		{
-			if (ServiceContext.IsFuture())
-				return StorageProcedures.FutureGetOffers(connection, ServiceContext.User.Id);
-
-			return StorageProcedures.GetOffers(connection, ServiceContext.Client.FirmCode);
+			return StorageProcedures.FutureGetOffers(connection, ServiceContext.User.Id);
 		}
 
 		private DisposibleAction InvokeGetActivePrices(MySqlConnection c)
 		{
-			if (ServiceContext.IsFuture())
-				return StorageProcedures.FutureGetActivePrices(c, ServiceContext.User.Id);
-			return StorageProcedures.GetActivePrices(c, ServiceContext.Client.FirmCode);
+			return StorageProcedures.FutureGetActivePrices(c, ServiceContext.User.Id);
 		}
 
 		private DisposibleAction InvokeGetPrices(MySqlConnection c)
 		{
-			if (ServiceContext.IsFuture())
-				return StorageProcedures.FutureGetPrices(c, ServiceContext.User.Id);
-			return StorageProcedures.GetPrices(c, ServiceContext.Client.FirmCode);
+			var user = ServiceContext.User;
+			return StorageProcedures.GetPricesForAddress(c, user.Id, user.AvaliableAddresses.Single().Id);
 		}
-
 
 		public virtual DataSet GetOrdersByDate(DateTime olderThan, int priceCode)
 		{
