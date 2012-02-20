@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using Common.MySql;
 using NUnit.Framework;
 
 namespace Integration
@@ -59,6 +60,9 @@ namespace Integration
 
 		private static void LogDataSet(DataSet dataSet)
 		{
+			if (ConnectionHelper.IsIntegration())
+				return;
+
 			foreach (DataTable dataTable in dataSet.Tables)
 			{
 				Console.WriteLine("<table>");

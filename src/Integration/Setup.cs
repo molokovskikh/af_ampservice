@@ -1,12 +1,8 @@
 ﻿using System;
 using AmpService;
-using Castle.ActiveRecord;
-using Castle.ActiveRecord.Framework.Config;
-using Common.Models;
 using Common.MySql;
 using Common.Service;
 using NUnit.Framework;
-using Test.Support;
 
 namespace Integration
 {
@@ -23,9 +19,8 @@ namespace Integration
 			ServiceContext.GetUserName = () => {
 				throw new Exception("Тесты не инициализированы");
 			};
-			ActiveRecordStarter.Initialize(
-				new[] { typeof(TestClient).Assembly },
-				ActiveRecordSectionHandler.Instance);
+
+			Test.Support.Setup.Initialize();
 		}
 	}
 }
