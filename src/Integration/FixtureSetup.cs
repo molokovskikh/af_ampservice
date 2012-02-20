@@ -7,9 +7,10 @@ using NUnit.Framework;
 namespace Integration
 {
 	[SetUpFixture]
-	public class Setup
+	public class FixtureSetup
 	{
-		public Setup()
+		[SetUp]
+		public void Setup()
 		{
 			if (ConnectionHelper.IsIntegration())
 				Global.Initialize("integration");
@@ -21,6 +22,12 @@ namespace Integration
 			};
 
 			Test.Support.Setup.Initialize();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			Global.Deinitialize();
 		}
 	}
 }

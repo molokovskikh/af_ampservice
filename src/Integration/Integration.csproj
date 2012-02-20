@@ -89,7 +89,7 @@
     <Compile Include="GetPricesFixture.cs" />
     <Compile Include="IntegrationTests.cs" />
     <Compile Include="PostOrderFixture.cs" />
-    <Compile Include="Setup.cs" />
+    <Compile Include="FixtureSetup.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AmpService\AmpService.csproj">

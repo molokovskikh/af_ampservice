@@ -78,10 +78,15 @@ namespace AmpService
 			IoC.Resolve<LockMonitor>().Start();
 		}
 
-		protected void Application_End(object sender, EventArgs e)
+		public static void Deinitialize()
 		{
 			IoC.Resolve<LockMonitor>().Stop();
 			IoC.Container.Dispose();
+		}
+
+		protected void Application_End(object sender, EventArgs e)
+		{
+			Deinitialize();
 		}
 	}
 }
