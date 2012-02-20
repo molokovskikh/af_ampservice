@@ -3,6 +3,7 @@ using AmpService;
 using Castle.ActiveRecord;
 using Castle.ActiveRecord.Framework.Config;
 using Common.Models;
+using Common.MySql;
 using Common.Service;
 using NUnit.Framework;
 using Test.Support;
@@ -14,7 +15,10 @@ namespace Integration
 	{
 		public Setup()
 		{
-			Global.Initialize();
+			if (ConnectionHelper.IsIntegration())
+				Global.Initialize("integration");
+			else 
+				Global.Initialize();
 			ServiceContext.GetHost = () => "localhost";
 			ServiceContext.GetUserName = () => {
 				throw new Exception("Тесты не инициализированы");

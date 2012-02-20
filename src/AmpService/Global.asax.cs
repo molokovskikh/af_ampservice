@@ -30,12 +30,12 @@ namespace AmpService
 			}
 		}
 
-		public static void Initialize()
+		public static void Initialize(string connectionStringName = "Main")
 		{
 			XmlConfigurator.Configure();
 			GlobalContext.Properties["Version"] = Assembly.GetExecutingAssembly().GetName().Version;
 
-			var sessionFactoryHolder = new SessionFactoryHolder();
+			var sessionFactoryHolder = new SessionFactoryHolder(connectionStringName);
 			sessionFactoryHolder
 				.Configuration
 				.AddInputStream(HbmSerializer.Default.Serialize(typeof(ServiceLogEntity).Assembly))

@@ -63,7 +63,7 @@ where id = :CoreId
 							 where orderItem.CoreId == coreId
 							 select orderItem).Single();
 
-			Assert.That(offer.Id, Is.EqualTo(orderLine.CoreId));
+			Assert.That(offer.Id.CoreId, Is.EqualTo(orderLine.CoreId));
 			Assert.That(orderLine.RequestRatio, Is.EqualTo(offer.RequestRatio));
 			Assert.That(orderLine.MinOrderCount, Is.EqualTo(offer.MinOrderCount));
 			Assert.That(orderLine.OrderCost, Is.EqualTo(offer.OrderCost));
