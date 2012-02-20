@@ -1,27 +1,18 @@
-using Common.Models;
-using Common.Service;
+using Castle.ActiveRecord;
 using NUnit.Framework;
 
 namespace Integration
 {
 	[TestFixture]
-	public class SecurityFixture
+	public class SecurityFixture : IntegrationFixture
 	{
-		private AmpService.AmpService service;
-
-		[SetUp]
-		public void Setup()
-		{
-			service = new AmpService.AmpService();
-			ServiceContext.GetUserName = () => "kvasov";
-		}
-
 		[Test]
 		public void Every_method_should_return_null_if_user_not_have_iol_permission()
 		{
-			Execute(@"
-delete ap from AssignedPermissions ap, osuseraccessright oar, userpermissions up
-where ap.permissionid = up.id and oar.rowid = ap.userid and oar.osusername = 'kvasov' and up.shortcut = 'IOL';");
+			using(new SessionScope()) {
+				testUser.AssignedPermissions.Clear();
+				testUser.Save();
+			}
 
 			Assert.That(service.GetNameFromCatalog(new[] {""},
 				new string[] {},
@@ -47,11 +38,6 @@ where ap.permissionid = up.id and oar.rowid = ap.userid and oar.osusername = 'kv
 				new[] {544523u},
 				new[] {false}), 
 				Is.Null);
-		}
-
-		public void Execute(string command)
-		{
-			With.Session(s => s.CreateSQLQuery(command).ExecuteUpdate());
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace AmpService
 			sessionFactoryHolder
 				.Configuration
 				.AddInputStream(HbmSerializer.Default.Serialize(typeof(ServiceLogEntity).Assembly))
-				.AddInputStream(HbmSerializer.Default.Serialize(typeof(Client).Assembly));
+				.AddInputStream(HbmSerializer.Default.Serialize(typeof(FutureClient).Assembly));
 
 			IoC.Container.Register(
 				Component.For<Service>().Interceptors(

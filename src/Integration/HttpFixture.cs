@@ -1,37 +1,16 @@
 ﻿using System;
-using System.Configuration;
 using System.Data;
-using MySql.Data.MySqlClient;
 using NUnit.Framework;
 
 namespace Integration
 {
 	[TestFixture]
-	public class HttpFixture
+	public class HttpFixture : IntegrationFixture
 	{
-		public void Execute(string commandText)
-		{
-			using (var connection = new MySqlConnection(ConfigurationManager.ConnectionStrings["Main"].ConnectionString))
-			{
-				connection.Open();
-				var command = connection.CreateCommand();
-				command.CommandText = commandText;
-				command.ExecuteNonQuery();
-			}
-		}
-
 		[Test]
 		public void Get_orders_older_than()
 		{
 			var begin = DateTime.Now;
-			Execute(@"
-delete from orders.ordershead
-where writetime > curdate() and clientcode = 2575;
-
-update usersettings.RetClientsSet
-set ServiceClient = 0,
-	InvisibleOnFirm = 0
-where ClientCode = 2575");
 			var offers = Request("GetPrices", false,
 			                     false,
 			                     new[] {"OriginalName", "PriceCode"},

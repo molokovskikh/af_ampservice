@@ -13,16 +13,8 @@ using Test.Support;
 namespace Integration
 {
 	[TestFixture]
-	public class GetPricesFixture
+	public class GetPricesFixture : IntegrationFixture
 	{
-		private AmpService.AmpService service;
-
-		[SetUp]
-		public void Setup()
-		{
-			service = new AmpService.AmpService();
-		}
-
 		[Test]
 		public void Get_prices_should_return_offer_check_fields()
 		{
@@ -68,7 +60,7 @@ namespace Integration
 		[Test]
 		public void Calculate_row_count()
 		{
-			With.Session(s => s.Linq<ServiceLogEntity>()
+			With.Session(s => s.Query<ServiceLogEntity>()
 				.Where(e => e.UserName == "kvasov" && e.MethodName == "GetPrices")
 				.ToList()
 				.Each(s.Delete));
@@ -78,7 +70,7 @@ namespace Integration
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			var productCount = data.Tables[0].Rows.Cast<DataRow>().GroupBy(r => r["PrepCode"]).Count();
 			With.Session(s => {
-				var entity = s.Linq<ServiceLogEntity>().Where(e => e.MethodName == "GetPrices" && e.LogTime >= begin).First();
+				var entity = s.Query<ServiceLogEntity>().First(e => e.MethodName == "GetPrices" && e.LogTime >= begin);
 				Assert.That(entity.RowCount, Is.EqualTo(productCount));
 			});
 		}

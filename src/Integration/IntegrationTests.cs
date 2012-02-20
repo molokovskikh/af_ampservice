@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Linq;
-using Common.Service;
-using log4net.Config;
 using NUnit.Framework;
-using Test.Support;
 
 namespace Integration
 {
@@ -14,7 +10,6 @@ namespace Integration
 		[Test]
 		public void GetNameFromCatalogTest()
 		{
-
 			LogDataSet(service.GetNameFromCatalog(null, null, false, false, null, 100, 0));
 
 			LogDataSet(service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0));

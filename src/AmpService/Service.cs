@@ -84,7 +84,7 @@ LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 			if (offerOnly && priceId != null && !(priceId.Length == 1 && priceId[0] == 0))
 				query.Where(Utils.StringArrayToQuery(priceId, "ap.pricecode"));
 
-			With.Slave(c => {
+			With.Connection(c => {
 				if (offerOnly)
 					using(InvokeGetActivePrices(c))
 						query.Table(data, "Catalog", c);
@@ -102,22 +102,22 @@ LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 select p.PriceCode,
 		p.PriceName,
 		pd.PriceInfo,
-		cd.FirmCode,
-		cd.ShortName as FirmName,
+		s.Id as FirmCode,
+		s.Name as FirmName,
 		rd.ContactInfo,
 		rd.OperativeInfo,
 		ifnull(p.MinReq, 0) as MinReq
 from usersettings.prices p
-	join usersettings.clientsdata cd on p.FirmCode = cd.FirmCode
+	join Future.Suppliers as s ON p.FirmCode = s.Id
 	join usersettings.pricesdata pd on pd.PriceCode = p.PriceCode
 	join usersettings.RegionalData rd on p.FirmCode = rd.FirmCode and p.RegionCode = rd.RegionCode
 ");
 
 			if (firmNames != null && firmNames.Length > 0)
-				adapter.SelectCommand.CommandText += " where " + Utils.StringArrayToQuery(firmNames, "cd.ShortName");
+				adapter.SelectCommand.CommandText += " where " + Utils.StringArrayToQuery(firmNames, "s.Name");
 
 			var data = new DataSet();
-			With.Slave(c => {
+			With.Connection(c => {
 				using(InvokeGetPrices(c))
 				{
 					adapter.SelectCommand.Connection = c;
@@ -165,11 +165,11 @@ from usersettings.prices p
 		}
 
 		public virtual DataSet PostOrder(ulong[] orderIds,
-										 uint[] quanties, 
-										 string[] messages, 
-										 uint[] orderCodes1, 
-										 uint[] orderCodes2,
-										 bool[] junks)
+			uint[] quanties,
+			string[] messages,
+			uint[] orderCodes1,
+			uint[] orderCodes2,
+			bool[] junks)
 		{
 			if (orderIds == null
 				|| quanties == null
@@ -234,7 +234,7 @@ SELECT  c.id OrderID,
 		0 UpCost,
 		if(if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))>c.MaxBoundCost,c.MaxBoundCost, if(round(cc.Cost*ap.UpCost,2)<c.MinBoundCost, c.MinBoundCost, round(cc.Cost*ap.UpCost,2))) Cost,
 		ap.pricecode SalerID,
-		cd.ShortName SalerName,
+		s.Name SalerName,
 		ap.PriceDate,
 		c.ProductId PrepCode,
 		c.synonymcode OrderCode1,
@@ -243,7 +243,7 @@ FROM farm.core0 c
 	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
 		JOIN usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
 	JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
-	JOIN usersettings.clientsdata cd on cd.FirmCode = ap.FirmCode
+	JOIN Future.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym s on s.PriceCode = ifnull(pd.parentsynonym, ap.pricecode) and s.SynonymCode = c.SynonymCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(pd.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
@@ -251,7 +251,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 		and c.SynonymFirmCrCode = ?SynonymFirmCrCode
 		and c.Junk = ?Junk;";
 
-			With.Slave(c => {
+			With.Connection(c => {
 				using(InvokeGetActivePrices(c))
 				{
 					foreach (var toOrder in toOrders)
@@ -285,20 +285,20 @@ WHERE	c.SynonymCode = ?SynonymCode
 		}
 
 		[OfferRowCalculator("PrepCode")]
-		public virtual DataSet GetPrices(bool onlyLeader, 
-										 bool newEar,
-										 string[] rangeField,
-										 string[] rangeValue, 
-										 string[] sortField,
-										 string[] sortOrder, 
-										 uint limit, 
-										 uint selStart)
+		public virtual DataSet GetPrices(bool onlyLeader,
+			bool newEar,
+			string[] rangeField,
+			string[] rangeValue,
+			string[] sortField,
+			string[] sortOrder,
+			uint limit,
+			uint selStart)
 		{
 			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
 			var validRequestFields = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
 				{"OrderID", "c.id"},
 				{"SalerCode", "c.Code"},
-				{"SalerName", "cd.ShortName"},
+				{"SalerName", "s.Name"},
 				{"ItemID", "ampc.Code"},
 				{"OriginalCR", "sfc.Synonym"},
 				{"OriginalName", "s.Synonym"},
@@ -332,7 +332,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 
 			//проверка входящих параметров
 			if (rangeValue == null || rangeField == null
-			    || rangeField.Length != rangeValue.Length)
+				|| rangeField.Length != rangeValue.Length)
 				throw new ArgumentException("Входящие параметры не валидны");
 			//TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
 			//то будет Exception на этапе трансляции
@@ -355,7 +355,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 					if (!(String.Compare(direction, "Asc", true) == 0 || String.Compare(direction, "Desc", true) == 0))
 						throw new ArgumentException(
 							String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"",
-							              direction), direction);
+										  direction), direction);
 			}
 
 			//словарь хранящий имена фильтруемых полей и значения фильтрации
@@ -421,7 +421,7 @@ SELECT  c.id OrderID,
 		ifnull(c.MinOrderCount, 0) MinOrderCount,
 		0 UpCost,
 		ap.PriceCode PriceCode,
-		cd.ShortName SalerName,
+		s.Name SalerName,
 		ap.PriceDate,
 		c.ProductId as PrepCode,
 		c.synonymcode OrderCode1,
@@ -430,8 +430,8 @@ SELECT  c.id OrderID,
 FROM farm.core0 c
 	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
 		JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
-		JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
-	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode	
+		JOIN Future.Suppliers as s ON ap.FirmCode = s.Id
+	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
@@ -448,15 +448,15 @@ WHERE ap.pricecode != 2647
 
 				command = @"
 SELECT  c.id OrderID,
-        ifnull(c.Code, '') SalerCode,
-        ifnull(c.CodeCr, '') CreaterCode,
-        ifnull(ampc.code, '') ItemID,
-        s.synonym OriginalName,
-        ifnull(sfc.synonym, '') OriginalCr,
-        ifnull(c.Unit, '') Unit,
-        ifnull(c.Volume, '') Volume,
-        ifnull(c.Quantity, '') Quantity,
-        ifnull(c.Note, '') Note,
+		ifnull(c.Code, '') SalerCode,
+		ifnull(c.CodeCr, '') CreaterCode,
+		ifnull(ampc.code, '') ItemID,
+		s.synonym OriginalName,
+		ifnull(sfc.synonym, '') OriginalCr,
+		ifnull(c.Unit, '') Unit,
+		ifnull(c.Volume, '') Volume,
+		ifnull(c.Quantity, '') Quantity,
+		ifnull(c.Note, '') Note,
 		ifnull(c.Period, '') Period,
 		ifnull(c.Doc, '') Doc,
 		c.Junk as Junk,
@@ -465,7 +465,7 @@ SELECT  c.id OrderID,
 		ifnull(c.MinOrderCount, 0) MinOrderCount,
 		0 UpCost,
 		ap.pricecode PriceCode,
-		cd.ShortName SalerName,
+		s.Name SalerName,
 		ap.PriceDate,
 		p.Id PrepCode,
 		c.synonymcode OrderCode1,
@@ -474,11 +474,11 @@ SELECT  c.id OrderID,
 FROM UserSettings.MinCosts as offers
 	JOIN farm.core0 as c on c.id = offers.id
 		JOIN UserSettings.activeprices as ap ON ap.PriceCode = offers.PriceCode
-			  JOIN UserSettings.ClientsData as cd ON ap.FirmCode = cd.FirmCode
+			JOIN Future.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
-    LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
+	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 ";
 
 				if (predicatBlock != "")
@@ -493,7 +493,7 @@ FROM UserSettings.MinCosts as offers
 			command += Utils.FormatOrderBlock(sortField, sortOrder);
 			command += Utils.GetLimitString(selStart, limit);
 
-			With.Slave(c => {
+			With.Connection(c => {
 				using(prerequirements(c))
 				{
 					var dataAdapter = new MySqlDataAdapter(command, c);
@@ -550,70 +550,32 @@ FROM UserSettings.MinCosts as offers
 
 			adapter.SelectCommand.CommandText = String.Format(@"
 SELECT  ol.RowId OrderLineId,
-		i.firmclientcode as ClientCode, 
-        i.firmclientcode2 as ClientCode2, 
-        i.firmclientcode3 as ClientCode3, 
-        oh.RowID as OrderId,
-        cast(oh.PriceDate as char) as PriceDate, 
-        cast(oh.WriteTime as char) as OrderDate, 
-        ifnull(oh.ClientAddition, '') as Comment,
-        ol.Code as ItemID,
-        ol.Cost,
-        ol.Quantity,
-        if(length(FirmClientCode)< 1, concat(cd.shortname, '; ', cd.adress, '; ',
-		(select c.contactText
-        from contacts.contact_groups cg
-          join contacts.contacts c on cg.Id = c.ContactOwnerId
-        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
-              and cg.Type = 0
-              and c.Type = 1
-        limit 1)), '') as Addition,
-        if(length(FirmClientCode)< 1, cd.shortname, '') as ClientName,
-		ifnull(i.FirmCostCorr + i.PublicCostCorr + pd.UpCost + prd.UpCost, 0) PriceMarkup
-FROM UserSettings.PricesData pd
-	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
-	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
-	join Usersettings.pricesregionaldata prd on prd.PriceCode = pd.PriceCode and prd.RegionCode = oh.RegionCode
-	JOIN UserSettings.Intersection i ON i.ClientCode = oh.ClientCode and i.RegionCode= oh.RegionCode and i.PriceCode = oh.PriceCode
-    JOIN UserSettings.ClientsData cd ON cd.FirmCode  = oh.ClientCode 
-		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.FirmCode
-WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
-	and oh.Deleted = 0
-	and oh.Submited = 1
-	and rcs.ServiceClient = 0
-	and rcs.InvisibleOnFirm != 2
-	and oh.UserId is null
-	{0}
-
-union
-
-SELECT  ol.RowId OrderLineId,
 		ifnull(i.SupplierClientId, '') as ClientCode,
-        ifnull(ai.SupplierDeliveryId, '') as ClientCode2,
-        ifnull(i.SupplierPaymentId, '') as ClientCode3,
-        oh.RowID as OrderID,
-        cast(oh.PriceDate as char) as PriceDate,
-        cast(oh.WriteTime as char) as OrderDate,
-        ifnull(oh.ClientAddition, '') as Comment,
-        ol.Code as ItemID,
-        ol.Cost,
-        ol.Quantity,
-        if(length(ifnull(i.SupplierClientId, ''))< 1, concat(cd.Name, '; ', a.Address, '; ',
+		ifnull(ai.SupplierDeliveryId, '') as ClientCode2,
+		ifnull(i.SupplierPaymentId, '') as ClientCode3,
+		oh.RowID as OrderID,
+		cast(oh.PriceDate as char) as PriceDate,
+		cast(oh.WriteTime as char) as OrderDate,
+		ifnull(oh.ClientAddition, '') as Comment,
+		ol.Code as ItemID,
+		ol.Cost,
+		ol.Quantity,
+		if(length(ifnull(i.SupplierClientId, ''))< 1, concat(cd.Name, '; ', a.Address, '; ',
 		(select c.contactText
-        from contacts.contact_groups cg
-          join contacts.contacts c on cg.Id = c.ContactOwnerId
-        where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
-              and cg.Type = 0
-              and c.Type = 1
-        limit 1)), '') as Addition,
-        if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName,
+		from contacts.contact_groups cg
+		  join contacts.contacts c on cg.Id = c.ContactOwnerId
+		where cd.ContactGroupOwnerId = cg.ContactGroupOwnerId
+			  and cg.Type = 0
+			  and c.Type = 1
+		limit 1)), '') as Addition,
+		if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName,
 		ifnull(i.PriceMarkup + pd.UpCost + prd.UpCost, 0) PriceMarkup
 FROM UserSettings.PricesData pd 
 	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
 	join Usersettings.pricesregionaldata prd on prd.PriceCode = pd.PriceCode and prd.RegionCode = oh.RegionCode
 	JOIN Future.Intersection i ON i.ClientId = oh.ClientCode and i.RegionId = oh.RegionCode and i.PriceId = oh.PriceCode
-    JOIN Future.Clients cd ON cd.Id = oh.ClientCode
+	JOIN Future.Clients cd ON cd.Id = oh.ClientCode
 	join Future.Addresses a on a.Id = oh.AddressId
 		join Future.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
@@ -628,7 +590,7 @@ order by OrderDate
 
 			var data = new DataSet();
 
-			With.Slave(c => {
+			With.Connection(c => {
 				adapter.SelectCommand.Connection = c;
 				adapter.Fill(data);
 			});

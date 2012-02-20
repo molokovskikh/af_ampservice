@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Linq;
 using Castle.ActiveRecord;
-using Common.Models;
-using Common.Service;
 using NUnit.Framework;
-using Test.Support;
 
 namespace Integration
 {
@@ -31,8 +27,8 @@ namespace Integration
 			var begin = DateTime.Now;
 			using (new TransactionScope())
 			{
-				client.Settings.ServiceClient = true;
-				client.Settings.Save();
+				testClient.Settings.ServiceClient = true;
+				testClient.Settings.Save();
 			}
 			BuildOrder();
 
@@ -46,8 +42,8 @@ namespace Integration
 			var begin = DateTime.Now;
 			using (new TransactionScope())
 			{
-				client.Settings.InvisibleOnFirm = 2;
-				client.Settings.Save();
+				testClient.Settings.InvisibleOnFirm = 2;
+				testClient.Settings.Save();
 			}
 			BuildOrder();
 
@@ -101,26 +97,6 @@ where RowId = {0}", orderId));
 			var orderData = service.GetOrder(orderId);
 			Assert.That(orderData.Tables[0].Rows.Count, Is.EqualTo(1));
 			Assert.That(Convert.ToUInt32(orderData.Tables[0].Rows[0]["OrderID"]), Is.EqualTo(orderId));
-		}
-	}
-
-	public class IntegrationFixture
-	{
-		protected AmpService.AmpService service;
-		protected TestClient client;
-
-		[SetUp]
-		public void Setup()
-		{
-			client = TestClient.Create();
-			var user = client.Users.First();
-			ServiceContext.GetUserName = () => user.Login;
-			service = new AmpService.AmpService();
-		}
-
-		public void Execute(string command)
-		{
-			With.Session(s => s.CreateSQLQuery(command).ExecuteUpdate());
 		}
 	}
 }
