@@ -108,7 +108,7 @@ select p.PriceCode,
 		rd.OperativeInfo,
 		ifnull(p.MinReq, 0) as MinReq
 from usersettings.prices p
-	join Future.Suppliers as s ON p.FirmCode = s.Id
+	join Customers.Suppliers as s ON p.FirmCode = s.Id
 	join usersettings.pricesdata pd on pd.PriceCode = p.PriceCode
 	join usersettings.RegionalData rd on p.FirmCode = rd.FirmCode and p.RegionCode = rd.RegionCode
 ");
@@ -243,7 +243,7 @@ FROM farm.core0 c
 	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
 		JOIN usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
 	JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
-	JOIN Future.Suppliers as s ON ap.FirmCode = s.Id
+	JOIN Customers.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym s on s.PriceCode = ifnull(pd.parentsynonym, ap.pricecode) and s.SynonymCode = c.SynonymCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 	LEFT JOIN farm.synonymfirmcr scr ON scr.PriceCode = ifnull(pd.ParentSynonym, ap.pricecode) and c.synonymfirmcrcode = scr.synonymfirmcrcode
@@ -430,7 +430,7 @@ SELECT  c.id OrderID,
 FROM farm.core0 c
 	JOIN ActivePrices ap on c.PriceCode = ap.PriceCode
 		JOIN farm.CoreCosts cc on cc.Core_Id = c.Id and cc.PC_CostCode = ap.CostCode
-		JOIN Future.Suppliers as s ON ap.FirmCode = s.Id
+		JOIN Customers.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
@@ -474,7 +474,7 @@ SELECT  c.id OrderID,
 FROM UserSettings.MinCosts as offers
 	JOIN farm.core0 as c on c.id = offers.id
 		JOIN UserSettings.activeprices as ap ON ap.PriceCode = offers.PriceCode
-			JOIN Future.Suppliers as s ON ap.FirmCode = s.Id
+			JOIN Customers.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
@@ -574,10 +574,10 @@ FROM UserSettings.PricesData pd
 	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
 	join Usersettings.pricesregionaldata prd on prd.PriceCode = pd.PriceCode and prd.RegionCode = oh.RegionCode
-	JOIN Future.Intersection i ON i.ClientId = oh.ClientCode and i.RegionId = oh.RegionCode and i.PriceId = oh.PriceCode
-	JOIN Future.Clients cd ON cd.Id = oh.ClientCode
-	join Future.Addresses a on a.Id = oh.AddressId
-		join Future.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
+	JOIN Customers.Intersection i ON i.ClientId = oh.ClientCode and i.RegionId = oh.RegionCode and i.PriceId = oh.PriceCode
+	JOIN Customers.Clients cd ON cd.Id = oh.ClientCode
+	join Customers.Addresses a on a.Id = oh.AddressId
+		join Customers.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
 WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 	and oh.Deleted = 0
