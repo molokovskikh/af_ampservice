@@ -185,7 +185,7 @@ from usersettings.prices p
 			var client = ServiceContext.Client;
 			var rules = _rulesRepository.Get(client.FirmCode);
 
-			var offers = _offerRepository.GetByIds(ServiceContext.Orderable, orderIds);
+			var offers = _offerRepository.GetByIds(ServiceContext.User, orderIds);
 
 			var orders = new List<Order>();
 			var toOrders = ToOrder.FromRequest(orderIds, quanties, messages, orderCodes1, orderCodes2, junks);
