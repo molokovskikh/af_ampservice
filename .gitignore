@@ -1,3 +1,9 @@
 bin
 obj
+*.log
+build/
 output/
+_Resharper*
+*.user
+*.suo
+*.ncb
