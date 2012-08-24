@@ -49,27 +49,5 @@ namespace Integration
 			Assert.That(data.Tables[0].Columns.Contains("Mnn"), Is.True, "нет мнн");
 		}
 
-//		private static void LogDataSet(DataSet dataSet)
-//		{
-//			if (ConnectionHelper.IsIntegration())
-//				return;
-//
-//			foreach (DataTable dataTable in dataSet.Tables)
-//			{
-//				Console.WriteLine("<table>");
-//				foreach (DataRow dataRow in dataTable.Rows)
-//				{
-//					Console.WriteLine("\t<row>");
-//					Console.Write("\t");
-//					foreach (DataColumn column in dataTable.Columns)
-//					{
-//						Console.Write(dataRow[column] + " ");
-//					}
-//					Console.WriteLine();
-//					Console.WriteLine("\t</row>");
-//				}
-//				Console.WriteLine("</table>");
-//			}
-//		}
 	}
 }
