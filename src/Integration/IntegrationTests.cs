@@ -23,16 +23,16 @@ namespace Integration
 		[Test]
 		public void GetNameFromCatalogTest()
 		{
-			service.GetNameFromCatalog(null, null, false, false, null, 100, 0, null);
-			service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0, null);
-			service.GetNameFromCatalog(new[] { "*" }, new[] { "*" }, false, false, new uint[0], 100, 0, null);
-			service.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] { 5 }, 100, 0, null);
-			service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, false, new uint[0], 100, 0, null);
-			service.GetNameFromCatalog(null, null, false, true, null, 100, 0, null);
-			service.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0, null);
-			service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, false, true, new uint[0], 100, 0, null);
-			service.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] { 5 }, 100, 0, null);
-			service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0, null);
+			service.GetNameFromCatalog(null, null, false, false, null, 100, 0);
+			service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0);
+			service.GetNameFromCatalog(new[] { "*" }, new[] { "*" }, false, false, new uint[0], 100, 0);
+			service.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] { 5 }, 100, 0);
+			service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, false, new uint[0], 100, 0);
+			service.GetNameFromCatalog(null, null, false, true, null, 100, 0);
+			service.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0);
+			service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, false, true, new uint[0], 100, 0);
+			service.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] { 5 }, 100, 0);
+			service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0);
 		}
 
 		[Test]
@@ -55,7 +55,7 @@ namespace Integration
 		[Test]
 		public void Get_name_from_catalog_for_future_client()
 		{
-			var data = service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0, null);
+			var data = service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			Assert.That(data.Tables[0].Columns.Contains("VitallyImportant"), Is.True, "нет VitallyImportant");
 			Assert.That(data.Tables[0].Columns.Contains("Mnn"), Is.True, "нет мнн");

@@ -37,25 +37,14 @@ namespace Integration
 			};
 
 			Save(product);
-
-			var supplier = TestSupplier.Create();
-
-			var core = new TestCore {
-				Price = supplier.Prices[0],
-				Product = product,
-				Quantity = "2",
-				Code = "12352",
-				Period = "10.01.2015"
-			};
-
-			Save(core);
 		}
 
 		[Test]
 		public void GetNameFromCatalogWithMnn()
 		{
-			var data = service.GetNameFromCatalog(null, null, false, false, null, 5, 0, new uint[] { 1 });
+			var data = service.GetNameFromCatalog(new string[] {"Тестовое наименование"}, null, false, false, null, 5, 0);
 			Assert.That(data.Tables[0].Rows.Count > 0);
+			Assert.That(data.Tables[0].Columns.Contains("MnnId"));
 		}
 	}
 }

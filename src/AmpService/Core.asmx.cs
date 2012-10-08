@@ -22,10 +22,9 @@ namespace AmpService
 			bool offerOnly,
 			uint[] priceID,
 			uint limit,
-			uint selStart,
-			uint[] mnnId)
+			uint selStart)
 		{
-			return service.GetNameFromCatalog(name, form, newEar, offerOnly, priceID, limit, selStart, mnnId);
+			return service.GetNameFromCatalog(name, form, newEar, offerOnly, priceID, limit, selStart);
 		}
 
 		[WebMethod]

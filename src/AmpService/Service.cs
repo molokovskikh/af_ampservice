@@ -35,8 +35,7 @@ namespace AmpService
 			bool offerOnly,
 			uint[] priceId,
 			uint limit,
-			uint selStart,
-			uint[] mnnId)
+			uint selStart)
 		{
 			var data = new DataSet();
 
@@ -49,7 +48,8 @@ cn.Name,
 cf.Form,
 cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
 c.VitallyImportant,
-ifnull(m.Mnn, '') as Mnn")
+ifnull(m.Mnn, '') as Mnn,
+ifnull(m.Id, '') as MnnId")
 				.From(@"
 Catalogs.Catalog c
 JOIN Catalogs.CatalogNames cn on cn.id = c.nameid
@@ -84,9 +84,6 @@ LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 
 			if (offerOnly && priceId != null && !(priceId.Length == 1 && priceId[0] == 0))
 				query.Where(Utils.StringArrayToQuery(priceId, "ap.pricecode"));
-
-			if(mnnId != null && mnnId.Length > 0)
-				query.Where(Utils.StringArrayToQuery(mnnId, "cn.MnnId"));
 
 			With.Connection(c => {
 				if (offerOnly)

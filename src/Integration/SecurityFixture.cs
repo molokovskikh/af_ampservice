@@ -18,7 +18,7 @@ namespace Integration
 				new string[] {},
 				false,
 				false,
-				new uint[] {}, 100, 0, null),
+				new uint[] {}, 100, 0),
 				Is.Null);
 
 			Assert.That(service.GetPriceCodeByName(new[] {"%протек%"}),
