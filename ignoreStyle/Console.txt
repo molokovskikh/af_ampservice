@@ -3,3 +3,4 @@
 \src\Common.Tools\Common.Tools.Test\ReleatableCommandFixture.cs
 \src\Common.Service\Common.Service.Tests\ForTesting\FakeLogger.cs
 \src\Test.Support\Test.Support\log4net\EventFilter.cs
+\src\Test.Support\Test.Support.Web\WatinSetup.cs
