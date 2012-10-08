@@ -83,6 +83,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GetNameFromCatalogFixture.cs" />
     <Compile Include="GetOrderFixture.cs" />
     <Compile Include="IntegrationFixture.cs" />
     <Compile Include="SecurityFixture.cs" />

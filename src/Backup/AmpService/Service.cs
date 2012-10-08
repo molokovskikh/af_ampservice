@@ -35,8 +35,7 @@ namespace AmpService
 			bool offerOnly,
 			uint[] priceId,
 			uint limit,
-			uint selStart,
-			uint[] mnnId)
+			uint selStart)
 		{
 			var data = new DataSet();
 
@@ -84,9 +83,6 @@ LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 
 			if (offerOnly && priceId != null && !(priceId.Length == 1 && priceId[0] == 0))
 				query.Where(Utils.StringArrayToQuery(priceId, "ap.pricecode"));
-
-			if(mnnId != null && mnnId.Length > 0)
-				query.Where(Utils.StringArrayToQuery(mnnId, "cn.MnnId"));
 
 			With.Connection(c => {
 				if (offerOnly)
@@ -307,8 +303,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 				{"OriginalCR", "sfc.Synonym"},
 				{"OriginalName", "s.Synonym"},
 				{"PriceCode", "ap.PriceCode"},
-				{"PrepCode", "c.ProductId"},
-				{"Mnn", "cm.MnnId"}
+				{"PrepCode", "c.ProductId"}
 			};
 
 			var validSortFields = new List<string> {
@@ -438,8 +433,6 @@ FROM farm.core0 c
 		JOIN Customers.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
-	LEFT JOIN Catalogs.catalog cl on p.CatalogId = cl.Id
-	LEFT JOIN Catalogs.Catalognames cm on cl.NameId = cm.Id
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 WHERE ap.pricecode != 2647
@@ -484,8 +477,6 @@ FROM UserSettings.MinCosts as offers
 			JOIN Customers.Suppliers as s ON ap.FirmCode = s.Id
 	JOIN farm.synonym as s ON s.SynonymCode = c.SynonymCode
 	JOIN Catalogs.Products as p ON p.Id = c.ProductId
-	LEFT JOIN Catalogs.catalog cl on p.CatalogId = cl.Id
-	LEFT JOIN Catalogs.Catalognames cm on cl.NameId = cm.Id
 	LEFT JOIN farm.SynonymFirmCr as sfc ON sfc.SynonymFirmCrCode = c.SynonymFirmCrCode
 	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 ";

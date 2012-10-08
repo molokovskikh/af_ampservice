@@ -2,6 +2,7 @@
 using System.Data;
 using Common.MySql;
 using NUnit.Framework;
+using Test.Support;
 
 namespace Integration
 {
@@ -9,27 +10,38 @@ namespace Integration
 	public class IntegrationTests : IntegrationFixture
 	{
 		[Test]
+		public void GetNameFromCatalogWithMnn()
+		{
+			var catalog = new TestProduct();
+			
+			catalog.CatalogProduct = new TestCatalogProduct {
+				Name = "тестовый продукт из каталога"
+			};
+
+		}
+
+		[Test]
 		public void GetNameFromCatalogTest()
 		{
-			LogDataSet(service.GetNameFromCatalog(null, null, false, false, null, 100, 0));
+			LogDataSet(service.GetNameFromCatalog(null, null, false, false, null, 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0));
+			LogDataSet(service.GetNameFromCatalog(null, null, false, false, new uint[0], 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(new[] { "*" }, new[] { "*" }, false, false, new uint[0], 100, 0));
+			LogDataSet(service.GetNameFromCatalog(new[] { "*" }, new[] { "*" }, false, false, new uint[0], 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] { 5 }, 100, 0));
+			LogDataSet(service.GetNameFromCatalog(new String[0], new String[0], false, false, new uint[] { 5 }, 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, false, new uint[0], 100, 0));
+			LogDataSet(service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, false, new uint[0], 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(null, null, false, true, null, 100, 0));
+			LogDataSet(service.GetNameFromCatalog(null, null, false, true, null, 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0));
+			LogDataSet(service.GetNameFromCatalog(null, null, false, true, new uint[0], 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, false, true, new uint[0], 100, 0));
+			LogDataSet(service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, false, true, new uint[0], 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] { 5 }, 100, 0));
+			LogDataSet(service.GetNameFromCatalog(new String[0], new String[0], false, true, new uint[] { 5 }, 100, 0, null));
 
-			LogDataSet(service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0));
+			LogDataSet(service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0, null));
 		}
 
 		[Test]
@@ -52,7 +64,7 @@ namespace Integration
 		[Test]
 		public void Get_name_from_catalog_for_future_client()
 		{
-			var data = service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0);
+			var data = service.GetNameFromCatalog(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0, null);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			Assert.That(data.Tables[0].Columns.Contains("VitallyImportant"), Is.True, "нет VitallyImportant");
 			Assert.That(data.Tables[0].Columns.Contains("Mnn"), Is.True, "нет мнн");
