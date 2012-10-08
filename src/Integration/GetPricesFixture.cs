@@ -60,9 +60,9 @@ namespace Integration
 		[Test]
 		public void GetPriceWithMnn()
 		{
-			var data = service.GetPrices(true, false, new[] { "Mnn", "Mnn" }, new[] { "1", "2" }, null, null, 2, 1);
+			var data = service.GetPrices(true, false, new[] { "MnnId", "MnnId" }, new[] { "1", "2" }, null, null, 2, 1);
 			Assert.That(data, Is.Not.Null);
-			data = service.GetPrices(false, false, new[] { "Mnn", "Mnn" }, new[] { "1", "2" }, null, null, 2, 1);
+			data = service.GetPrices(false, false, new[] { "MnnId", "MnnId" }, new[] { "1", "2" }, null, null, 2, 1);
 			Assert.That(data, Is.Not.Null);
 		}
 

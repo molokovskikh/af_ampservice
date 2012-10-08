@@ -305,7 +305,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 				{"OriginalName", "s.Synonym"},
 				{"PriceCode", "ap.PriceCode"},
 				{"PrepCode", "c.ProductId"},
-				{"Mnn", "cm.MnnId"}
+				{"MnnId", "cm.MnnId"}
 			};
 
 			var validSortFields = new List<string> {
