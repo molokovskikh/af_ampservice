@@ -5,12 +5,14 @@ using Castle.Core;
 using Castle.MicroKernel.Registration;
 using Common.Models;
 using Common.Models.Repositories;
+using Common.MySql;
 using Common.Service;
 using Common.Service.Interceptors;
 using Common.Service.Models;
 using log4net;
 using log4net.Config;
 using NHibernate.Mapping.Attributes;
+using With = Common.MySql.With;
 
 namespace AmpService
 {
@@ -34,8 +36,9 @@ namespace AmpService
 		{
 			XmlConfigurator.Configure();
 			GlobalContext.Properties["Version"] = Assembly.GetExecutingAssembly().GetName().Version;
-
-			var sessionFactoryHolder = new SessionFactoryHolder(connectionStringName);
+			ConnectionHelper.DefaultConnectionStringName = "Main";
+			With.DefaultConnectionStringName = ConnectionHelper.GetConnectionName();
+			var sessionFactoryHolder = new SessionFactoryHolder(ConnectionHelper.GetConnectionName());
 			sessionFactoryHolder
 				.Configuration
 				.AddInputStream(HbmSerializer.Default.Serialize(typeof(ServiceLogEntity).Assembly))
