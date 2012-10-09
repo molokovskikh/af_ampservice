@@ -100,6 +100,41 @@ namespace AmpService
 
 			return "";
 		}
+
+		/// <summary>
+		/// Аналогична StringArrayToQuery, но символ * в запросе преобразует в like '%' OR is null
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="array"></param>
+		/// <param name="fieldName"></param>
+		/// <returns></returns>
+		public static string StringArrayToQueryNull<T>(IEnumerable<T> array, string fieldName)
+		{
+			var builder = new StringBuilder();
+			var index = 0;
+			if (array != null && array.Count() > 0)
+			{
+				builder.Append(" (");
+				foreach (var item in array)
+				{
+					var value = item.ToString();
+					if(value == "*")
+						builder.Append(fieldName + " like '%' or " + fieldName + " is null");
+					else if (value.IndexOf("*") > -1)
+						builder.Append(fieldName + " like '" + value.Replace("*", "%") + "'");
+					else
+						builder.Append(fieldName + " = '" + value + "'");
+					builder.Append(" or ");
+					index++;
+				}
+				builder.Remove(builder.Length - 4, 4);
+				builder.Append(") ");
+			}
+			if (index > 0)
+				return builder.ToString();
+
+			return "";
+		}
 		/// <summary>
 		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.
 		/// Пример: массив orderFields = {"field1", "field2"}, orderDirection = {"ASC"}
