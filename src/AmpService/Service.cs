@@ -35,7 +35,9 @@ namespace AmpService
 			bool offerOnly,
 			uint[] priceId,
 			uint limit,
-			uint selStart)
+			uint selStart,
+			string[] mnn,
+			string[] property)
 		{
 			var data = new DataSet();
 
@@ -61,6 +63,8 @@ LEFT JOIN Catalogs.PropertyValues pv on pv.id = pp.PropertyValueId
 LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 				.Where("p.Hidden = 0", "c.Hidden = 0")
 				.Where(Utils.StringArrayToQuery(form, "cf.Form"))
+				.Where(Utils.StringArrayToQuery(mnn, "m.Mnn"))
+				.Where(Utils.StringArrayToQuery(property, "pv.Value"))
 				.GroupBy("p.Id")
 				.OrderBy("cn.Name, cf.Form")
 				.Limit(Utils.GetLimitString(selStart, limit).ToLower().Replace("limit ", ""));
