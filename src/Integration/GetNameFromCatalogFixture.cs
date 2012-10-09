@@ -42,7 +42,7 @@ namespace Integration
 		[Test]
 		public void GetNameFromCatalogWithMnn()
 		{
-			var data = service.GetNameFromCatalog(new string[] {"Тестовое наименование"}, null, false, false, null, 5, 0, new string[] {"*препарат"}, null);
+			var data = service.GetNameFromCatalogWithMnn(new string[] {"Тестовое наименование"}, null, false, false, null, 5, 0, new string[] {"*препарат"}, null);
 			Assert.That(data.Tables[0].Rows.Count > 0);
 			Assert.That(data.Tables[0].Columns.Contains("MnnId"));
 		}
@@ -50,7 +50,7 @@ namespace Integration
 		[Test]
 		public void GetNameFromCatalogWithProperty()
 		{
-			var data = service.GetNameFromCatalog(null, null, false, false, null, 5, 0, null, new string[] {"*та*"});
+			var data = service.GetNameFromCatalogWithMnn(null, null, false, false, null, 5, 0, null, new string[] {"*та*"});
 			Assert.That(data.Tables[0].Rows.Count > 0);
 		}
 	}

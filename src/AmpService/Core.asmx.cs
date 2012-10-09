@@ -22,6 +22,18 @@ namespace AmpService
 			bool offerOnly,
 			uint[] priceID,
 			uint limit,
+			uint selStart)
+		{
+			return service.GetNameFromCatalog(name, form, newEar, offerOnly, priceID, limit, selStart, null, null);
+		}
+
+		[WebMethod]
+		public DataSet GetNameFromCatalogWithMnn(string[] name,
+			string[] form,
+			bool newEar,
+			bool offerOnly,
+			uint[] priceID,
+			uint limit,
 			uint selStart,
 			string[] mnn,
 			string[] property)

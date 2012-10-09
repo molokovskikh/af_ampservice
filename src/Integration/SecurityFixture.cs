@@ -14,7 +14,7 @@ namespace Integration
 				testUser.Save();
 			}
 
-			Assert.That(service.GetNameFromCatalog(new[] {""},
+			Assert.That(service.GetNameFromCatalogWithMnn(new[] {""},
 				new string[] {},
 				false,
 				false,
