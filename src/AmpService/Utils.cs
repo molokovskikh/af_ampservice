@@ -62,19 +62,19 @@ namespace AmpService
 	}
 
 	/// <summary>
-	/// Класс содержит вспомогательные функции для генерации SQL запросов
+	/// РљР»Р°СЃСЃ СЃРѕРґРµСЂР¶РёС‚ РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё РґР»СЏ РіРµРЅРµСЂР°С†РёРё SQL Р·Р°РїСЂРѕСЃРѕРІ
 	/// </summary>
 	public class Utils
 	{
 		/// <summary>
-		/// Преобразовывает массив строк для использования в запросе.
-		/// Также происходит замена символа "*" на "%".
-		/// Пример: массив {"hello", "w*rld"} разворачивается в строку 
+		/// РџСЂРµРѕР±СЂР°Р·РѕРІС‹РІР°РµС‚ РјР°СЃСЃРёРІ СЃС‚СЂРѕРє РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ Р·Р°РїСЂРѕСЃРµ.
+		/// РўР°РєР¶Рµ РїСЂРѕРёСЃС…РѕРґРёС‚ Р·Р°РјРµРЅР° СЃРёРјРІРѕР»Р° "*" РЅР° "%".
+		/// РџСЂРёРјРµСЂ: РјР°СЃСЃРёРІ {"hello", "w*rld"} СЂР°Р·РІРѕСЂР°С‡РёРІР°РµС‚СЃСЏ РІ СЃС‚СЂРѕРєСѓ
 		/// "and ( someField like 'hello'  or  someField like 'w%rld')"
 		/// </summary>
-		/// <param name="array">Аргументы поиска</param>
-		/// <param name="fieldName">Имя поля по которому происходит поиск</param>
-		/// <returns>Отформатированная строка</returns>
+		/// <param name="array">РђСЂРіСѓРјРµРЅС‚С‹ РїРѕРёСЃРєР°</param>
+		/// <param name="fieldName">РРјСЏ РїРѕР»СЏ РїРѕ РєРѕС‚РѕСЂРѕРјСѓ РїСЂРѕРёСЃС…РѕРґРёС‚ РїРѕРёСЃРє</param>
+		/// <returns>РћС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРЅР°СЏ СЃС‚СЂРѕРєР°</returns>
 		public static string StringArrayToQuery<T>(IEnumerable<T> array, string fieldName)
 		{
 			var builder = new StringBuilder();
@@ -102,7 +102,7 @@ namespace AmpService
 		}
 
 		/// <summary>
-		/// Аналогична StringArrayToQuery, но символ * в запросе преобразует в like '%' OR is null
+		/// РђРЅР°Р»РѕРіРёС‡РЅР° StringArrayToQuery, РЅРѕ СЃРёРјРІРѕР» * РІ Р·Р°РїСЂРѕСЃРµ РїСЂРµРѕР±СЂР°Р·СѓРµС‚ РІ like '%' OR is null
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="array"></param>
@@ -136,14 +136,14 @@ namespace AmpService
 			return "";
 		}
 		/// <summary>
-		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.
-		/// Пример: массив orderFields = {"field1", "field2"}, orderDirection = {"ASC"}
-		/// преобразуется к виду " ORDER BY field1 ASC, field2 ".
+		/// РџСЂРµРѕР±СЂР°Р·РѕРІС‹РІР°РµС‚ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ Р±Р»РѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё SQL Р·Р°РїСЂРѕСЃР°.
+		/// РџСЂРёРјРµСЂ: РјР°СЃСЃРёРІ orderFields = {"field1", "field2"}, orderDirection = {"ASC"}
+		/// РїСЂРµРѕР±СЂР°Р·СѓРµС‚СЃСЏ Рє РІРёРґСѓ " ORDER BY field1 ASC, field2 ".
 		/// </summary>
-		/// <param name="orderFields">Список полей из которых формируется блок сортировки.</param>
-		/// <param name="orderDirection">Список направлений сортировки для orderFields.
-		/// Допустимые значения: null, "ASC", "DESC".
-		/// Примечание: длинна списка orderDirection может быть меньше или равна длинне orderFields.
+		/// <param name="orderFields">РЎРїРёСЃРѕРє РїРѕР»РµР№ РёР· РєРѕС‚РѕСЂС‹С… С„РѕСЂРјРёСЂСѓРµС‚СЃСЏ Р±Р»РѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё.</param>
+		/// <param name="orderDirection">РЎРїРёСЃРѕРє РЅР°РїСЂР°РІР»РµРЅРёР№ СЃРѕСЂС‚РёСЂРѕРІРєРё РґР»СЏ orderFields.
+		/// Р”РѕРїСѓСЃС‚РёРјС‹Рµ Р·РЅР°С‡РµРЅРёСЏ: null, "ASC", "DESC".
+		/// РџСЂРёРјРµС‡Р°РЅРёРµ: РґР»РёРЅРЅР° СЃРїРёСЃРєР° orderDirection РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ РёР»Рё СЂР°РІРЅР° РґР»РёРЅРЅРµ orderFields.
 		/// </param>
 		/// <returns></returns>
 		public static string FormatOrderBlock(IList<string> orderFields, IList<string> orderDirection)
@@ -163,12 +163,12 @@ namespace AmpService
 			}
 			return builder.ToString();
 		}
-		
+
 		/// <summary>
-		/// Формирует блок LIMIT для SQL запроса. Пример: "LIMIT 1 20"
+		/// Р¤РѕСЂРјРёСЂСѓРµС‚ Р±Р»РѕРє LIMIT РґР»СЏ SQL Р·Р°РїСЂРѕСЃР°. РџСЂРёРјРµСЂ: "LIMIT 1 20"
 		/// </summary>
-		/// <param name="offset">Начиная с какого элемента</param>
-		/// <param name="count">Количество элементов</param>
+		/// <param name="offset">РќР°С‡РёРЅР°СЏ СЃ РєР°РєРѕРіРѕ СЌР»РµРјРµРЅС‚Р°</param>
+		/// <param name="count">РљРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ</param>
 		/// <returns></returns>
 		public static string GetLimitString(uint offset, uint count)
 		{

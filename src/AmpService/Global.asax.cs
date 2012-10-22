@@ -28,7 +28,7 @@ namespace AmpService
 			}
 			catch (Exception ex)
 			{
-				_log.Error("Не удалось запустить приложение", ex);
+				_log.Error("РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїСѓСЃС‚РёС‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ", ex);
 			}
 		}
 
