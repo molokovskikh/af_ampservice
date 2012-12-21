@@ -71,7 +71,7 @@ namespace Integration
 				MnnId = 1,
 			};
 			Save(product);
-			Flush();
+			Reopen();
 			var data = service.GetNameFromCatalogWithMnn(new string[] { "'Тестовое наименование" },
 				new string[] { "тестовая форма'" }, false, false, null, 5, 0, null, null);
 			Assert.That(data.Tables[0].Rows.Count > 0);
