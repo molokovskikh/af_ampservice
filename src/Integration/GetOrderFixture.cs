@@ -25,8 +25,7 @@ namespace Integration
 		public void Do_not_show_orders_from_service_clients()
 		{
 			var begin = DateTime.Now;
-			using (new TransactionScope())
-			{
+			using (new TransactionScope()) {
 				testClient.Settings.ServiceClient = true;
 				testClient.Settings.Save();
 			}
@@ -40,8 +39,7 @@ namespace Integration
 		public void Do_not_show_orders_from_hidden_clients()
 		{
 			var begin = DateTime.Now;
-			using (new TransactionScope())
-			{
+			using (new TransactionScope()) {
 				testClient.Settings.InvisibleOnFirm = 2;
 				testClient.Settings.Save();
 			}
@@ -64,15 +62,15 @@ namespace Integration
 		{
 			var offers = service.GetPrices(false,
 				false,
-				new[] {"OriginalName", "PriceCode"},
-				new[] {"*папа*", "94"}, null, null, 100, 0);
+				new[] { "OriginalName", "PriceCode" },
+				new[] { "*папа*", "94" }, null, null, 100, 0);
 			var offer = offers.Tables[0].Rows[0];
-			var orderIds = service.PostOrder(new[] {Convert.ToUInt64(offer["OrderID"])},
-				new[] {1u},
-				new[] {"Тестовое сообщение"},
-				new[] {Convert.ToUInt32(offer["OrderCode1"])},
-				new[] {Convert.ToUInt32(offer["OrderCode2"])},
-				new[] {false});
+			var orderIds = service.PostOrder(new[] { Convert.ToUInt64(offer["OrderID"]) },
+				new[] { 1u },
+				new[] { "Тестовое сообщение" },
+				new[] { Convert.ToUInt32(offer["OrderCode1"]) },
+				new[] { Convert.ToUInt32(offer["OrderCode2"]) },
+				new[] { false });
 			var orderId = Convert.ToUInt32(orderIds.Tables[0].Rows[0]["OrderID"]);
 			Execute(String.Format(@"
 update orders.ordershead

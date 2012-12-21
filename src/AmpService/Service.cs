@@ -10,7 +10,7 @@ using Common.MySql;
 using Common.Service;
 using Common.Tools;
 using MySql.Data.MySqlClient;
-using With=Common.MySql.With;
+using With = Common.MySql.With;
 
 namespace AmpService
 {
@@ -69,8 +69,7 @@ LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 				.OrderBy("cn.Name, cf.Form")
 				.Limit(Utils.GetLimitString(selStart, limit).ToLower().Replace("limit ", ""));
 
-			if (offerOnly)
-			{
+			if (offerOnly) {
 				query.Join("JOIN Farm.Core0 c0 on c0.ProductId = p.Id", "JOIN activeprices ap on ap.PriceCode = c0.PriceCode");
 
 				if (newEar || searchByApmCode)
@@ -91,7 +90,7 @@ LEFT JOIN Catalogs.Properties prop on prop.Id = pv.PropertyId")
 
 			With.Connection(c => {
 				if (offerOnly)
-					using(InvokeGetActivePrices(c))
+					using (InvokeGetActivePrices(c))
 						query.Table(data, "Catalog", c);
 				else
 					query.Table(data, "Catalog", c);
@@ -123,8 +122,7 @@ from usersettings.prices p
 
 			var data = new DataSet();
 			With.Connection(c => {
-				using(InvokeGetPrices(c))
-				{
+				using (InvokeGetPrices(c)) {
 					adapter.SelectCommand.Connection = c;
 					adapter.Fill(data, "PriceList");
 				}
@@ -142,21 +140,19 @@ from usersettings.prices p
 			public bool Junk;
 			public OrderItem OrderItem;
 
-			public static IList<ToOrder> FromRequest(ulong[] orderIds, 
-													 uint[] quanties,
-													 string[] messages,
-													 uint[] orderCodes1,
-													 uint[] orderCodes2,
-													 bool[] junks)
+			public static IList<ToOrder> FromRequest(ulong[] orderIds,
+				uint[] quanties,
+				string[] messages,
+				uint[] orderCodes1,
+				uint[] orderCodes2,
+				bool[] junks)
 			{
 				return orderIds.Select((orderId, i) => {
-
 					var message = "";
 					if (messages.Length > i)
 						message = messages[i];
-					
-					var toOrder = new ToOrder
-					{
+
+					var toOrder = new ToOrder {
 						OrderId = orderIds[i],
 						Quantity = quanties[i],
 						Message = message,
@@ -194,15 +190,13 @@ from usersettings.prices p
 
 			var orders = new List<Order>();
 			var toOrders = ToOrder.FromRequest(orderIds, quanties, messages, orderCodes1, orderCodes2, junks);
-			foreach(var toOrder in toOrders)
-			{
+			foreach (var toOrder in toOrders) {
 				var offer = offers.FirstOrDefault(o => o.Id.CoreId == toOrder.OrderId);
 				if (offer == null)
 					continue;
 
 				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.Id.Price.PriceCode);
-				if (order == null)
-				{
+				if (order == null) {
 					order = new Order(offer.PriceList, ServiceContext.User, rules);
 					order.ClientAddition = toOrder.Message;
 					orders.Add(order);
@@ -210,14 +204,12 @@ from usersettings.prices p
 				toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
 			}
 
-			Common.Models.With.Transaction(() => {
-				orders.Each(_orderRepository.Save);
-			});
+			Common.Models.With.Transaction(() => { orders.Each(_orderRepository.Save); });
 
 			var result = new DataSet();
 			var table = result.Tables.Add("Prices");
-			table.Columns.Add("OrderID", typeof (long));
-			table.Columns.Add("OriginalOrderID", typeof (ulong));
+			table.Columns.Add("OrderID", typeof(long));
+			table.Columns.Add("OriginalOrderID", typeof(ulong));
 
 			var selectOffer = @"
 SELECT  c.id OrderID,
@@ -257,15 +249,12 @@ WHERE	c.SynonymCode = ?SynonymCode
 		and c.Junk = ?Junk;";
 
 			With.Connection(c => {
-				using(InvokeGetActivePrices(c))
-				{
-					foreach (var toOrder in toOrders)
-					{
+				using (InvokeGetActivePrices(c)) {
+					foreach (var toOrder in toOrders) {
 						var row = result.Tables[0].NewRow();
 						row["OriginalOrderID"] = toOrder.OrderId;
 						result.Tables[0].Rows.Add(row);
-						if (toOrder.OrderItem != null)
-						{
+						if (toOrder.OrderItem != null) {
 							row["OrderID"] = toOrder.OrderItem.Order.RowId;
 							continue;
 						}
@@ -276,8 +265,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 						dataAdapter.SelectCommand.Parameters.AddWithValue("?SynonymFirmCrCode", toOrder.OrderCode2);
 						dataAdapter.SelectCommand.Parameters.AddWithValue("?Junk", toOrder.Junk);
 						dataAdapter.Fill(data);
-						if (data.Tables[0].Rows.Count == 0)
-						{
+						if (data.Tables[0].Rows.Count == 0) {
 							row["OrderID"] = -1;
 							continue;
 						}
@@ -286,7 +274,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 				}
 			});
 
-			return result; 
+			return result;
 		}
 
 		[OfferRowCalculator("PrepCode")]
@@ -301,15 +289,15 @@ WHERE	c.SynonymCode = ?SynonymCode
 		{
 			//словарь для валидации и трансляции имен полей для клиента в имена полей для использования в запросе
 			var validRequestFields = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
-				{"OrderID", "c.id"},
-				{"SalerCode", "c.Code"},
-				{"SalerName", "s.Name"},
-				{"ItemID", "ampc.Code"},
-				{"OriginalCR", "sfc.Synonym"},
-				{"OriginalName", "s.Synonym"},
-				{"PriceCode", "ap.PriceCode"},
-				{"PrepCode", "c.ProductId"},
-				{"MnnId", "cm.MnnId"}
+				{ "OrderID", "c.id" },
+				{ "SalerCode", "c.Code" },
+				{ "SalerName", "s.Name" },
+				{ "ItemID", "ampc.Code" },
+				{ "OriginalCR", "sfc.Synonym" },
+				{ "OriginalName", "s.Synonym" },
+				{ "PriceCode", "ap.PriceCode" },
+				{ "PrepCode", "c.ProductId" },
+				{ "MnnId", "cm.MnnId" }
 			};
 
 			var validSortFields = new List<string> {
@@ -348,20 +336,18 @@ WHERE	c.SynonymCode = ?SynonymCode
 				if (!validRequestFields.ContainsKey(fieldName))
 					throw new ArgumentException(String.Format("По полю {0} не может производиться фильтрация", fieldName), fieldName);
 			//проверка имен полей для сортировки
-			if (sortField != null)
-			{
+			if (sortField != null) {
 				foreach (var fieldName in sortField)
 					if (!validSortFields.Exists(value => String.Compare(fieldName, value, true) == 0))
 						throw new ArgumentException(String.Format("По поляю {0} не может производиться сортировка", fieldName), fieldName);
 			}
 			//проверка направлений сортировки
-			if (sortOrder != null)
-			{
+			if (sortOrder != null) {
 				foreach (var direction in sortOrder)
 					if (!(String.Compare(direction, "Asc", true) == 0 || String.Compare(direction, "Desc", true) == 0))
 						throw new ArgumentException(
 							String.Format("Не допустимое значение направления сортровки {0}. Допустимые значение \"Asc\" и \"Desc\"",
-										  direction), direction);
+								direction), direction);
 			}
 
 			//словарь хранящий имена фильтруемых полей и значения фильтрации
@@ -370,8 +356,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 			var filtedField = new Dictionary<string, List<string>>();
 			//разбирается входящие параметры args.RangeField и args.RangeValue и одновременно клиентские имена
 			//транслируются во внутренние
-			for (var i = 0; i < rangeField.Length; i++)
-			{
+			for (var i = 0; i < rangeField.Length; i++) {
 				//преобразовываем клиентские названия полей во внутренние
 				var innerFieldName = validRequestFields[rangeField[i]];
 				//если в словаре не такого поля 
@@ -392,17 +377,15 @@ WHERE	c.SynonymCode = ?SynonymCode
 			if (newEar)
 				predicatBlock += " ampc.id is null ";
 
-			foreach (var fieldName in filtedField.Keys)
-			{
+			foreach (var fieldName in filtedField.Keys) {
 				if (predicatBlock != "")
 					predicatBlock += " and ";
 				predicatBlock += Utils.StringArrayToQuery(filtedField[fieldName], fieldName);
 			}
 
-			Func<MySqlConnection, DisposibleAction>  prerequirements;
+			Func<MySqlConnection, DisposibleAction> prerequirements;
 			string command;
-			if (!onlyLeader)
-			{
+			if (!onlyLeader) {
 				prerequirements = c => InvokeGetActivePrices(c);
 
 				command = @"
@@ -450,8 +433,7 @@ WHERE ap.pricecode != 2647
 
 				command += @"; select * from offers ";
 			}
-			else
-			{
+			else {
 				prerequirements = c => InvokeGetOffers(c);
 
 				command = @"
@@ -493,7 +475,6 @@ FROM UserSettings.MinCosts as offers
 
 				if (predicatBlock != "")
 					command += " where " + predicatBlock;
-
 			}
 
 			//группировка нужна т.к. в асортиментном прайсе амп может быть несколько записей 
@@ -504,8 +485,7 @@ FROM UserSettings.MinCosts as offers
 			command += Utils.GetLimitString(selStart, limit);
 
 			With.Connection(c => {
-				using(prerequirements(c))
-				{
+				using (prerequirements(c)) {
 					var dataAdapter = new MySqlDataAdapter(command, c);
 					dataAdapter.Fill(data, "PriceList");
 				}
@@ -535,8 +515,7 @@ FROM UserSettings.MinCosts as offers
 			return GetOrders(adapter => {
 				var filter = "and oh.WriteTime >= ?OlderThan";
 				adapter.SelectCommand.Parameters.AddWithValue("?OlderThan", olderThan);
-				if (priceCode > 0)
-				{
+				if (priceCode > 0) {
 					filter += " and oh.PriceCode = ?PriceCode";
 					adapter.SelectCommand.Parameters.AddWithValue("?PriceCode", priceCode);
 				}
@@ -606,7 +585,6 @@ order by OrderDate
 			});
 
 			return data;
-
 		}
 	}
 }

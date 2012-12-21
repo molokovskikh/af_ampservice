@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -12,10 +12,8 @@ namespace AmpService
 		{
 			var destTable = dest.Table;
 			var sourceTable = source.Table;
-			if (destTable.Columns.Count < sourceTable.Columns.Count)
-			{
-				foreach (DataColumn column in sourceTable.Columns)
-				{
+			if (destTable.Columns.Count < sourceTable.Columns.Count) {
+				foreach (DataColumn column in sourceTable.Columns) {
 					if (!destTable.Columns.Contains(column.ColumnName))
 						destTable.Columns.Add(column.ColumnName, column.DataType);
 				}
@@ -79,11 +77,9 @@ namespace AmpService
 		{
 			var builder = new StringBuilder();
 			var index = 0;
-			if (array != null && array.Count() > 0)
-			{
+			if (array != null && array.Count() > 0) {
 				builder.Append(" (");
-				foreach (var item in array)
-				{
+				foreach (var item in array) {
 					var value = item.ToString();
 					value = MySql.Data.MySqlClient.MySqlHelper.EscapeString(value);
 					if (value.IndexOf("*") > -1)
@@ -113,14 +109,12 @@ namespace AmpService
 		{
 			var builder = new StringBuilder();
 			var index = 0;
-			if (array != null && array.Count() > 0)
-			{
+			if (array != null && array.Count() > 0) {
 				builder.Append(" (");
-				foreach (var item in array)
-				{
+				foreach (var item in array) {
 					var value = item.ToString();
 					value = MySql.Data.MySqlClient.MySqlHelper.EscapeString(value);
-					if(value == "*")
+					if (value == "*")
 						builder.Append(fieldName + " like '%' or " + fieldName + " is null");
 					else if (value.IndexOf("*") > -1)
 						builder.Append(fieldName + " like '" + value.Replace("*", "%") + "'");
@@ -137,6 +131,7 @@ namespace AmpService
 
 			return "";
 		}
+
 		/// <summary>
 		/// Преобразовывает список строк для использования в блок сортировки SQL запроса.
 		/// Пример: массив orderFields = {"field1", "field2"}, orderDirection = {"ASC"}
@@ -151,11 +146,9 @@ namespace AmpService
 		public static string FormatOrderBlock(IList<string> orderFields, IList<string> orderDirection)
 		{
 			var builder = new StringBuilder();
-			if ((orderFields != null) && (orderFields.Count > 0))
-			{
+			if ((orderFields != null) && (orderFields.Count > 0)) {
 				builder.Append(" ORDER BY ");
-				for (var i = 0; i < orderFields.Count; i++)
-				{
+				for (var i = 0; i < orderFields.Count; i++) {
 					var direction = String.Empty;
 					if ((orderDirection != null) && (i < orderDirection.Count))
 						direction = orderDirection[i];
@@ -175,8 +168,7 @@ namespace AmpService
 		public static string GetLimitString(uint offset, uint count)
 		{
 			var result = String.Empty;
-			if (offset >= 0)
-			{
+			if (offset >= 0) {
 				result = " limit " + offset;
 				if (count > 0)
 					result += "," + count;

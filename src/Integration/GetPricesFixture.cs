@@ -32,13 +32,13 @@ namespace Integration
 					"prepCode", "PriceCode", "PriceCode", "PrepCode", "ItemID", "PrepCode", "PrepCode",
 					"OriginalName", "ItemID", "PriceCode"
 				},
-				new[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, null, null, 100, 0);
+				new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }, null, null, 100, 0);
 			Assert.That(data, Is.Not.Null);
 
 			data = service.GetPrices(false, false, new[] { "OriginalName" }, new[] { "*а*" }, null, null, 100, 0);
 			Assert.That(data, Is.Not.Null);
 
-			service.GetPrices(false, false, new[] {"OriginalName", "OriginalName"}, new[] {"к*", "т*"}, null, null, 100, 0);
+			service.GetPrices(false, false, new[] { "OriginalName", "OriginalName" }, new[] { "к*", "т*" }, null, null, 100, 0);
 			Assert.That(data, Is.Not.Null);
 
 			service.GetPrices(false, false, new[] { "OriginalName", "OriginalName" }, new[] { "к*", "т*" }, new[] { "OrderID" }, null, 100, 0);
@@ -75,7 +75,7 @@ namespace Integration
 				.Each(s.Delete));
 
 			var begin = DateTime.Now;
-			var data = service.GetPrices(false, false, new[] {"OriginalName"}, new[] {"*папа*"}, new[] {"OriginalName"}, new[] {"asc"}, 1000, 0);
+			var data = service.GetPrices(false, false, new[] { "OriginalName" }, new[] { "*папа*" }, new[] { "OriginalName" }, new[] { "asc" }, 1000, 0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			var productCount = data.Tables[0].Rows.Cast<DataRow>().GroupBy(r => r["PrepCode"]).Count();
 			With.Session(s => {
@@ -91,7 +91,7 @@ namespace Integration
 			var user = client.Users.First();
 			ServiceContext.GetUserName = () => user.Login;
 
-			var  data = service.GetPriceCodeByName(null);
+			var data = service.GetPriceCodeByName(null);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 		}
 	}

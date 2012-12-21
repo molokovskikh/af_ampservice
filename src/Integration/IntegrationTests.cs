@@ -13,11 +13,10 @@ namespace Integration
 		public void GetNameFromCatalogWithMnn()
 		{
 			var catalog = new TestProduct();
-			
+
 			catalog.CatalogProduct = new TestCatalogProduct {
 				Name = "тестовый продукт из каталога"
 			};
-
 		}
 
 		[Test]
@@ -60,6 +59,5 @@ namespace Integration
 			Assert.That(data.Tables[0].Columns.Contains("VitallyImportant"), Is.True, "нет VitallyImportant");
 			Assert.That(data.Tables[0].Columns.Contains("Mnn"), Is.True, "нет мнн");
 		}
-
 	}
 }

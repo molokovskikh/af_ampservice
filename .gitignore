@@ -7,3 +7,5 @@ _Resharper*
 *.user
 *.suo
 *.ncb
+packages/
+*.Cache

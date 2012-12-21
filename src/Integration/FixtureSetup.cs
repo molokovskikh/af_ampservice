@@ -14,12 +14,10 @@ namespace Integration
 		{
 			if (ConnectionHelper.IsIntegration())
 				Global.Initialize("integration");
-			else 
+			else
 				Global.Initialize();
 			ServiceContext.GetHost = () => "localhost";
-			ServiceContext.GetUserName = () => {
-				throw new Exception("Тесты не инициализированы");
-			};
+			ServiceContext.GetUserName = () => { throw new Exception("Тесты не инициализированы"); };
 
 			Test.Support.Setup.Initialize();
 		}

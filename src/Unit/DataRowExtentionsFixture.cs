@@ -10,10 +10,10 @@ namespace AmpService.Tests
 		public void Copy_data_row_values()
 		{
 			var table = new DataTable();
-			table.Columns.Add("c1", typeof (int));
+			table.Columns.Add("c1", typeof(int));
 			var table1 = new DataTable();
-			table1.Columns.Add("c2", typeof (string));
-			table1.Columns.Add("c3", typeof (int));
+			table1.Columns.Add("c2", typeof(string));
+			table1.Columns.Add("c3", typeof(int));
 			var source = table1.NewRow();
 			source["c2"] = "123";
 			table1.Rows.Add(source);

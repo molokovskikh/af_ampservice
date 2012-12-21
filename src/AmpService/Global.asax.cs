@@ -18,16 +18,14 @@ namespace AmpService
 {
 	public class Global : HttpApplication
 	{
-		private readonly ILog _log = LogManager.GetLogger(typeof (Global));
+		private readonly ILog _log = LogManager.GetLogger(typeof(Global));
 
 		protected void Application_Start(object sender, EventArgs e)
 		{
-			try
-			{
+			try {
 				Initialize();
 			}
-			catch (Exception ex)
-			{
+			catch (Exception ex) {
 				_log.Error("Не удалось запустить приложение", ex);
 			}
 		}
@@ -51,9 +49,7 @@ namespace AmpService
 					InterceptorReference.ForType<ContextLoaderInterceptor>(),
 					InterceptorReference.ForType<PermissionCheckInterceptor>(),
 					InterceptorReference.ForType<UpdateLastAccessTimeInterceptor>(),
-					InterceptorReference.ForType<MonitorExecutingTimeInterceptor>()
-				).Anywhere,
-
+					InterceptorReference.ForType<MonitorExecutingTimeInterceptor>()).Anywhere,
 				Component.For<ErrorLoggingInterceptor>(),
 				Component.For<ContextLoaderInterceptor>(),
 				Component.For<LoggingInterceptor>()
@@ -63,18 +59,15 @@ namespace AmpService
 				Component.For<UpdateLastAccessTimeInterceptor>()
 					.Parameters(Parameter.ForKey("Field").Eq("IOLTime")),
 				Component.For<MonitorExecutingTimeInterceptor>(),
-
 				Component.For<LockMonitor>()
 					.Parameters(Parameter.ForKey("TimeOut").Eq("10000")),
 				Component.For<IClientLoader>().ImplementedBy<ClientLoader>(),
-
 				Component.For<ISessionFactoryHolder>().Instance(sessionFactoryHolder),
 				Component.For<RepositoryInterceptor>(),
-				Component.For(typeof (IRepository<>)).ImplementedBy(typeof (Repository<>)),
+				Component.For(typeof(IRepository<>)).ImplementedBy(typeof(Repository<>)),
 				Component.For<ISecurityRepository>().ImplementedBy<SecurityRepository>(),
 				Component.For<IOfferRepository>().ImplementedBy<OfferRepository>(),
-				Component.For<ILogRepository>().ImplementedBy<LogRepository>()
-				);
+				Component.For<ILogRepository>().ImplementedBy<LogRepository>());
 
 			ServiceContext.GetUserName = () => ServiceContext.NormalizeUsername(HttpContext.Current.User.Identity.Name);
 			ServiceContext.GetHost = () => HttpContext.Current.Request.UserHostAddress;
