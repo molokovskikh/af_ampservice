@@ -53,5 +53,28 @@ namespace Integration
 			var data = service.GetNameFromCatalogWithMnn(null, null, false, false, null, 5, 0, null, new string[] {"*та*"});
 			Assert.That(data.Tables[0].Rows.Count > 0);
 		}
+
+
+		[Test]
+		public void GetNameFromCatalogWithEscapeChar()
+		{
+			var product = new TestProduct();
+
+			product.CatalogProduct = new TestCatalogProduct {
+				Name = "тестовый продукт из каталога"
+			};
+			product.CatalogProduct.CatalogForm = new TestCatalogForm {
+				Form = "Тестовая форма'"
+			};
+			product.CatalogProduct.CatalogName = new TestCatalogName {
+				Name = "'Тестовое наименование",
+				MnnId = 1,
+			};
+			Save(product);
+			Flush();
+			var data = service.GetNameFromCatalogWithMnn(new string[] {"'Тестовое наименование"},
+				new string[] {"тестовая форма'"}, false, false, null, 5, 0, null, null);
+			Assert.That(data.Tables[0].Rows.Count > 0);
+		}
 	}
 }

@@ -85,6 +85,7 @@ namespace AmpService
 				foreach (var item in array)
 				{
 					var value = item.ToString();
+					value = MySql.Data.MySqlClient.MySqlHelper.EscapeString(value);
 					if (value.IndexOf("*") > -1)
 						builder.Append(fieldName + " like '" + value.Replace("*", "%") + "'");
 					else
@@ -118,6 +119,7 @@ namespace AmpService
 				foreach (var item in array)
 				{
 					var value = item.ToString();
+					value = MySql.Data.MySqlClient.MySqlHelper.EscapeString(value);
 					if(value == "*")
 						builder.Append(fieldName + " like '%' or " + fieldName + " is null");
 					else if (value.IndexOf("*") > -1)
