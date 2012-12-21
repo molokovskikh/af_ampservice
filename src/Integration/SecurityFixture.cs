@@ -21,12 +21,12 @@ namespace Integration
 				new uint[] {}, 100, 0, null, null),
 				Is.Null);
 
-			Assert.That(service.GetPriceCodeByName(new[] {"%протек%"}),
+			Assert.That(service.GetPriceCodeByName(new[] {"%РїСЂРѕС‚РµРє%"}),
 				Is.Null);
 
 			Assert.That(service.GetPrices(false, false,
 				new[] {"OriginalName"},
-				new[] {"%папа%"},
+				new[] {"%РїР°РїР°%"},
 				new string[] {},
 				new string[] {}, 100, 0),
 				Is.Null);
@@ -36,7 +36,7 @@ namespace Integration
 				new[] {"123"},
 				new[] {46528u},
 				new[] {544523u},
-				new[] {false}), 
+				new[] {false}),
 				Is.Null);
 		}
 	}
