@@ -568,7 +568,6 @@ FROM UserSettings.PricesData pd
 	join Customers.Addresses a on a.Id = oh.AddressId
 		join Customers.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
-	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 	and oh.Deleted = 0
 	and oh.Submited = 1
