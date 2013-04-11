@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Web.Services;
+using System.Web.Services.Protocols;
 using Common.Models;
 
 namespace AmpService
@@ -113,6 +114,12 @@ namespace AmpService
 		public DataSet GetOrder(uint orderId)
 		{
 			return service.GetOrder(orderId);
+		}
+
+		[WebMethod]
+		public DataSet GetOrderLines(DateTime begin, DateTime end)
+		{
+			return service.GetOrderItems(begin, end);
 		}
 	}
 }

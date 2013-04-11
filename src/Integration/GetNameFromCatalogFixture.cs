@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Common.Service;
+using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.Suppliers;
@@ -75,6 +76,31 @@ namespace Integration
 			var data = service.GetNameFromCatalogWithMnn(new string[] { "'Тестовое наименование" },
 				new string[] { "тестовая форма'" }, false, false, null, 5, 0, null, null);
 			Assert.That(data.Tables[0].Rows.Count > 0);
+		}
+
+		[Test]
+		public void Get_orders()
+		{
+			var supplier = TestSupplier.CreateNaked();
+			supplier.CreateSampleCore();
+			var offer = supplier.Prices[0].Core[0];
+			testClient.MaintainIntersection();
+			session.Transaction.Commit();
+
+			service.PostOrder(new[] { offer.Id },
+				new uint[] { 1 },
+				new[] { "" },
+				new[] { offer.ProducerSynonym.Id },
+				new[] { offer.ProductSynonym.Id },
+				new[] { false });
+
+			var order = session.Query<TestOrder>().First(o => o.Client == testClient);
+			order.WriteTime = order.WriteTime.AddHours(-1);
+			session.Save(order);
+			session.Flush();
+
+			var lines = service.GetOrderLines(DateTime.Now.AddDays(-1), DateTime.Now.AddMinutes(-30));
+			Assert.AreEqual(1, lines.Tables[0].Rows.Count);
 		}
 	}
 }

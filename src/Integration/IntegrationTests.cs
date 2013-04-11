@@ -3,6 +3,7 @@ using System.Data;
 using Common.MySql;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.Suppliers;
 
 namespace Integration
 {

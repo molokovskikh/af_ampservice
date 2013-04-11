@@ -496,12 +496,12 @@ FROM UserSettings.MinCosts as offers
 
 		private DisposibleAction InvokeGetOffers(MySqlConnection connection)
 		{
-			return StorageProcedures.FutureGetOffers(connection, ServiceContext.User.Id);
+			return StorageProcedures.GetOffers(connection, ServiceContext.User.Id);
 		}
 
 		private DisposibleAction InvokeGetActivePrices(MySqlConnection c)
 		{
-			return StorageProcedures.FutureGetActivePrices(c, ServiceContext.User.Id);
+			return StorageProcedures.GetActivePrices(c, ServiceContext.User.Id);
 		}
 
 		private DisposibleAction InvokeGetPrices(MySqlConnection c)
@@ -568,6 +568,7 @@ FROM UserSettings.PricesData pd
 	join Customers.Addresses a on a.Id = oh.AddressId
 		join Customers.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
+	LEFT JOIN farm.core0 ampc ON ampc.ProductId = c.ProductId and ampc.codefirmcr = c.codefirmcr and ampc.PriceCode = 1864
 WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
 	and oh.Deleted = 0
 	and oh.Submited = 1
@@ -585,6 +586,52 @@ order by OrderDate
 			});
 
 			return data;
+		}
+
+		public DataSet GetOrderItems(DateTime begin, DateTime end)
+		{
+			if ((DateTime.Now - end) < TimeSpan.FromMinutes(15))
+				throw new Exception("Запрос некорректен: данные за последние 15 минут не предоставляются");
+
+			var sql = @"
+select  oh.WriteTime,
+		a.Address,
+		concat(s.Name, ' (', pd.PriceName, ')') as PriceName,
+		u.Login,
+		oh.RowId as OrderId,
+		ifnull(ifnull(s.Synonym, (select Catalogs.GetProductName(ol.ProductId))), '') as Product,
+		ifnull(ifnull(sf.Synonym, pr.Name), '') as Producer,
+		ol.Cost,
+		ol.Quantity,
+		ifnull(ol.ProductId, '') as PrepCode,
+		ifnull(ampc.code, '') as ItemID
+from Orders.OrdersHead oh
+	join Orders.OrdersList ol ON oh.RowID = ol.OrderID
+	join UserSettings.PricesData pd  ON pd.PriceCode = oh.PriceCode
+		join Customers.Suppliers s on s.Id = pd.FirmCode
+	join Customers.Clients cd ON cd.Id = oh.ClientCode
+	join Customers.Addresses a on a.Id = oh.AddressId
+	join Customers.Users u on u.Id = oh.UserId
+	left join farm.Synonym s on s.SynonymCode = ol.SynonymCode
+	left join farm.SynonymFirmCr sf on sf.SynonymFirmCrCode = ol.SynonymFirmCrCode
+	left join catalogs.Producers pr on pr.Id = ol.CodeFirmCr
+	left join farm.core0 ampc ON ampc.ProductId = ol.ProductId and ampc.codefirmcr = ol.codefirmcr and ampc.PriceCode = 1864
+WHERE oh.Deleted = 0
+	and oh.ClientCode = ?clientId
+	and oh.WriteTime >= ?begin
+	and oh.WriteTime <= ?end
+order by oh.WriteTime";
+
+			return With.Connection(c => {
+				var adapter = new MySqlDataAdapter(sql, c);
+				var parameters = adapter.SelectCommand.Parameters;
+				parameters.AddWithValue("clientId", ServiceContext.User.Client.Id);
+				parameters.AddWithValue("begin", begin);
+				parameters.AddWithValue("end", end);
+				var data = new DataSet();
+				adapter.Fill(data);
+				return data;
+			});
 		}
 	}
 }
