@@ -54,11 +54,7 @@ namespace Integration
 		[Test]
 		public void Get_order_should_return_order_by_id()
 		{
-			Console.WriteLine(testUser.Id);
-			Console.WriteLine(PriceId);
 			var orderId = BuildOrder();
-			Console.WriteLine(Service.SupplierIds.Implode());
-			Console.WriteLine(orderId);
 			var data = service.GetOrder(orderId);
 			Assert.That(data.Tables[0].Rows.Count, Is.EqualTo(1));
 			Assert.That(data.Tables[0].Rows[0]["OrderID"], Is.EqualTo(orderId));
