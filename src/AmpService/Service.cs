@@ -19,6 +19,8 @@ namespace AmpService
 		private readonly IRepository<Order> _orderRepository;
 		private readonly IOfferRepository _offerRepository;
 		private readonly IRepository<OrderRules> _rulesRepository;
+		public static uint AssortmentPriceId = 1864;
+		public static uint[] SupplierIds = new uint[] { 94, 62 };
 
 		public Service(IOfferRepository offerRepository,
 			IRepository<Order> orderRepository,
@@ -568,14 +570,14 @@ FROM UserSettings.PricesData pd
 	join Customers.Addresses a on a.Id = oh.AddressId
 		join Customers.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
-WHERE (pd.FirmCode = 62 or pd.FirmCode = 94)
+WHERE pd.FirmCode in ({1})
 	and oh.Deleted = 0
 	and oh.Submited = 1
 	and rcs.ServiceClient = 0
 	and rcs.InvisibleOnFirm != 2
 	{0}
 order by OrderDate
-", filter);
+", filter, SupplierIds.Implode());
 
 			var data = new DataSet();
 
@@ -587,7 +589,7 @@ order by OrderDate
 			return data;
 		}
 
-		public DataSet GetOrderItems(DateTime begin, DateTime end)
+		public virtual DataSet GetOrderItems(DateTime begin, DateTime end)
 		{
 			if ((DateTime.Now - end) < TimeSpan.FromMinutes(15))
 				throw new Exception("Запрос некорректен: данные за последние 15 минут не предоставляются");
@@ -627,6 +629,7 @@ order by oh.WriteTime";
 				parameters.AddWithValue("clientId", ServiceContext.User.Client.Id);
 				parameters.AddWithValue("begin", begin);
 				parameters.AddWithValue("end", end);
+				parameters.AddWithValue("assortmentPriceId", AssortmentPriceId);
 				var data = new DataSet();
 				adapter.Fill(data);
 				return data;

@@ -51,14 +51,5 @@ namespace Integration
 			var data = service.GetPriceCodeByName(null);
 			Assert.That(data.Tables[0].Columns.Contains("MinReq"), "MinReq отсутствует");
 		}
-
-		[Test]
-		public void Get_name_from_catalog_for_future_client()
-		{
-			var data = service.GetNameFromCatalogWithMnn(new[] { "5*" }, new[] { "*" }, true, true, new uint[0], 100, 0, null, null);
-			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
-			Assert.That(data.Tables[0].Columns.Contains("VitallyImportant"), Is.True, "нет VitallyImportant");
-			Assert.That(data.Tables[0].Columns.Contains("Mnn"), Is.True, "нет мнн");
-		}
 	}
 }

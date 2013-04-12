@@ -1,5 +1,7 @@
 ﻿using System;
+using AmpService;
 using Castle.ActiveRecord;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace Integration
@@ -52,7 +54,11 @@ namespace Integration
 		[Test]
 		public void Get_order_should_return_order_by_id()
 		{
+			Console.WriteLine(testUser.Id);
+			Console.WriteLine(PriceId);
 			var orderId = BuildOrder();
+			Console.WriteLine(Service.SupplierIds.Implode());
+			Console.WriteLine(orderId);
 			var data = service.GetOrder(orderId);
 			Assert.That(data.Tables[0].Rows.Count, Is.EqualTo(1));
 			Assert.That(data.Tables[0].Rows[0]["OrderID"], Is.EqualTo(orderId));
@@ -63,7 +69,7 @@ namespace Integration
 			var offers = service.GetPrices(false,
 				false,
 				new[] { "OriginalName", "PriceCode" },
-				new[] { "*папа*", "94" }, null, null, 100, 0);
+				new[] { "*", PriceId.ToString() }, null, null, 100, 0);
 			var offer = offers.Tables[0].Rows[0];
 			var orderIds = service.PostOrder(new[] { Convert.ToUInt64(offer["OrderID"]) },
 				new[] { 1u },

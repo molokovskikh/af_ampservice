@@ -117,7 +117,7 @@ namespace AmpService
 		}
 
 		[WebMethod]
-		public DataSet GetOrderLines(DateTime begin, DateTime end)
+		public DataSet GetOrderItems(DateTime begin, DateTime end)
 		{
 			return service.GetOrderItems(begin, end);
 		}

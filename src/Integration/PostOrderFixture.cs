@@ -28,7 +28,7 @@ namespace Integration
 
 			var data = service.GetPrices(false, false,
 				new[] { "OriginalName" },
-				new[] { "*папа*" },
+				new[] { "*" },
 				new string[] { },
 				new string[] { },
 				100,
@@ -75,7 +75,7 @@ where id = :CoreId
 		{
 			var data = service.GetPrices(false, false,
 				new[] { "OriginalName" },
-				new[] { "*папа*" },
+				new[] { "*" },
 				null,
 				null,
 				100,
@@ -95,7 +95,7 @@ where id = :CoreId
 		{
 			var data = service.GetPrices(false, false,
 				new[] { "OriginalName" },
-				new[] { "*папа*" },
+				new[] { "*" },
 				null,
 				null,
 				100,
@@ -119,7 +119,7 @@ where id = :CoreId
 		{
 			var data = service.GetPrices(false, false,
 				new[] { "OriginalName" },
-				new[] { "*папа*" },
+				new[] { "*" },
 				null,
 				null,
 				100,
@@ -167,7 +167,7 @@ where id = :CoreId")
 				new[] { false });
 
 			Assert.That(result.Tables[0].Rows.Count, Is.EqualTo(1));
-			Assert.That(Convert.ToInt32(result.Tables[0].Rows[0]["OrderID"]), Is.EqualTo(coreId));
+			Assert.That(Convert.ToUInt64(result.Tables[0].Rows[0]["OrderID"]), Is.EqualTo(coreId));
 			Assert.That(result.Tables[0].Columns.Contains("SalerCode"), Is.True);
 		}
 
@@ -188,7 +188,7 @@ where id = :CoreId")
 				false,
 				false,
 				new[] { "OriginalName" },
-				new[] { "*папа*" },
+				new[] { "*" },
 				null,
 				null,
 				100,

@@ -70,16 +70,16 @@ namespace Integration
 		public void Calculate_row_count()
 		{
 			With.Session(s => s.Query<ServiceLogEntity>()
-				.Where(e => e.UserName == "kvasov" && e.MethodName == "GetPrices")
+				.Where(e => e.UserName == testUser.Login && e.MethodName == "GetPrices")
 				.ToList()
 				.Each(s.Delete));
 
 			var begin = DateTime.Now;
-			var data = service.GetPrices(false, false, new[] { "OriginalName" }, new[] { "*папа*" }, new[] { "OriginalName" }, new[] { "asc" }, 1000, 0);
+			var data = service.GetPrices(false, false, new[] { "OriginalName" }, new[] { "*" }, new[] { "OriginalName" }, new[] { "asc" }, 1000, 0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			var productCount = data.Tables[0].Rows.Cast<DataRow>().GroupBy(r => r["PrepCode"]).Count();
 			With.Session(s => {
-				var entity = s.Query<ServiceLogEntity>().First(e => e.MethodName == "GetPrices" && e.LogTime >= begin);
+				var entity = s.Query<ServiceLogEntity>().First(e => e.MethodName == "GetPrices" && e.LogTime >= begin && e.UserName == testUser.Login);
 				Assert.That(entity.RowCount, Is.EqualTo(productCount));
 			});
 		}

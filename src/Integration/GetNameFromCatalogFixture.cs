@@ -44,8 +44,11 @@ namespace Integration
 		public void GetNameFromCatalogWithMnn()
 		{
 			var data = service.GetNameFromCatalogWithMnn(new string[] { "Тестовое наименование" }, null, false, false, null, 5, 0, new string[] { "*препарат" }, null);
-			Assert.That(data.Tables[0].Rows.Count > 0);
-			Assert.That(data.Tables[0].Columns.Contains("MnnId"));
+			var table = data.Tables[0];
+			Assert.That(table.Rows.Count > 0);
+			Assert.That(table.Columns.Contains("MnnId"));
+			Assert.That(table.Columns.Contains("VitallyImportant"), Is.True, "нет VitallyImportant");
+			Assert.That(table.Columns.Contains("Mnn"), Is.True, "нет мнн");
 		}
 
 		[Test]
@@ -99,7 +102,7 @@ namespace Integration
 			session.Save(order);
 			session.Flush();
 
-			var lines = service.GetOrderLines(DateTime.Now.AddDays(-1), DateTime.Now.AddMinutes(-30));
+			var lines = service.GetOrderItems(DateTime.Now.AddDays(-1), DateTime.Now.AddMinutes(-30));
 			Assert.AreEqual(1, lines.Tables[0].Rows.Count);
 		}
 	}
