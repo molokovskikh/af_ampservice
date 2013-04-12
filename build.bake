@@ -3,7 +3,8 @@ import file from Db.bake
 
 Global(
 	Project : "AmpService",
-	HumanReadableName : "Служба для Амп"
+	HumanReadableName : "Служба для Амп",
+	Profile: @catalog
 )
 
 task @Build, [@WebBuild]
