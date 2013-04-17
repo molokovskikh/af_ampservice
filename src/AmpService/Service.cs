@@ -591,8 +591,8 @@ order by OrderDate
 
 		public virtual DataSet GetOrderItems(DateTime begin, DateTime end)
 		{
-			if ((DateTime.Now - end) < TimeSpan.FromMinutes(15))
-				throw new Exception("Запрос некорректен: данные за последние 15 минут не предоставляются");
+			if ((DateTime.Now - end) < TimeSpan.FromMinutes(10))
+				throw new Exception("Запрос некорректен: данные за последние 10 минут не предоставляются");
 
 			var sql = @"
 select  oh.WriteTime,
