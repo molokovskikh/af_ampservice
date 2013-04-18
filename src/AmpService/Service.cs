@@ -595,7 +595,8 @@ order by OrderDate
 				throw new Exception("Запрос некорректен: данные за последние 10 минут не предоставляются");
 
 			var sql = @"
-select  oh.WriteTime,
+select  date(oh.WriteTime) as WriteDate,
+		time(oh.WriteTime) as WriteTime,
 		a.Address,
 		concat(s.Name, ' (', pd.PriceName, ')') as PriceName,
 		u.Login,
