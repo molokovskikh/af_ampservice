@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using Common.Service;
@@ -103,7 +104,10 @@ namespace Integration
 			session.Flush();
 
 			var lines = service.GetOrderItems(DateTime.Now.AddDays(-1), DateTime.Now.AddMinutes(-30));
+			var row = lines.Tables[0].Rows[0];
 			Assert.AreEqual(1, lines.Tables[0].Rows.Count);
+			Assert.IsInstanceOf<string>(row["WriteTime"]);
+			Assert.IsInstanceOf<string>(row["WriteDate"]);
 		}
 	}
 }
