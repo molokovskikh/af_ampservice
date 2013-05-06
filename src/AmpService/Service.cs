@@ -551,7 +551,7 @@ SELECT  ol.RowId OrderLineId,
 		ol.Code as ItemID,
 		ol.Cost,
 		ol.Quantity,
-		if(length(ifnull(i.SupplierClientId, ''))< 1, concat(cd.Name, '; ', a.Address, '; ',
+		if(length(ifnull(ai.SupplierDeliveryId, ''))< 1, concat(cd.Name, '; ', a.Address, '; ',
 		(select c.contactText
 		from contacts.contact_groups cg
 		  join contacts.contacts c on cg.Id = c.ContactOwnerId
