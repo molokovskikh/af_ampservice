@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Linq;
 using AmpService;
 using Castle.ActiveRecord;
 using Common.Tools;
@@ -18,9 +20,9 @@ namespace Integration
 			var orders = service.GetOrdersByDate(begin, 0);
 			Assert.That(orders, Is.Not.Null);
 			Assert.That(orders.Tables.Count, Is.GreaterThan(0));
-			Assert.That(orders.Tables[0].Rows.Count, Is.EqualTo(1));
-			var order = orders.Tables[0].Rows[0];
-			Assert.That(Convert.ToInt64(order["OrderID"]), Is.EqualTo(orderId));
+			Assert.That(orders.Tables[0].Rows.Count, Is.GreaterThanOrEqualTo(1));
+			var ids = orders.Tables[0].AsEnumerable().Select(r => Convert.ToUInt64(r["OrderID"]));
+			Assert.True(ids.Contains(orderId), "не выбрали заказ {0}", orderId);
 		}
 
 		[Test]
