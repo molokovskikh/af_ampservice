@@ -622,7 +622,8 @@ WHERE oh.Deleted = 0
 	and oh.ClientCode = ?clientId
 	and oh.WriteTime >= ?begin
 	and oh.WriteTime <= ?end
-order by oh.WriteTime";
+order by oh.WriteTime
+group by ol.RowId";
 
 			return With.Connection(c => {
 				var adapter = new MySqlDataAdapter(sql, c);
