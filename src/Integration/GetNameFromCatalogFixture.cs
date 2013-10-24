@@ -35,7 +35,7 @@ namespace Integration
 			};
 			product.CatalogProduct.CatalogName = new TestCatalogName {
 				Name = "Тестовое наименование",
-				MnnId = 1,
+				Mnn = session.Query<TestMnn>().First(),
 			};
 
 			Save(product);
@@ -73,7 +73,7 @@ namespace Integration
 			};
 			product.CatalogProduct.CatalogName = new TestCatalogName {
 				Name = "'Тестовое наименование",
-				MnnId = 1,
+				Mnn = session.Query<TestMnn>().First(),
 			};
 			Save(product);
 			Reopen();
