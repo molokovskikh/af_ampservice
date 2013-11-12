@@ -12,6 +12,7 @@ namespace Integration
 		[SetUp]
 		public void Setup()
 		{
+			Global.Initialize();
 			ServiceContext.GetHost = () => "localhost";
 			ServiceContext.GetUserName = () => { throw new Exception("Тесты не инициализированы"); };
 
