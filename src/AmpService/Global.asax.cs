@@ -30,11 +30,10 @@ namespace AmpService
 			}
 		}
 
-		public static void Initialize(string connectionStringName = "Main")
+		public static void Initialize()
 		{
 			XmlConfigurator.Configure();
 			GlobalContext.Properties["Version"] = Assembly.GetExecutingAssembly().GetName().Version;
-			ConnectionHelper.DefaultConnectionStringName = "Main";
 			With.DefaultConnectionStringName = ConnectionHelper.GetConnectionName();
 			var sessionFactoryHolder = new SessionFactoryHolder(ConnectionHelper.GetConnectionName());
 			sessionFactoryHolder
