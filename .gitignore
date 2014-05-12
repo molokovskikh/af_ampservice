@@ -10,3 +10,5 @@ _Resharper*
 packages/
 *.Cache
 src/*.properties
+
+*.gen.*
