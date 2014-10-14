@@ -314,7 +314,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 			return result;
 		}
 
-		public DataSet PostOrder2(ulong[] orderIds,
+		public virtual DataSet PostOrder2(ulong[] orderIds,
 			decimal[] cost,
 			uint[] quanties,
 			DateTime[] priceDates,
