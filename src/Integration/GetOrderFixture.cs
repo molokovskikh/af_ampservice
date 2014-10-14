@@ -30,10 +30,8 @@ namespace Integration
 		public void Do_not_show_orders_from_service_clients()
 		{
 			var begin = DateTime.Now;
-			using (new TransactionScope()) {
-				testClient.Settings.ServiceClient = true;
-				testClient.Settings.Save();
-			}
+			testClient.Settings.ServiceClient = true;
+			session.Save(testClient.Settings);
 			BuildOrder();
 
 			var orders = service.GetOrdersByDate(begin, 0);
@@ -44,10 +42,8 @@ namespace Integration
 		public void Do_not_show_orders_from_hidden_clients()
 		{
 			var begin = DateTime.Now;
-			using (new TransactionScope()) {
-				testClient.Settings.InvisibleOnFirm = 2;
-				testClient.Settings.Save();
-			}
+			testClient.Settings.InvisibleOnFirm = 2;
+			session.Save(testClient.Settings);
 			BuildOrder();
 
 			var orders = service.GetOrdersByDate(begin, 0);
@@ -77,10 +73,10 @@ namespace Integration
 				new[] { Convert.ToUInt32(offer["OrderCode2"]) },
 				new[] { false });
 			var orderId = Convert.ToUInt32(orderIds.Tables[0].Rows[0]["OrderID"]);
-			Execute(String.Format(@"
+			session.CreateSQLQuery(String.Format(@"
 update orders.ordershead
 set Submited = 1
-where RowId = {0}", orderId));
+where RowId = {0}", orderId)).ExecuteUpdate();
 			return orderId;
 		}
 

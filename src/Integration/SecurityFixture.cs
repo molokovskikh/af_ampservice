@@ -11,10 +11,8 @@ namespace Integration
 		[Test]
 		public void Every_method_should_return_null_if_user_not_have_iol_permission()
 		{
-			using (new SessionScope()) {
-				testUser.AssignedPermissions.Clear();
-				testUser.Save();
-			}
+			testUser.AssignedPermissions.Clear();
+			session.Save(testUser);
 
 			Assert.Throws<FaultException<DoNotHavePermissionFault>>(() => service.GetNameFromCatalogWithMnn(new[] { "" },
 				new string[] { },

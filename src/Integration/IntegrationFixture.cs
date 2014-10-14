@@ -9,9 +9,9 @@ using Test.Support.Suppliers;
 
 namespace Integration
 {
-	public class IntegrationFixture
+	public class IntegrationFixture : Test.Support.IntegrationFixture
 	{
-		protected AmpService.AmpService service;
+		private AmpService.AmpService _service;
 		protected TestClient testClient;
 		protected TestUser testUser;
 		public static bool OffersCreated = false;
@@ -21,24 +21,27 @@ namespace Integration
 		public void Setup()
 		{
 			if (!OffersCreated) {
-				using(new SessionScope()) {
-					var supplier = TestSupplier.CreateNaked();
-					Service.SupplierIds = new[] { supplier.Id };
-					PriceId = supplier.Prices[0].Id;
-					supplier.CreateSampleCore();
-				}
+				var supplier = TestSupplier.CreateNaked(session);
+				Service.SupplierIds = new[] { supplier.Id };
+				PriceId = supplier.Prices[0].Id;
+				supplier.CreateSampleCore();
 				OffersCreated = true;
 			}
 
-			testClient = TestClient.Create();
+			testClient = TestClient.CreateNaked(session);
 			testUser = testClient.Users.First();
 			ServiceContext.GetUserName = () => testUser.Login;
-			service = new AmpService.AmpService();
+			_service = new AmpService.AmpService();
 		}
 
-		public void Execute(string command)
+		protected AmpService.AmpService service
 		{
-			With.Session(s => s.CreateSQLQuery(command).ExecuteUpdate());
+			get
+			{
+				if (session.Transaction.IsActive)
+					session.Transaction.Commit();
+				return _service;
+			}
 		}
 	}
 }

@@ -5,6 +5,10 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -17,14 +21,20 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AmpService</RootNamespace>
     <AssemblyName>AmpService</AssemblyName>
-    <SccProjectName></SccProjectName>
-    <SccLocalPath></SccLocalPath>
-    <SccAuxPath></SccAuxPath>
-    <SccProvider></SccProvider>
-    <FileUpgradeFlags></FileUpgradeFlags>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <UpgradeBackupLocation></UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <UseIISExpress>false</UseIISExpress>
   </PropertyGroup>
@@ -65,10 +75,6 @@
     <Reference Include="NHibernate">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="NHibernate.ByteCode.Castle">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\NHibernate.ByteCode.Castle.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate.Mapping.Attributes">
       <SpecificVersion>False</SpecificVersion>
@@ -131,6 +137,10 @@
       <Project>{8A680813-C83B-497A-85E6-E8F07B7D7650}</Project>
       <Name>Common.MySql</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Common.MySql\Common.NHibernate\Common.NHibernate.csproj">
+      <Project>{8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0}</Project>
+      <Name>Common.NHibernate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common.Service\Common.Service\Common.Service.csproj">
       <Project>{42D52206-A0F4-4624-B3DA-D554DC6A5C09}</Project>
       <Name>Common.Service</Name>
@@ -173,10 +183,12 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>54617</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl></IISUrl>
+          <IISUrl>
+          </IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl></CustomServerUrl>
+          <CustomServerUrl>
+          </CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>

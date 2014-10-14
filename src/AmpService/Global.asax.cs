@@ -11,7 +11,10 @@ using Common.Service.Interceptors;
 using Common.Service.Models;
 using log4net;
 using log4net.Config;
+using NHibernate;
+using NHibernate.Cfg;
 using NHibernate.Mapping.Attributes;
+using NHibernate.Mapping.ByCode;
 using With = Common.MySql.With;
 
 namespace AmpService
@@ -30,16 +33,20 @@ namespace AmpService
 			}
 		}
 
-		public static void Initialize()
+		public static void Initialize(ISessionFactory factory = null)
 		{
 			XmlConfigurator.Configure();
 			GlobalContext.Properties["Version"] = Assembly.GetExecutingAssembly().GetName().Version;
 			With.DefaultConnectionStringName = ConnectionHelper.GetConnectionName();
-			var sessionFactoryHolder = new SessionFactoryHolder(ConnectionHelper.GetConnectionName());
-			sessionFactoryHolder
-				.Configuration
-				.AddInputStream(HbmSerializer.Default.Serialize(typeof(ServiceLogEntity).Assembly))
-				.AddInputStream(HbmSerializer.Default.Serialize(typeof(Client).Assembly));
+			SessionFactoryHolder sessionFactoryHolder;
+			if (factory == null) {
+				sessionFactoryHolder = new SessionFactoryHolder(ConnectionHelper.GetConnectionName());
+				var cfg = sessionFactoryHolder.Configuration;
+				Map(cfg);
+			}
+			else {
+				sessionFactoryHolder = new SessionFactoryHolder(factory);
+			}
 
 			IoC.Container.Register(
 				Component.For<Service>().Interceptors(
@@ -61,16 +68,30 @@ namespace AmpService
 				Component.For<LockMonitor>()
 					.Parameters(Parameter.ForKey("TimeOut").Eq("10000")),
 				Component.For<IClientLoader>().ImplementedBy<ClientLoader>(),
+				Component.For<ISessionFactory>().Instance(sessionFactoryHolder.SessionFactory),
 				Component.For<ISessionFactoryHolder>().Instance(sessionFactoryHolder),
 				Component.For<RepositoryInterceptor>(),
 				Component.For(typeof(IRepository<>)).ImplementedBy(typeof(Repository<>)),
 				Component.For<ISecurityRepository>().ImplementedBy<SecurityRepository>(),
-				Component.For<IOfferRepository>().ImplementedBy<OfferRepository>(),
 				Component.For<ILogRepository>().ImplementedBy<LogRepository>());
 
 			ServiceContext.GetUserName = () => ServiceContext.NormalizeUsername(HttpContext.Current.User.Identity.Name);
 			ServiceContext.GetHost = () => HttpContext.Current.Request.UserHostAddress;
 			IoC.Resolve<LockMonitor>().Start();
+		}
+
+		public static void Map(Configuration cfg)
+		{
+			cfg.AddInputStream(HbmSerializer.Default.Serialize(typeof(ServiceLogEntity).Assembly));
+			cfg.AddInputStream(HbmSerializer.Default.Serialize(typeof(Client).Assembly));
+			var mapper = new ConventionModelMapper();
+			mapper.Class<ArchiveOffer>(m => {
+				m.Catalog("Farm");
+				m.Table("CoreArchive");
+				m.ManyToOne(i => i.PriceList, x => x.Column("PriceCode"));
+			});
+			var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
+			cfg.AddDeserializedMapping(mapping, "AmpService.Models");
 		}
 
 		public static void Deinitialize()

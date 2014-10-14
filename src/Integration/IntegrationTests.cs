@@ -1,25 +1,11 @@
 ﻿using System;
-using System.Data;
-using Common.MySql;
 using NUnit.Framework;
-using Test.Support;
-using Test.Support.Suppliers;
 
 namespace Integration
 {
 	[TestFixture]
 	public class IntegrationTests : IntegrationFixture
 	{
-		[Test]
-		public void GetNameFromCatalogWithMnn()
-		{
-			var catalog = new TestProduct();
-
-			catalog.CatalogProduct = new TestCatalogProduct {
-				Name = "тестовый продукт из каталога"
-			};
-		}
-
 		[Test]
 		public void GetNameFromCatalogTest()
 		{
@@ -38,7 +24,8 @@ namespace Integration
 		[Test]
 		public void GetPriceCodeByNameTest()
 		{
-			service.GetPriceCodeByName(null);
+			var data = service.GetPriceCodeByName(null);
+			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			service.GetPriceCodeByName(new[] { "Протек-15" });
 			service.GetPriceCodeByName(new[] { "Протек-15", "Материа Медика" });
 			service.GetPriceCodeByName(new[] { "Протек*" });

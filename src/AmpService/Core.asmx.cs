@@ -105,6 +105,19 @@ namespace AmpService
 		}
 
 		[WebMethod]
+		public DataSet PostOrder2(ulong[] orderId,
+			decimal[] cost,
+			DateTime[] priecDate,
+			uint[] quantity,
+			string[] message,
+			uint[] orderCode1,
+			uint[] orderCode2,
+			bool[] junk)
+		{
+			return service.PostOrder2(orderId, cost, quantity, priecDate, message, orderCode1, orderCode2, junk);
+		}
+
+		[WebMethod]
 		public DataSet GetOrdersByDate(DateTime olderThan, int priceCode)
 		{
 			return service.GetOrdersByDate(olderThan, priceCode);

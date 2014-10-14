@@ -7,28 +7,28 @@ using System.Xml;
 using Common.Models;
 using Common.Models.Repositories;
 using Common.MySql;
+using Common.NHibernate;
 using Common.Service;
 using Common.Tools;
+using log4net;
 using MySql.Data.MySqlClient;
+using NHibernate;
+using NHibernate.Linq;
 using With = Common.MySql.With;
 
 namespace AmpService
 {
 	public class Service
 	{
-		private readonly IRepository<Order> _orderRepository;
-		private readonly IOfferRepository _offerRepository;
-		private readonly IRepository<OrderRules> _rulesRepository;
-		public static uint AssortmentPriceId = 1864;
-		public static uint[] SupplierIds = new uint[] { 94, 62 };
+		ILog log = LogManager.GetLogger(typeof(Service));
 
-		public Service(IOfferRepository offerRepository,
-			IRepository<Order> orderRepository,
-			IRepository<OrderRules> rulesRepository)
+		public static uint AssortmentPriceId = 1864;
+		public static uint[] SupplierIds = { 94, 62 };
+		private ISessionFactory _factory;
+
+		public Service(ISessionFactory factory)
 		{
-			_offerRepository = offerRepository;
-			_orderRepository = orderRepository;
-			_rulesRepository = rulesRepository;
+			_factory = factory;
 		}
 
 		public virtual DataSet GetNameFromCatalog(string[] name,
@@ -134,13 +134,16 @@ from usersettings.prices p
 
 		public class ToOrder
 		{
-			public ulong OrderId;
+			public ulong OfferId;
 			public uint Quantity;
 			public string Message;
 			public uint OrderCode1;
 			public uint OrderCode2;
 			public bool Junk;
 			public OrderItem OrderItem;
+
+			public decimal Cost;
+			public DateTime PriceDate;
 
 			public static IList<ToOrder> FromRequest(ulong[] orderIds,
 				uint[] quanties,
@@ -155,8 +158,36 @@ from usersettings.prices p
 						message = messages[i];
 
 					var toOrder = new ToOrder {
-						OrderId = orderIds[i],
+						OfferId = orderIds[i],
 						Quantity = quanties[i],
+						Message = message,
+						OrderCode1 = orderCodes1[i],
+						OrderCode2 = orderCodes2[i],
+						Junk = junks[i],
+					};
+					return toOrder;
+				}).ToList();
+			}
+
+			public static IList<ToOrder> FromRequest(ulong[] orderIds,
+				uint[] quanties,
+				decimal[] costs,
+				DateTime[] pricedates,
+				string[] messages,
+				uint[] orderCodes1,
+				uint[] orderCodes2,
+				bool[] junks)
+			{
+				return orderIds.Select((orderId, i) => {
+					var message = "";
+					if (messages.Length > i)
+						message = messages[i];
+
+					var toOrder = new ToOrder {
+						OfferId = orderIds[i],
+						Quantity = quanties[i],
+						Cost = costs[i],
+						PriceDate = pricedates[i],
 						Message = message,
 						OrderCode1 = orderCodes1[i],
 						OrderCode2 = orderCodes2[i],
@@ -185,29 +216,35 @@ from usersettings.prices p
 				|| orderIds.Length != junks.Length)
 				return null;
 
-			var client = ServiceContext.Client;
-			var rules = _rulesRepository.Get(client.FirmCode);
-
-			var offers = _offerRepository.GetByIds(ServiceContext.User, orderIds);
-
-			var orders = new List<Order>();
 			var toOrders = ToOrder.FromRequest(orderIds, quanties, messages, orderCodes1, orderCodes2, junks);
-			foreach (var toOrder in toOrders) {
-				var offer = offers.FirstOrDefault(o => o.Id.CoreId == toOrder.OrderId);
-				if (offer == null)
-					continue;
+			using (var session = _factory.OpenSession())
+			using (var trx = session.BeginTransaction()) {
+				var user = ServiceContext.User;
+				var rules = session.Load<OrderRules>(user.Client.Id);
+				var offers = OfferQuery.GetByIds(session, user, orderIds);
+				var orders = new List<Order>();
+				foreach (var toOrder in toOrders) {
+					var offer = offers.FirstOrDefault(o => o.Id.CoreId == toOrder.OfferId);
+					if (offer == null)
+						continue;
 
-				var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.Id.Price.PriceCode);
-				if (order == null) {
-					order = new Order(offer.PriceList, ServiceContext.User, rules);
-					order.ClientAddition = toOrder.Message;
-					orders.Add(order);
+					var order = orders.FirstOrDefault(o => o.PriceList.PriceCode == offer.PriceList.Id.Price.PriceCode);
+					if (order == null) {
+						order = new Order(offer.PriceList, ServiceContext.User, rules);
+						order.ClientAddition = toOrder.Message;
+						orders.Add(order);
+					}
+					toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
 				}
-				toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
+
+				session.SaveEach(orders);
+				trx.Commit();
 			}
+			return BuildOrderReport(toOrders);
+		}
 
-			Common.Models.With.Transaction(() => { orders.Each(_orderRepository.Save); });
-
+		private DataSet BuildOrderReport(IList<ToOrder> toOrders)
+		{
 			var result = new DataSet();
 			var table = result.Tables.Add("Prices");
 			table.Columns.Add("OrderID", typeof(long));
@@ -254,7 +291,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 				using (InvokeGetActivePrices(c)) {
 					foreach (var toOrder in toOrders) {
 						var row = result.Tables[0].NewRow();
-						row["OriginalOrderID"] = toOrder.OrderId;
+						row["OriginalOrderID"] = toOrder.OfferId;
 						result.Tables[0].Rows.Add(row);
 						if (toOrder.OrderItem != null) {
 							row["OrderID"] = toOrder.OrderItem.Order.RowId;
@@ -262,7 +299,6 @@ WHERE	c.SynonymCode = ?SynonymCode
 						}
 						var data = new DataSet();
 						var dataAdapter = new MySqlDataAdapter(selectOffer, c);
-						dataAdapter.SelectCommand.Parameters.AddWithValue("?ClientCode", client.FirmCode);
 						dataAdapter.SelectCommand.Parameters.AddWithValue("?SynonymCode", toOrder.OrderCode1);
 						dataAdapter.SelectCommand.Parameters.AddWithValue("?SynonymFirmCrCode", toOrder.OrderCode2);
 						dataAdapter.SelectCommand.Parameters.AddWithValue("?Junk", toOrder.Junk);
@@ -275,8 +311,101 @@ WHERE	c.SynonymCode = ?SynonymCode
 					}
 				}
 			});
-
 			return result;
+		}
+
+		public DataSet PostOrder2(ulong[] orderIds,
+			decimal[] cost,
+			uint[] quanties,
+			DateTime[] priceDates,
+			string[] messages,
+			uint[] orderCodes1,
+			uint[] orderCodes2,
+			bool[] junks)
+		{
+			orderIds = orderIds ?? new ulong[0];
+			cost = cost ?? new decimal[0];
+			quanties = quanties ?? new uint[0];
+			messages = messages ?? new string[0];
+			orderCodes1 = orderCodes1 ?? new uint[0];
+			orderCodes2 = orderCodes2 ?? new uint[0];
+			junks = junks ?? new bool[0];
+			priceDates = priceDates ?? new DateTime[0];
+
+			var length = orderIds.Length;
+			if (cost.Length != length
+				|| quanties.Length != length
+				|| orderCodes1.Length != length
+				|| orderCodes2.Length != length
+				|| junks.Length != length
+				|| priceDates.Length != length) {
+				log.Warn("Некорректное число параметров");
+				return null;
+			}
+
+			using (var session = _factory.OpenSession())
+			using (var trx = session.BeginTransaction()) {
+				var user = ServiceContext.User;
+				var rules = session.Load<OrderRules>(user.Client.Id);
+				List<ActivePrice> activePrices;
+				using(StorageProcedures.GetActivePrices((MySqlConnection)session.Connection, user.Id)) {
+					activePrices = session.Query<ActivePrice>().ToList();
+				}
+
+				var orders = new List<Order>();
+				var toOrders = ToOrder.FromRequest(orderIds, quanties, cost, priceDates, messages, orderCodes1, orderCodes2, junks);
+				var offers = OfferQuery.GetByIds(session, user, toOrders.Select(o => o.OfferId));
+				foreach (var toOrder in toOrders) {
+					try {
+						if (toOrder.Cost <= 0)
+							throw new OrderException(String.Format("Цена не может быть меньше или равной нулю, текущее значение цены {0}", cost));
+
+						var offer = offers.FirstOrDefault(o => o.Id.CoreId == toOrder.OfferId);
+						if (offer == null) {
+							var archiveOffer = session.Get<ArchiveOffer>(toOrder.OfferId);
+							if (archiveOffer == null) {
+								log.WarnFormat("Не удалось найти предложение в архиве {0} игнорирую строку", toOrder.OfferId);
+								continue;
+							}
+							offer = archiveOffer.ToOffer(activePrices, toOrder.Cost);
+							if (offer == null) {
+								log.WarnFormat("Прайс {0} больше не доступен клиенту игнорирую строку {1}",
+									archiveOffer.PriceList.PriceCode, toOrder.OfferId);
+								continue;
+							}
+						}
+						else if ((decimal)offer.Cost != toOrder.Cost) {
+							log.WarnFormat("Заявка сделана по неактуальному прайс-листу код предложения {0}", toOrder.OfferId);
+							offer = Offer.Clone(offer, offer.PriceList, (float)toOrder.Cost, toOrder.OfferId);
+						}
+
+						if (toOrder.PriceDate > offer.PriceList.PriceDate) {
+							throw new OrderException(String.Format("Дата прайс-листа {0} по позиции {1} больше текущей даты прайс-листа {2}",
+								toOrder.PriceDate,
+								toOrder.OfferId,
+								offer.PriceList.PriceDate));
+						}
+
+						var order = orders.FirstOrDefault(o => o.PriceList == offer.PriceList.Id.Price
+							&& o.PriceDate == toOrder.PriceDate);
+						if (order == null) {
+							order = new Order(offer.PriceList, user, rules);
+							order.PriceDate = toOrder.PriceDate;
+							order.ClientAddition = toOrder.Message;
+							orders.Add(order);
+						}
+						toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
+					}
+					catch(OrderException e) {
+						log.Error(String.Format("Не удалось сформировать заявку по позиции {0}", toOrder.OfferId), e);
+					}
+				}
+
+				session.SaveEach(orders);
+				trx.Commit();
+
+				return BuildOrderReport(toOrders);
+			}
 		}
 
 		[OfferRowCalculator("PrepCode")]

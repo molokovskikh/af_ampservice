@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Text;
-using Common.Service;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
@@ -11,20 +7,11 @@ using Test.Support.Suppliers;
 
 namespace Integration
 {
-	public class GetNameFromCatalogFixture : Test.Support.IntegrationFixture
+	public class GetNameFromCatalogFixture : IntegrationFixture
 	{
-		protected AmpService.AmpService service;
-		protected TestClient testClient;
-		protected TestUser testUser;
-
 		[SetUp]
 		public void Setup()
 		{
-			testClient = TestClient.Create();
-			testUser = testClient.Users.First();
-			ServiceContext.GetUserName = () => testUser.Login;
-			service = new AmpService.AmpService();
-
 			var product = new TestProduct();
 
 			product.CatalogProduct = new TestCatalogProduct {
@@ -38,13 +25,13 @@ namespace Integration
 				Mnn = session.Query<TestMnn>().First(),
 			};
 
-			Save(product);
+			session.Save(product);
 		}
 
 		[Test]
 		public void GetNameFromCatalogWithMnn()
 		{
-			var data = service.GetNameFromCatalogWithMnn(new string[] { "Тестовое наименование" }, null, false, false, null, 5, 0, new string[] { "*препарат" }, null);
+			var data = service.GetNameFromCatalogWithMnn(new[] { "Тестовое наименование" }, null, false, false, null, 5, 0, new[] { "*препарат" }, null);
 			var table = data.Tables[0];
 			Assert.That(table.Rows.Count > 0);
 			Assert.That(table.Columns.Contains("MnnId"));
@@ -55,16 +42,14 @@ namespace Integration
 		[Test]
 		public void GetNameFromCatalogWithProperty()
 		{
-			var data = service.GetNameFromCatalogWithMnn(null, null, false, false, null, 5, 0, null, new string[] { "*та*" });
+			var data = service.GetNameFromCatalogWithMnn(null, null, false, false, null, 5, 0, null, new[] { "*та*" });
 			Assert.That(data.Tables[0].Rows.Count > 0);
 		}
-
 
 		[Test]
 		public void GetNameFromCatalogWithEscapeChar()
 		{
 			var product = new TestProduct();
-
 			product.CatalogProduct = new TestCatalogProduct {
 				Name = "тестовый продукт из каталога"
 			};
@@ -75,21 +60,21 @@ namespace Integration
 				Name = "'Тестовое наименование",
 				Mnn = session.Query<TestMnn>().First(),
 			};
-			Save(product);
-			Reopen();
-			var data = service.GetNameFromCatalogWithMnn(new string[] { "'Тестовое наименование" },
-				new string[] { "тестовая форма'" }, false, false, null, 5, 0, null, null);
+			session.Save(product);
+
+			session.Transaction.Commit();
+			var data = service.GetNameFromCatalogWithMnn(new[] { "'Тестовое наименование" },
+				new[] { "тестовая форма'" }, false, false, null, 5, 0, null, null);
 			Assert.That(data.Tables[0].Rows.Count > 0);
 		}
 
 		[Test]
 		public void Get_orders()
 		{
-			var supplier = TestSupplier.CreateNaked();
-			supplier.CreateSampleCore();
+			var supplier = TestSupplier.CreateNaked(session);
+			supplier.CreateSampleCore(session);
 			var offer = supplier.Prices[0].Core[0];
 			testClient.MaintainIntersection();
-			session.Transaction.Commit();
 
 			service.PostOrder(new[] { offer.Id },
 				new uint[] { 1 },

@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using Common.Models;
 using Common.Models.Repositories;
+using Common.NHibernate;
 using Common.Service;
 using Common.Service.Models;
 using Common.Tools;
@@ -69,30 +70,18 @@ namespace Integration
 		[Test]
 		public void Calculate_row_count()
 		{
-			With.Session(s => s.Query<ServiceLogEntity>()
+			var toDelete = session.Query<ServiceLogEntity>()
 				.Where(e => e.UserName == testUser.Login && e.MethodName == "GetPrices")
-				.ToList()
-				.Each(s.Delete));
+				.ToList();
+			session.DeleteEach(toDelete);
 
 			var begin = DateTime.Now;
 			var data = service.GetPrices(false, false, new[] { "OriginalName" }, new[] { "*" }, new[] { "OriginalName" }, new[] { "asc" }, 1000, 0);
 			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
 			var productCount = data.Tables[0].Rows.Cast<DataRow>().GroupBy(r => r["PrepCode"]).Count();
-			With.Session(s => {
-				var entity = s.Query<ServiceLogEntity>().First(e => e.MethodName == "GetPrices" && e.LogTime >= begin && e.UserName == testUser.Login);
-				Assert.That(entity.RowCount, Is.EqualTo(productCount));
-			});
-		}
-
-		[Test]
-		public void Get_prices_by_future_clients()
-		{
-			var client = TestClient.Create();
-			var user = client.Users.First();
-			ServiceContext.GetUserName = () => user.Login;
-
-			var data = service.GetPriceCodeByName(null);
-			Assert.That(data.Tables[0].Rows.Count, Is.GreaterThan(0));
+			var entity = session.Query<ServiceLogEntity>()
+				.First(e => e.MethodName == "GetPrices" && e.LogTime >= begin && e.UserName == testUser.Login);
+			Assert.That(entity.RowCount, Is.EqualTo(productCount));
 		}
 	}
 }
