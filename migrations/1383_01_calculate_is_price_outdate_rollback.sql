@@ -1,0 +1,1 @@
+drop trigger orders.CalculateIsPriceOutdate;

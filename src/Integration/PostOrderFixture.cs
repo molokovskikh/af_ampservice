@@ -135,21 +135,6 @@ where id = :CoreId")
 		}
 
 		[Test]
-		public void Post_order_by_future_clients()
-		{
-			var data = GetPrices();
-
-			var row = data.Tables[0].Rows[0];
-			PostOrder(row);
-
-			var orders = session.Query<TestOrder>().Where(o => o.Client.Id == testClient.Id).ToList();
-			Assert.That(orders.Count, Is.EqualTo(1));
-			var order = orders.First();
-			Assert.That(order.Address.Id, Is.EqualTo(testClient.Addresses.First().Id));
-			Assert.That(order.User.Id, Is.EqualTo(testUser.Id));
-		}
-
-		[Test]
 		public void Sugest_order_for_new_client()
 		{
 			var data = GetPrices();
