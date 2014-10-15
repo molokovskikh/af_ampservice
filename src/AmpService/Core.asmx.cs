@@ -104,17 +104,24 @@ namespace AmpService
 			return service.PostOrder(orderId, quantity, message, orderCode1, orderCode2, junk);
 		}
 
+		/// <summary>
+		/// Формирует заявки по ценам клиента
+		/// </summary>
+		/// <param name="cost">cost - массив цен</param>
+		/// <param name="priceDate">массив дат прайс-листов, получается из функции GetPrices поле PriceDate
+		/// функция работает аналогично PostOrder
+		/// </param>
 		[WebMethod]
 		public DataSet PostOrder2(ulong[] orderId,
 			decimal[] cost,
-			DateTime[] priecDate,
+			DateTime[] priceDate,
 			uint[] quantity,
 			string[] message,
 			uint[] orderCode1,
 			uint[] orderCode2,
 			bool[] junk)
 		{
-			return service.PostOrder2(orderId, cost, quantity, priecDate, message, orderCode1, orderCode2, junk);
+			return service.PostOrder2(orderId, cost, quantity, priceDate, message, orderCode1, orderCode2, junk);
 		}
 
 		[WebMethod]
