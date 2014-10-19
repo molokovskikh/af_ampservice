@@ -53,7 +53,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\NHibernate.dll</HintPath>
     </Reference>
-    <Reference Include="NHibernate.Mapping.Attributes, Version=3.2.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="NHibernate.Mapping.Attributes" />
     <Reference Include="nunit.framework">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nunit.framework.dll</HintPath>
