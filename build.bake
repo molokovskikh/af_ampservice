@@ -1,5 +1,3 @@
-﻿import file from Web.bake
-import file from Db.bake
 
 Global(
 	Project : "AmpService",
@@ -11,4 +9,4 @@ task @Build, [@WebBuild]
 
 task @default, [@Build]
 
-task @deploy, [@DeployPipeline]
+task @deploy, ["deploy:pipeline"]
