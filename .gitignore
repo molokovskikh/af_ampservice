@@ -9,6 +9,5 @@ _Resharper*
 *.ncb
 packages/
 *.Cache
-src/*.properties
-
 *.gen.*
+.vs
