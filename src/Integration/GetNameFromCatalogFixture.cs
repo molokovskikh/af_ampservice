@@ -22,7 +22,7 @@ namespace Integration
 			};
 			product.CatalogProduct.CatalogName = new TestCatalogName {
 				Name = "Тестовое наименование",
-				Mnn = session.Query<TestMnn>().First(),
+				Mnn = session.Query<TestMnn>().First(x => x.Mnn.EndsWith("препарат")),
 			};
 
 			session.Save(product);
