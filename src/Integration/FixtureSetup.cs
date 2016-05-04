@@ -9,7 +9,7 @@ namespace Integration
 	[SetUpFixture]
 	public class FixtureSetup
 	{
-		[SetUp]
+		[OneTimeSetUp]
 		public void Setup()
 		{
 			Test.Support.Setup.BuildConfiguration("local");
@@ -23,7 +23,7 @@ namespace Integration
 			ServiceContext.GetUserName = () => { throw new Exception("Тесты не инициализированы"); };
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public void TearDown()
 		{
 			Global.Deinitialize();

@@ -11,3 +11,4 @@ packages/
 *.Cache
 *.gen.*
 .vs
+AssemblyInfo.cs
