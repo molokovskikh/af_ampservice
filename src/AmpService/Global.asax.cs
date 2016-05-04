@@ -37,7 +37,6 @@ namespace AmpService
 		{
 			XmlConfigurator.Configure();
 			GlobalContext.Properties["Version"] = Assembly.GetExecutingAssembly().GetName().Version;
-			With.DefaultConnectionStringName = ConnectionHelper.GetConnectionName();
 			SessionFactoryHolder sessionFactoryHolder;
 			if (factory == null) {
 				sessionFactoryHolder = new SessionFactoryHolder(ConnectionHelper.GetConnectionName());
