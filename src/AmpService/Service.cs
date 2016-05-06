@@ -47,8 +47,8 @@ namespace AmpService
 			var searchByApmCode = name != null && name.Length > 0 && int.TryParse(name[0], out i);
 
 			var query = new Query().Select(@"
-p.id as PrepCode,
-cn.Name,
+p.id as PrepCode, 
+cn.Name, 
 cf.Form,
 cast(ifnull(group_concat(distinct pv.Value ORDER BY prop.PropertyName, pv.Value SEPARATOR ', '), '') as CHAR) as Properties,
 c.VitallyImportant,
@@ -289,14 +289,12 @@ WHERE	c.SynonymCode = ?SynonymCode
 
 			With.Connection(c => {
 				using (InvokeGetActivePrices(c)) {
-					result.Tables[0].Columns.Add("OrderLineId", typeof(uint));
 					foreach (var toOrder in toOrders) {
 						var row = result.Tables[0].NewRow();
 						row["OriginalOrderID"] = toOrder.OfferId;
 						result.Tables[0].Rows.Add(row);
 						if (toOrder.OrderItem != null) {
 							row["OrderID"] = toOrder.OrderItem.Order.RowId;
-							row["OrderLineId"] = toOrder.OrderItem.RowId;
 							continue;
 						}
 						var data = new DataSet();
@@ -382,7 +380,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 						}
 
 						if (toOrder.PriceDate > offer.PriceList.PriceDate) {
-							throw new OrderException(string.Format("Дата прайс-листа {0} по позиции {1} больше текущей даты прайс-листа {2}",
+							throw new OrderException(String.Format("Дата прайс-листа {0} по позиции {1} больше текущей даты прайс-листа {2}",
 								toOrder.PriceDate,
 								toOrder.OfferId,
 								offer.PriceList.PriceDate));
@@ -399,7 +397,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 						toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
 					}
 					catch(OrderException e) {
-						log.Error($"Не удалось сформировать заявку по позиции {toOrder.OfferId}", e);
+						log.Error(String.Format("Не удалось сформировать заявку по позиции {0}", toOrder.OfferId), e);
 					}
 				}
 
@@ -461,7 +459,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 			if (rangeValue == null || rangeField == null
 				|| rangeField.Length != rangeValue.Length)
 				throw new ArgumentException("Входящие параметры не валидны");
-			//TODO: в принципе в этой проверке нет нужды если будет неверное название поля
+			//TODO: в принципе в этой проверке нет нужды если будет неверное название поля 
 			//то будет Exception на этапе трансляции
 
 			//проверка имен полей для фильтрации
@@ -492,7 +490,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 			for (var i = 0; i < rangeField.Length; i++) {
 				//преобразовываем клиентские названия полей во внутренние
 				var innerFieldName = validRequestFields[rangeField[i]];
-				//если в словаре не такого поля
+				//если в словаре не такого поля 
 				if (!filtedField.ContainsKey(innerFieldName))
 					//то добавляем его и создаем массив для хранения его значений
 					filtedField.Add(innerFieldName, new List<string>());
@@ -610,8 +608,8 @@ FROM UserSettings.MinCosts as offers
 					command += " where " + predicatBlock;
 			}
 
-			//группировка нужна т.к. в асортиментном прайсе амп может быть несколько записей
-			//соответствующие с одинаковым ProductId и CodeFirmCr но смысла в этом нет
+			//группировка нужна т.к. в асортиментном прайсе амп может быть несколько записей 
+			//соответствующие с одинаковым ProductId и CodeFirmCr но смысла в этом нет 
 			//ни какого они просто не нужны
 			command += " GROUP BY OrderID";
 			command += Utils.FormatOrderBlock(sortField, sortOrder);
@@ -692,7 +690,7 @@ SELECT  ol.RowId OrderLineId,
 		limit 1)), '') as Addition,
 		if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName,
 		ifnull(i.PriceMarkup + pd.UpCost + prd.UpCost, 0) PriceMarkup
-FROM UserSettings.PricesData pd
+FROM UserSettings.PricesData pd 
 	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
 	join Usersettings.pricesregionaldata prd on prd.PriceCode = pd.PriceCode and prd.RegionCode = oh.RegionCode
