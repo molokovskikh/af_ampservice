@@ -176,6 +176,7 @@ where id = :CoreId")
 			Assert.AreEqual(priceDate, order.PriceDate);
 			Assert.AreEqual(1, order.Items.Count);
 			Assert.AreEqual(cost, order.Items[0].Cost);
+			Assert.AreEqual(order.Items[0].Id, result.Tables[0].Rows[0]["OrderLineId"]);
 		}
 
 		[Test]
