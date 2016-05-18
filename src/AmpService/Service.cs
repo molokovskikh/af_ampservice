@@ -289,14 +289,14 @@ WHERE	c.SynonymCode = ?SynonymCode
 
 			With.Connection(c => {
 				using (InvokeGetActivePrices(c)) {
-					result.Tables[0].Columns.Add("OrderLineId", typeof(uint));
+					result.Tables[0].Columns.Add("OrderLineId", typeof(string));
 					foreach (var toOrder in toOrders) {
 						var row = result.Tables[0].NewRow();
 						row["OriginalOrderID"] = toOrder.OfferId;
 						result.Tables[0].Rows.Add(row);
 						if (toOrder.OrderItem != null) {
 							row["OrderID"] = toOrder.OrderItem.Order.RowId;
-							row["OrderLineId"] = toOrder.OrderItem.RowId;
+							row["OrderLineId"] = toOrder.OrderItem.RowId.ToString();
 							continue;
 						}
 						var data = new DataSet();
