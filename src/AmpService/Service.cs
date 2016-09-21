@@ -237,7 +237,7 @@ from usersettings.prices p
 					toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
 				}
 
-				session.SaveEach(orders);
+				session.SaveEach(orders.Where(x => x.OrderItems.Count > 0));
 				trx.Commit();
 			}
 			return BuildOrderReport(toOrders);
@@ -360,7 +360,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 				foreach (var toOrder in toOrders) {
 					try {
 						if (toOrder.Cost <= 0)
-							throw new OrderException(String.Format("Цена не может быть меньше или равной нулю, текущее значение цены {0}", cost));
+							throw new OrderException($"Цена не может быть меньше или равной нулю, текущее значение цены {cost}");
 
 						var offer = offers.FirstOrDefault(o => o.Id.CoreId == toOrder.OfferId);
 						if (offer == null) {
@@ -382,10 +382,8 @@ WHERE	c.SynonymCode = ?SynonymCode
 						}
 
 						if (toOrder.PriceDate > offer.PriceList.PriceDate) {
-							throw new OrderException(string.Format("Дата прайс-листа {0} по позиции {1} больше текущей даты прайс-листа {2}",
-								toOrder.PriceDate,
-								toOrder.OfferId,
-								offer.PriceList.PriceDate));
+							throw new OrderException(
+								$"Дата прайс-листа {toOrder.PriceDate} по позиции {toOrder.OfferId} больше текущей даты прайс-листа {offer.PriceList.PriceDate}");
 						}
 
 						var order = orders.FirstOrDefault(o => o.PriceList == offer.PriceList.Id.Price
@@ -399,7 +397,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 						toOrder.OrderItem = order.AddOrderItem(offer, toOrder.Quantity);
 					}
 					catch(OrderException e) {
-						log.Error($"Не удалось сформировать заявку по позиции {toOrder.OfferId}", e);
+						log.Warn($"Не удалось сформировать заявку по позиции {toOrder.OfferId}", e);
 					}
 				}
 
