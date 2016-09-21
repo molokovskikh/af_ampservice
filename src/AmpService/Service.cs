@@ -403,7 +403,7 @@ WHERE	c.SynonymCode = ?SynonymCode
 					}
 				}
 
-				session.SaveEach(orders);
+				session.SaveEach(orders.Where(x => x.OrderItems.Count > 0));
 				trx.Commit();
 
 				return BuildOrderReport(toOrders);
