@@ -38,5 +38,15 @@ namespace Integration
 			var data = service.GetPriceCodeByName(null);
 			Assert.That(data.Tables[0].Columns.Contains("MinReq"), "MinReq отсутствует");
 		}
+
+		[Test]
+		public void Get_categoris()
+		{
+			var data = service.GetCategories();
+			var dataTable = data.Tables[0];
+			Assert.AreEqual("Id", dataTable.Columns[0].ColumnName);
+			Assert.AreEqual("Name", dataTable.Columns[1].ColumnName);
+			Assert.That(dataTable.Rows.Count, Is.GreaterThan(0));
+		}
 	}
 }

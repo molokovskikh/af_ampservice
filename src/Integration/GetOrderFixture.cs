@@ -20,6 +20,7 @@ namespace Integration
 			var orders = service.GetOrdersByDate(begin, 0);
 			Assert.That(orders, Is.Not.Null);
 			Assert.That(orders.Tables.Count, Is.GreaterThan(0));
+			Assert.That(orders.Tables[0].Columns.Cast<DataColumn>().Implode(x => x.ColumnName), Does.Contain("CategoryId"));
 			Assert.That(orders.Tables[0].Rows.Count, Is.GreaterThanOrEqualTo(1),
 				"номер заказа {0} дата {1} поставщик {2}", orderId, begin, Service.SupplierIds.Implode());
 			var ids = orders.Tables[0].AsEnumerable().Select(r => Convert.ToUInt64(r["OrderID"]));

@@ -48,6 +48,12 @@ namespace AmpService
 			return service.GetPriceCodeByName(firmName);
 		}
 
+		[WebMethod]
+		public DataSet GetCategories()
+		{
+			return service.GetCategories();
+		}
+
 		/// <summary>
 		/// Выбирает список список позиций прайс листов, основываясь на полях
 		/// фильтрации из RangeField и их значениях из RangeValue.

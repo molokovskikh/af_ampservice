@@ -689,7 +689,8 @@ SELECT  ol.RowId OrderLineId,
 			  and c.Type = 1
 		limit 1)), '') as Addition,
 		if(length(ifnull(i.SupplierClientId, '')) < 1, cd.Name, '') as ClientName,
-		ifnull(i.PriceMarkup + pd.UpCost + prd.UpCost, 0) PriceMarkup
+		ifnull(i.PriceMarkup + pd.UpCost + prd.UpCost, 0) PriceMarkup,
+		c.CategoryId
 FROM UserSettings.PricesData pd
 	JOIN Orders.OrdersHead oh ON pd.PriceCode = oh.PriceCode
 	JOIN Orders.OrdersList ol ON oh.RowID = ol.OrderID
@@ -699,6 +700,8 @@ FROM UserSettings.PricesData pd
 	join Customers.Addresses a on a.Id = oh.AddressId
 		join Customers.AddressIntersection ai on i.Id = ai.IntersectionId and a.Id = ai.AddressId
 		JOIN UserSettings.RetClientsSet rcs on rcs.ClientCode = cd.Id
+	join Catalogs.Products p on p.Id = ol.ProductId
+		join Catalogs.Catalog c on c.Id = p.CatalogId
 WHERE pd.FirmCode in ({1})
 	and oh.Deleted = 0
 	and oh.Submited = 1
@@ -761,6 +764,16 @@ order by oh.WriteTime";
 				parameters.AddWithValue("begin", begin);
 				parameters.AddWithValue("end", end);
 				parameters.AddWithValue("assortmentPriceId", AssortmentPriceId);
+				var data = new DataSet();
+				adapter.Fill(data);
+				return data;
+			});
+		}
+
+		public virtual DataSet GetCategories()
+		{
+			return With.Connection(c => {
+				var adapter = new MySqlDataAdapter("select Id, Name from Catalogs.Category", c);
 				var data = new DataSet();
 				adapter.Fill(data);
 				return data;
